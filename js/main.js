@@ -14,6 +14,17 @@ var landingLogin = document.getElementById('landing-login');
 var logout = document.getElementById('logout');
 var login = document.getElementById('login');
 var snackbarContainer = document.querySelector('#necir-snackbar');
+var datalist = document.getElementById('data-list');
+var editButtons;
+
+var dialog = document.querySelector('#dialog');
+if (! dialog.showModal) {
+  dialogPolyfill.registerDialog(dialog);
+}
+var dialogName = document.getElementById('entry-name');
+var dialogCharacter = document.getElementById('entry-character');
+var dialogDescription = document.getElementById('entry-description');
+var dialogSave = document.getElementById('save-entry');
 
 function hasClass(el, className) {
   if (el.classList)
@@ -57,6 +68,7 @@ landingLogin.addEventListener('click', function() {
 	  };
 	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	  console.log(user);
+	  reloadList();
 	}).catch(function(error) {
 	  // Handle Errors here.
 	  var errorCode = error.code;
@@ -90,6 +102,7 @@ function firebaseLogin() {
 	  };
 	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	  console.log(user);
+	  reloadList();
 	}).catch(function(error) {
 	  // Handle Errors here.
 	  var errorCode = error.code;
@@ -129,5 +142,54 @@ function firebaseLogout() {
 	});
 }
 
+function editEntry() {
+	var path = this.getAttribute("data-path");
+	firebase.database().ref(path).once('value').then(function(snapshot) {
+	  var actor = snapshot.val();
+	  dialogName.innerHTML = actor.name;
+	  dialogName.setAttribute("data-path", path);
+	  dialogCharacter.innerHTML = actor.character;
+	  dialogDescription.innerHTML = actor.description;
+	  dialog.showModal();
+    });
+}
+
+function saveEntry(path, entryName, entryCharacter, entryDescription) {
+  firebase.database().ref(path).set({
+    name: entryName,
+    character: entryCharacter,
+    description: entryDescription
+  });
+
+  var snackbarData = {
+    message: 'Changes Submitted',
+    timeout: 2000
+  };
+  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+
+  dialog.close();
+  reloadList();
+}
+
+function reloadList() {
+	datalist.innerHTML = "";
+	firebase.database().ref('/test/actors').once('value').then(function(snapshot) {
+	var actors = snapshot.val();
+	  for (var i = 0; i < actors.length; i++) {
+		var li = document.createElement("li");
+		li.setAttribute("class", "mdl-list__item mdl-list__item--three-line");
+		li.innerHTML = '<span class="mdl-list__item-primary-content"><span>' + actors[i].name + ' AKA ' + actors[i].character + '</span><span class="mdl-list__item-text-body">' + actors[i].description + '</span></span><span class="mdl-list__item-secondary-content"><a data-path="/test/actors/' + i + '" class="mdl-list__item-secondary-action data-edit-btn" href="#"><i class="material-icons">mode_edit</i></a></span>';
+		datalist.appendChild(li);
+	  }
+	  editButtons = document.getElementsByClassName("data-edit-btn");
+      for (var i = 0; i < editButtons.length; i++) {
+  	    editButtons[i].addEventListener('click', editEntry, false);
+      }
+    });
+}
+
 login.addEventListener('click', firebaseLogin);
 logout.addEventListener('click', firebaseLogout);
+dialogSave.addEventListener('click', function() {
+	saveEntry(dialogName.getAttribute("data-path"), dialogName.textContent, dialogCharacter.textContent, dialogDescription.textContent);
+}, false);
