@@ -123,6 +123,15 @@
       </main>
     </div>
 
+    <div id="add-entry-wrapper">
+      <button id="add-entry" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+        <i class="material-icons">add</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large mdl-tooltip--top" for="add-entry">
+      Add a New Entry
+      </div>
+    </div>
+
     <div id="necir-snackbar" class="mdl-js-snackbar mdl-snackbar">
       <div class="mdl-snackbar__text"></div>
       <button class="mdl-snackbar__action" type="button"></button>
@@ -138,6 +147,18 @@
       </div>
       <div class="mdl-dialog__actions">
         <button id="save-entry" type="button" class="mdl-button">Save</button>
+      </div>
+    </dialog>
+
+    <dialog id="dialog2" class="mdl-dialog">
+      <h3 class="mdl-dialog__title">Add a New Actor</h3>
+      <h3 class="mdl-dialog__title" id="entry-name2" contenteditable="true" placeholder="Name"></h3>
+      <h4 class="mdl-dialog__title" id="entry-character2" contenteditable="true" placeholder="Character"></h4>
+      <div class="mdl-dialog__content">
+        <p id="entry-description2" contenteditable="true" placeholder="Description"></p>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button id="save-entry2" type="button" class="mdl-button">Save</button>
       </div>
     </dialog>
 

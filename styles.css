@@ -261,3 +261,19 @@ _:-ms-input-placeholder, :root .necir-graph {
 .necir-list-three {
   width: 650px;
 }
+
+#add-entry-wrapper {
+  position: fixed;
+  z-index: 9990;
+  right: 10px;
+  bottom: 10px;
+}
+
+[contenteditable=true]:empty:before {
+  content: attr(placeholder);
+  display: block; /* For Firefox */
+}
+
+.mdl-list__item--three-line .mdl-list__item-secondary-content {
+    height: auto !important;
+}
