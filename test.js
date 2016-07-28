@@ -5,7 +5,7 @@ firebase.initializeApp({
 });
 
 var db = firebase.database();
-var ref = db.ref("/reports");
+var ref = db.ref("/unfilteredIndices");
 
 var stdin = process.openStdin();
 console.log("Enter a Report ID: ");
