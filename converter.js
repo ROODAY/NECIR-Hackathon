@@ -23,6 +23,10 @@ lineReader.on('line', function (line) {
   			})
   		} else {
   			var key = '"' + result[0].Report_ID + '":';
+  			result[0].Location = "";
+  			result[0].Individual_Or_Organization = "";
+  			result[0].Notable_Contributor = "";
+  			result[0].Currently_Accessed = "";
   			var resultText = JSON.stringify(result[0]);
 	  		var dataText = key + resultText + ",";
 		  	fs.appendFile('fixeddata.json', dataText, function (err) {
