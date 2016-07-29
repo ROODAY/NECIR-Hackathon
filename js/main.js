@@ -7,28 +7,42 @@ var config = {
 firebase.initializeApp(config);
 var provider = new firebase.auth.GoogleAuthProvider();
 var database = firebase.database();
-
-var landing = document.getElementById('landing');
-var landingLogin = document.getElementById('landing-login');
-var logout = document.getElementById('logout');
-var login = document.getElementById('login');
-var tabs = document.getElementsByClassName('necir-tab');
-var adminAuth = document.getElementById('admin-auth');
 var user = JSON.parse(window.localStorage.getItem("user"));
 var unfilteredIndices = JSON.parse(window.localStorage.getItem('unfilteredIndices'));
 var repeatUser = window.localStorage.getItem("repeatUser");
+var currentReport, currentReportID;
+
+database.ref('currentlyAccessedIndices').set(null);
+
+var landing = document.querySelector('#landing');
+var landingLogin = document.querySelector('#landing-login');
+var logout = document.querySelector('#logout');
+var login = document.querySelector('#login');
+var adminAuth = document.querySelector('#admin-auth');
+var reportIDSpan = document.querySelector('#report-id');
+var reportTypeSpan = document.querySelector('#report-type');
+var filingDateSpan = document.querySelector('#filing-date');
+var beginEndDateSpan = document.querySelector('#begin-end-date');
+var receiptsSpan = document.querySelector('#receipts');
+var candidateSpan = document.querySelector('#candidate-name');
+var committeeSpan = document.querySelector('#committee-name');
+var districtSpan = document.querySelector('#district');
+var officeSpan = document.querySelector('#office');
+var preElement = document.querySelector('#raw-data');
+var snackbarContainer = document.querySelector('#necir-snackbar');
+var showFullReportButton = document.querySelector("#show-full-report");
+var fullReportDialog = document.querySelector('#full-report-dialog');
+var searchBar = document.querySelector('#search-bar');
+var reportsFilter = document.querySelector('#reports-filter');
+var resultsLengthWrapper = document.querySelector('#results-length-wrapper')
+var tabs = document.querySelectorAll('.necir-tab');
+var navLinks = document.querySelectorAll(".tab-link");
 
 landing.style.margin = "-100vh";
 setTimeout(function(){
 	addClass(landing, 'hidden');
 }, 500);
-var sampleData = {"Report_ID":39,"Status":"C","CPF_ID":13771,"Filing_ID":13771,"Report_Type_ID":60,"Report_Type_Description":"Deposit Report","Amendment":false,"Amendment_Reason":"","Amendment_To_Report_ID":"","Amended_By_Report_ID":"","Filing_Date":"1\/2\/2002 11:01","Reporting_Period":"1\/2\/2002","Report_Year":2002,"Beginning_Date":"","Ending_Date":"1\/2\/2002 0:00","Beginning_Balance":"","Receipts":"$185.00","Subtotal":"","Expenditures":"","Ending_Balance":"","Inkinds":"","Receipts_Unitemized":"$0.00","Receipts_Itemized":"$185.00","Expenditures_Unitemized":"","Expenditures_Itemized":"","Inkinds_Unitemized":"","Inkinds_Itemized":"","Liabilities":"","Savings_Total":"","Report_Month":"","UI":2000001,"Reimbursee":"","Candidate_First_Name":"Jill","Candidate_Last_Name":"Stein","Full_Name":"Jill Stein","Full_Name_Reverse":"Stein, Jill","Bank_Name":"","District_Code":1109,"Office":"Constitutional","District":"Governor","Comm_Name":"Stein Committee","Report_Candidate_First_Name":"Jill","Report_Candidate_Last_Name":"Stein","Report_Office_District":"Governor of Massachusetts","Report_Comm_Name":"Jill Stein For Governor Campaign","Report_Bank_Name":"Citizen's Bank","Report_Candidate_Address":"","Report_Candidate_City":"","Report_Candidate_State":"","Report_Candidate_Zip":"","Report_Treasurer_First_Name":"","Report_Treasurer_Last_Name":"","Report_Comm_Address":"","Report_Comm_City":"","Report_Comm_State":"","Report_Comm_Zip":"","Category":"D","Candidate_Clarification":"","Rec_Count":24,"Exp_Count":0,"Inkind_Count":0,"Liab_Count":0,"R1_Count":0,"CPF9_Count":0,"SV1_Count":0,"Asset_Count":0,"Savings_Account_Count":0,"R1_Item_Count":0,"CPF9_Item_Count":0,"SV1_Item_Count":0,"Filing_Mechanism":"Unspecified Client Software","Also_Dissolution":0,"Segregated_Account_Type":"","Municipality_Code":0,"Current_Report_ID":39,"Location":"","Individual_Or_Organization":"","Notable_Contributor":"","Currently_Accessed":""}
-var preElement = document.getElementById('raw-data');
-preElement.innerHTML = JSON.stringify(sampleData, null, 4);
 
-var snackbarContainer = document.querySelector('#necir-snackbar');
-var showFullReportButton = document.querySelector("#show-full-report");
-var fullReportDialog = document.querySelector('#full-report-dialog');
 if (! fullReportDialog.showModal) {
   dialogPolyfill.registerDialog(fullReportDialog);
 }
@@ -40,6 +54,26 @@ showFullReportButton.addEventListener('click', function() {
 fullReportDialog.querySelector('button').addEventListener('click', function() {
 	fullReportDialog.close();
 });
+
+for (var i = 0; i < navLinks.length; i++) {
+	navLinks[i].addEventListener('click', function(){
+		for (var i = 0; i < tabs.length; i++) {
+			addClass(tabs[i], "hidden");
+		}
+		var query = this.href.substring(this.href.indexOf("#"));
+		removeClass(document.querySelector(query), "hidden");
+		var num = parseInt(query.substring(query.length - 1));
+		if (num === 3 || num === 4) {
+			removeClass(searchBar, 'hidden');
+			removeClass(reportsFilter, 'hidden');
+			removeClass(resultsLengthWrapper, 'hidden');
+		} else {
+			addClass(searchBar, 'hidden');
+			addClass(reportsFilter, 'hidden');
+			addClass(resultsLengthWrapper, 'hidden');
+		}
+	});
+}
 
 function hasClass(el, className) {
   if (el.classList)
@@ -81,7 +115,7 @@ function firebaseLogin() {
 	  }
 	  addClass(login, 'hidden');
 	  removeClass(logout, 'hidden');
-	  database.ref('admins/' + user.uid).on('value', function(snapshot){
+	  database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 	  	if (snapshot.val() === null) {
 	  		removeClass(adminAuth, 'hidden2');
 	  		addClass(document.querySelector('#approve-reports'), 'hidden2');
@@ -97,7 +131,6 @@ function firebaseLogin() {
 	  user.lastLogin = new Date();
 	  window.localStorage.setItem("user", JSON.stringify(user));
 	  window.localStorage.setItem("repeatUser", true);
-	  console.log(user);
 	}).catch(function(error) {
 	  console.error(error);
 	  var err = {
@@ -129,7 +162,6 @@ function firebaseLogout() {
 		  };
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	  	window.localStorage.setItem("user", null);
-		console.log("sign out successful");
 	}, function(error) {
 		var snackbarData = {
 		    message: 'Logout Unsuccessful',
@@ -140,6 +172,96 @@ function firebaseLogout() {
 	});
 }
 
+function getNextReport(startIndex) {
+	currentReportID = unfilteredIndices[Object.keys(unfilteredIndices)[startIndex]];
+	database.ref('currentlyAccessedIndices/' + currentReportID).once('value').then(function(snapshot){
+		if (snapshot.val() === null) {
+			database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function() {
+				database.ref('reports/' + currentReportID).once('value').then(function(snapshot){
+					currentReport = snapshot.val();
+					fillReportData();
+				});
+			});
+		} else {
+			getNextReport(startIndex + 1);
+		}
+	});
+}
+
+function fillReportData() {
+	reportIDSpan.innerHTML = currentReport.Report_ID;
+	reportTypeSpan.innerHTML = currentReport.Report_Type_Description;
+	filingDateSpan.innerHTML = currentReport.Filing_Date.replace(/\\/g, '');
+	beginEndDateSpan.innerHTML = currentReport.Beginning_Date.replace(/\\/g, '') + ' - ' + currentReport.Ending_Date.replace(/\\/g, '');
+	receiptsSpan.innerHTML = currentReport.Receipts;
+	candidateSpan.innerHTML = currentReport.Full_Name;
+	committeeSpan.innerHTML = currentReport.Comm_Name;
+	districtSpan.innerHTML = currentReport.District;
+	officeSpan.innerHTML = currentReport.Office;
+	preElement.innerHTML = JSON.stringify(currentReport, null, 4);
+	removeClass(document.querySelector("#current-report"), "hidden");
+	addClass(document.querySelector("#get-report"), 'hidden');
+}
+
+function saveCategorizations() {
+	swal({
+	    title: "Are you sure?", 
+	    text: "Continuing will save the current categorization and move on to the next report.", 
+	    type: "warning", 
+	    showCancelButton: true, 
+	    confirmButtonColor: "#DD6B55", 
+	    confirmButtonText: "Yes, continue!", 
+	    closeOnConfirm: true
+	}, function() {
+	    currentReport.Individual_Or_Organization = document.querySelector('input[name="organizationOptions"]:checked').value;
+		currentReport.Location = document.querySelector('input[name="locationOptions"]:checked').value;
+		currentReport.Notable_Contributor = document.querySelector("#switch-notable").checked;
+		database.ref('reports/' + currentReportID).set(currentReport, function(err){
+			database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(){
+				database.ref('unfilteredIndices/' + currentReportID).set(null, function(){
+					database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(){
+						delete unfilteredIndices[currentReportID];
+						window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+						getNextReport(0);
+					});
+				});
+			});		
+		});
+	});
+}
+
+function authenticateAsAdmin() {
+	user = firebase.auth().currentUser;
+	if (user) {
+	  swal( {
+		    title: "Authenticate as Admin", 
+		    text: "Enter the NECIR Admin password:", 
+		    type: "input", 
+		    showCancelButton: true, 
+		    closeOnConfirm: false, 
+		    animation: "slide-from-top", 
+		    inputPlaceholder: "xxxxxxxxxx"
+		}, function(inputValue) {
+		    if (inputValue===false) return false;
+		    if (inputValue==="") {
+		        swal.showInputError("You need to write something!");
+		        return false
+		    }
+		    database.ref('adminCode').once('value').then(function(snapshot) {
+		    	if (inputValue === snapshot.val()) {
+		    		database.ref('admins/' + user.uid).set(true, function(err){
+		    			swal("Success!", "Your account is now an admin account!", "success");
+		    		});
+		    	} else {
+		    		swal("Oops...", "That password wasn't correct!", "error");
+		    	}
+			});
+		});
+	} else {
+	  swal("Oops...", "You must be logged in to authenticate as admin!", "error");
+	}
+}
+
 if (user != null) {
 	document.getElementById('user-name').innerHTML = user.displayName;
 	if (isReal(user.photoURL)) {
@@ -147,7 +269,7 @@ if (user != null) {
 	}
 	addClass(login, 'hidden');
 	removeClass(logout, 'hidden');
-	database.ref('admins/' + user.uid).on('value', function(snapshot){
+	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			removeClass(adminAuth, 'hidden2');
 			addClass(document.querySelector('#approve-reports'), 'hidden2');
@@ -167,6 +289,9 @@ if (repeatUser != null) {
 
 login.addEventListener('click', firebaseLogin);
 logout.addEventListener('click', firebaseLogout);
+adminAuth.addEventListener('click', authenticateAsAdmin);
+document.querySelector("#get-report").addEventListener('click', getNextReport(0));
+document.querySelector('#save-categorization').addEventListener('click', saveCategorizations);
 landingLogin.addEventListener('click', function() {
 	firebaseLogin();
 	landing.style.margin = "-100vh";
@@ -174,51 +299,3 @@ landingLogin.addEventListener('click', function() {
 		addClass(landing, 'hidden');
 	}, 500);
 }, false);
-
-adminAuth.addEventListener('click', function(){
-	user = firebase.auth().currentUser;
-	if (user) {
-	  swal( {
-		    title: "Authenticate as Admin", 
-		    text: "Enter the NECIR Admin password:", 
-		    type: "input", 
-		    showCancelButton: true, 
-		    closeOnConfirm: false, 
-		    animation: "slide-from-top", 
-		    inputPlaceholder: "xxxxxxxxxx"
-		}, function(inputValue) {
-		    if (inputValue===false) return false;
-		    if (inputValue==="") {
-		        swal.showInputError("You need to write something!");
-		        return false
-		    }
-		    database.ref('adminCode').on('value', function(snapshot) {
-		    	if (inputValue === snapshot.val()) {
-		    		database.ref('admins/' + user.uid).set(true, function(err){
-		    			swal("Success!", "Your account is now an admin account!", "success");
-		    		});
-		    	} else {
-		    		swal("Oops...", "That password wasn't correct!", "error");
-		    	}
-			});
-		});
-	} else {
-	  swal("Oops...", "You must be logged in to authenticate as admin!", "error");
-	}
-});
-
-var navLinks = document.getElementsByClassName("tab-link");
-
-for (var i = 0; i < navLinks.length; i++) {
-	navLinks[i].addEventListener('click', function(){
-		for (var i = 0; i < tabs.length; i++) {
-			addClass(tabs[i], "hidden");
-		}
-		removeClass(document.querySelector(this.href.substring(this.href.indexOf("#"))), "hidden");
-	});
-}
-
-if (isReal(unfilteredIndices)) {
-	console.log(unfilteredIndices[Object.keys(unfilteredIndices)[0]]);
-	console.log(unfilteredIndices[Object.keys(unfilteredIndices)[Object.keys(unfilteredIndices).length - 1]]);
-}

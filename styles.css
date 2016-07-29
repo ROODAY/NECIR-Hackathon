@@ -288,3 +288,28 @@ _:-ms-input-placeholder, :root .necir-graph {
 .hidden2 {
   visibility: collapse;
 }
+
+html, body {
+  font-size: 16px;
+}
+
+#span-wrapper {
+  padding-bottom: 20px;
+}
+
+#categorization-options {
+  padding-bottom: 20px;
+}
+
+.necir-table {
+  width: 100% !important;
+}
+.mdl-data-table__cell--non-numeric.mdl-data-table__cell--non-numeric {
+    text-align: center !important;
+    font-size: 16px!important;
+}
+.mdl-data-table td:first-of-type, .mdl-data-table th:first-of-type {
+    padding-left: 0 !important;
+    text-align: center !important;
+    font-size: 16px !important;
+}
