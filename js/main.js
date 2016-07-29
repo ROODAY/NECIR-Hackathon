@@ -293,6 +293,10 @@ if (user != null) {
 			removeClass(document.querySelector('#approve-reports'), 'hidden2');
 		}
 	});
+	landing.style.margin = "-100vh";
+	setTimeout(function(){
+		addClass(landing, 'hidden');
+	}, 500);
 	firebase.auth().currentUser = user;
 }
 
@@ -382,10 +386,6 @@ document.querySelector("#view-reports-next").addEventListener('click', function(
 });
 
 window.onload = function() {
-	/*landing.style.margin = "-100vh";
-	setTimeout(function(){
-		addClass(landing, 'hidden');
-	}, 500);*/
 	document.querySelector('#view-reports-table > tbody').innerHTML = "";
 	fillViewReports(firstResultIndex);
 }
