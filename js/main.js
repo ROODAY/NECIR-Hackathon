@@ -29,22 +29,20 @@ var committeeSpan = document.querySelector('#committee-name');
 var districtSpan = document.querySelector('#district');
 var officeSpan = document.querySelector('#office');
 var preElement = document.querySelector('#raw-data');
+var tablePreElement = document.querySelector('#table-raw-data');
 var snackbarContainer = document.querySelector('#necir-snackbar');
 var showFullReportButton = document.querySelector("#show-full-report");
 var fullReportDialog = document.querySelector('#full-report-dialog');
+var tableFullReportDialog = document.querySelector('#table-full-report-dialog');
 var searchBar = document.querySelector('#search-bar');
 var reportsFilter = document.querySelector('#reports-filter');
 var resultsLengthWrapper = document.querySelector('#results-length-wrapper')
 var tabs = document.querySelectorAll('.necir-tab');
 var navLinks = document.querySelectorAll(".tab-link");
 
-landing.style.margin = "-100vh";
-setTimeout(function(){
-	addClass(landing, 'hidden');
-}, 500);
-
 if (! fullReportDialog.showModal) {
   dialogPolyfill.registerDialog(fullReportDialog);
+  dialogPolyfill.registerDialog(tableFullReportDialog);
 }
 
 showFullReportButton.addEventListener('click', function() {
@@ -53,6 +51,9 @@ showFullReportButton.addEventListener('click', function() {
 });
 fullReportDialog.querySelector('button').addEventListener('click', function() {
 	fullReportDialog.close();
+});
+tableFullReportDialog.querySelector('button').addEventListener('click', function() {
+	tableFullReportDialog.close();
 });
 
 for (var i = 0; i < navLinks.length; i++) {
@@ -299,3 +300,67 @@ landingLogin.addEventListener('click', function() {
 		addClass(landing, 'hidden');
 	}, 500);
 }, false);
+
+
+var resultsLength = 10;
+var firstResultIndex = 0;
+var resultSection = 'unfilteredIndices';
+
+function fillViewReports(index) {
+	var key = unfilteredIndices[Object.keys(unfilteredIndices)[index]];
+	database.ref('reports/' + key).once('value').then(function(snapshot){
+		var report = snapshot.val();
+		var tr = document.createElement('tr');
+		tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon view-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
+		document.querySelector('#view-reports-table > tbody').appendChild(tr);
+		if (index < firstResultIndex + resultsLength) {
+			fillViewReports(index + 1);
+		} else {
+			addViewReportsListeners();
+		}
+	});
+}
+
+function addViewReportsListeners() {
+	var viewReportIDButtons = document.querySelectorAll(".view-report-idbutton");
+	for (var i = 0; i < viewReportIDButtons.length; i++) {
+		viewReportIDButtons[i].addEventListener('click', function(){
+			var key = this.dataset.reportid;
+			console.log(key)
+			database.ref('reports/' + key).once('value').then(function(snapshot){
+				var report = snapshot.val();
+				tablePreElement.innerHTML = JSON.stringify(report, null, 4);
+				tableFullReportDialog.showModal();
+				tableFullReportDialog.scrollTop = 0;
+			});
+		});
+	}
+}
+
+document.querySelector("#refresh-view-reports").addEventListener('click', function(){
+	document.querySelector('#view-reports-table > tbody').innerHTML = "";
+	fillViewReports(firstResultIndex);
+});
+document.querySelector("#view-reports-previous").addEventListener('click', function(){
+	if ((firstResultIndex - (resultsLength + 1)) >= 0) {
+		firstResultIndex -= (resultsLength + 1);
+		document.querySelector('#view-reports-table > tbody').innerHTML = "";
+		fillViewReports(firstResultIndex);
+	}
+});
+document.querySelector("#view-reports-next").addEventListener('click', function(){
+	if ((firstResultIndex + resultsLength + 1) < Object.keys(unfilteredIndices).length) {
+		firstResultIndex += (resultsLength + 1);
+		document.querySelector('#view-reports-table > tbody').innerHTML = "";
+		fillViewReports(firstResultIndex);
+	}
+});
+
+window.onload = function() {
+	landing.style.margin = "-100vh";
+	setTimeout(function(){
+		addClass(landing, 'hidden');
+	}, 500);
+	document.querySelector('#view-reports-table > tbody').innerHTML = "";
+	fillViewReports(firstResultIndex);
+}

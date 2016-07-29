@@ -182,17 +182,18 @@
                   <th>Report ID</th>
                   <th class="mdl-data-table__cell--non-numeric">Candidate</th>
                   <th class="mdl-data-table__cell--non-numeric">District</th>
+                  <th class="mdl-data-table__cell--non-numeric"><button id="refresh-view-reports" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">refresh</i></button></th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>32</td>
-                  <td class="mdl-data-table__cell--non-numeric">Name</td>
-                  <td class="mdl-data-table__cell--non-numeric">taga</td>
-                  <td class="mdl-data-table__cell--non-numeric"><i class="material-icons">add</i></td>
-                </tr>
               </tbody>
             </table>
+            <button id="view-reports-previous" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              Previous
+            </button>
+            <button id="view-reports-next" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              Next
+            </button>
           </div>
           <div id="tab-4" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
             <table id="view-reports-table" class="necir-table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
@@ -226,6 +227,18 @@
       <div class="mdl-dialog__content">
         <div id="raw-data-wrapper">
           <pre id="raw-data" class="prettyprint"></pre>
+        </div>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button type="button" class="mdl-button">Close</button>
+      </div>
+    </dialog>
+
+    <dialog id="table-full-report-dialog" class="mdl-dialog">
+      <h4 class="mdl-dialog__title">Full Report Data</h4>
+      <div class="mdl-dialog__content">
+        <div id="table-raw-data-wrapper">
+          <pre id="table-raw-data" class="prettyprint"></pre>
         </div>
       </div>
       <div class="mdl-dialog__actions">

@@ -285,6 +285,13 @@ _:-ms-input-placeholder, :root .necir-graph {
   top: 12.5% !important;
 }
 
+#table-full-report-dialog {
+  width: 50% !important;
+  height: 75% !important;
+  overflow-y: scroll !important;
+  top: 12.5% !important;
+}
+
 .hidden2 {
   visibility: collapse;
 }
@@ -303,6 +310,7 @@ html, body {
 
 .necir-table {
   width: 100% !important;
+  margin-bottom: 20px !important;
 }
 .mdl-data-table__cell--non-numeric.mdl-data-table__cell--non-numeric {
     text-align: center !important;
@@ -312,4 +320,11 @@ html, body {
     padding-left: 0 !important;
     text-align: center !important;
     font-size: 16px !important;
+}
+
+#view-reports-previous {
+  float: left;
+}
+#view-reports-next {
+  float: right;
 }
