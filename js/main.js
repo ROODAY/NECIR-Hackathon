@@ -46,6 +46,7 @@ var reportsFilter = document.querySelector('#reports-filter');
 var resultsLengthWrapper = document.querySelector('#results-length-wrapper')
 var tabs = document.querySelectorAll('.necir-tab');
 var navLinks = document.querySelectorAll(".tab-link");
+var tags = document.querySelectorAll('pre');
 
 if (! fullReportDialog.showModal) {
   dialogPolyfill.registerDialog(fullReportDialog);
@@ -53,7 +54,6 @@ if (! fullReportDialog.showModal) {
 }
 
 showFullReportButton.addEventListener('click', function() {
-	var tags = document.querySelectorAll('pre');
 	for (var i = 0; i < tags.length; i++) {
 		hljs.highlightBlock(tags[i]);
 	}
@@ -362,7 +362,6 @@ function addViewReportsListeners() {
 			console.log(key)
 			database.ref('reports/' + key).once('value').then(function(snapshot){
 				var report = snapshot.val();
-				var tags = document.querySelectorAll('pre');
 				for (var i = 0; i < tags.length; i++) {
 					hljs.highlightBlock(tags[i]);
 				}
