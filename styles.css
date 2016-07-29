@@ -277,3 +277,10 @@ _:-ms-input-placeholder, :root .necir-graph {
 .mdl-list__item--three-line .mdl-list__item-secondary-content {
     height: auto !important;
 }
+
+#full-report-dialog {
+  width: 50% !important;
+  height: 75% !important;
+  overflow-y: scroll !important;
+  top: 12.5% !important;
+}

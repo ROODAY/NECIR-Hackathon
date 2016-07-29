@@ -12,11 +12,30 @@ var landing = document.getElementById('landing');
 var landingLogin = document.getElementById('landing-login');
 var logout = document.getElementById('logout');
 var login = document.getElementById('login');
+var tabs = document.getElementsByClassName('necir-tab');
 
 landing.style.margin = "-100vh";
+setTimeout(function(){
+	addClass(landing, 'hidden');
+}, 500);
+var sampleData = {"Report_ID":39,"Status":"C","CPF_ID":13771,"Filing_ID":13771,"Report_Type_ID":60,"Report_Type_Description":"Deposit Report","Amendment":false,"Amendment_Reason":"","Amendment_To_Report_ID":"","Amended_By_Report_ID":"","Filing_Date":"1\/2\/2002 11:01","Reporting_Period":"1\/2\/2002","Report_Year":2002,"Beginning_Date":"","Ending_Date":"1\/2\/2002 0:00","Beginning_Balance":"","Receipts":"$185.00","Subtotal":"","Expenditures":"","Ending_Balance":"","Inkinds":"","Receipts_Unitemized":"$0.00","Receipts_Itemized":"$185.00","Expenditures_Unitemized":"","Expenditures_Itemized":"","Inkinds_Unitemized":"","Inkinds_Itemized":"","Liabilities":"","Savings_Total":"","Report_Month":"","UI":2000001,"Reimbursee":"","Candidate_First_Name":"Jill","Candidate_Last_Name":"Stein","Full_Name":"Jill Stein","Full_Name_Reverse":"Stein, Jill","Bank_Name":"","District_Code":1109,"Office":"Constitutional","District":"Governor","Comm_Name":"Stein Committee","Report_Candidate_First_Name":"Jill","Report_Candidate_Last_Name":"Stein","Report_Office_District":"Governor of Massachusetts","Report_Comm_Name":"Jill Stein For Governor Campaign","Report_Bank_Name":"Citizen's Bank","Report_Candidate_Address":"","Report_Candidate_City":"","Report_Candidate_State":"","Report_Candidate_Zip":"","Report_Treasurer_First_Name":"","Report_Treasurer_Last_Name":"","Report_Comm_Address":"","Report_Comm_City":"","Report_Comm_State":"","Report_Comm_Zip":"","Category":"D","Candidate_Clarification":"","Rec_Count":24,"Exp_Count":0,"Inkind_Count":0,"Liab_Count":0,"R1_Count":0,"CPF9_Count":0,"SV1_Count":0,"Asset_Count":0,"Savings_Account_Count":0,"R1_Item_Count":0,"CPF9_Item_Count":0,"SV1_Item_Count":0,"Filing_Mechanism":"Unspecified Client Software","Also_Dissolution":0,"Segregated_Account_Type":"","Municipality_Code":0,"Current_Report_ID":39,"Location":"","Individual_Or_Organization":"","Notable_Contributor":"","Currently_Accessed":""}
+var preElement = document.getElementById('raw-data');
+preElement.innerHTML = JSON.stringify(sampleData, null, 4);
 
 var snackbarContainer = document.querySelector('#necir-snackbar');
-var datalist = document.getElementById('data-list');
+var showFullReportButton = document.querySelector("#show-full-report");
+var fullReportDialog = document.querySelector('#full-report-dialog');
+if (! fullReportDialog.showModal) {
+  dialogPolyfill.registerDialog(fullReportDialog);
+}
+
+showFullReportButton.addEventListener('click', function() {
+	fullReportDialog.showModal();
+	fullReportDialog.scrollTop = 0;
+});
+fullReportDialog.querySelector('button').addEventListener('click', function() {
+	fullReportDialog.close();
+});
 
 function hasClass(el, className) {
   if (el.classList)
@@ -40,12 +59,22 @@ function removeClass(el, className) {
   }
 }
 
+function isReal(el) {
+	if (el != null && el != undefined && el != "") {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 function firebaseLogin() {
 	firebase.auth().signInWithPopup(provider).then(function(result) {
 	  var token = result.credential.accessToken;
 	  var user = result.user;
 	  document.getElementById('user-name').innerHTML = user.displayName;
-	  document.getElementById('propic').src = user.photoURL;
+	  if (isReal(user.photoURL)) {
+	  	document.getElementById('propic').src = user.photoURL;
+	  }
 	  addClass(login, 'hidden');
 	  removeClass(logout, 'hidden');
 	  var snackbarData = {
@@ -55,16 +84,19 @@ function firebaseLogin() {
 	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	  console.log(user);
 	}).catch(function(error) {
-	  var errorCode = error.code;
-	  var errorMessage = error.message;
-	  var email = error.email;
-	  var credential = error.credential;
+	  console.error(error);
+	  var err = {
+	  	"Code": error.code,
+	  	"Message": error.message,
+	  	"Email": error.email,
+	  	"Credential": error.credential
+	  }
+	  console.log(err);
 	  var snackbarData = {
 	    message: 'Login Unsuccessful',
 	    timeout: 2000
 	  };
 	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  console.error(error);
 	});
 }
 
@@ -92,40 +124,17 @@ function firebaseLogout() {
 
 login.addEventListener('click', firebaseLogin);
 logout.addEventListener('click', firebaseLogout);
-
 landingLogin.addEventListener('click', function() {
-	firebase.auth().signInWithPopup(provider).then(function(result) {
-	  // This gives you a Google Access Token. You can use it to access the Google API.
-	  var token = result.credential.accessToken;
-	  // The signed-in user info.
-	  var user = result.user;
-	  landing.style.margin = "-100vh";
-	  setTimeout(function(){
-	  	addClass(landing, 'hidden');
-	  }, 500);
-	  document.getElementById('user-name').innerHTML = user.displayName;
-	  document.getElementById('propic').src = user.photoURL;
-	  addClass(login, 'hidden');
-	  removeClass(logout, 'hidden');
-	  var snackbarData = {
-	    message: 'Login Successful',
-	    timeout: 2000
-	  };
-	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  console.log(user);
-	}).catch(function(error) {
-	  // Handle Errors here.
-	  var errorCode = error.code;
-	  var errorMessage = error.message;
-	  // The email of the user's account used.
-	  var email = error.email;
-	  // The firebase.auth.AuthCredential type that was used.
-	  var credential = error.credential;
-	  var snackbarData = {
-	    message: 'Login Unsuccessful',
-	    timeout: 2000
-	  };
-	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  console.error(error);
-	});
+	firebaseLogin();
+	landing.style.margin = "-100vh";
+	setTimeout(function(){
+		addClass(landing, 'hidden');
+	}, 500);
 }, false);
+
+document.querySelector(".mdl-navigation__link").addEventListener('click', function(){
+	for (var i = 0; i < tabs.length; i++) {
+		addClass(tabs[i]);
+	}
+	removeClass(document.querySelector(this.href.substring(this.href.indexOf("#") + 1)), "hidden");
+});
