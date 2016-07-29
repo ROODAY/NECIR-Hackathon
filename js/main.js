@@ -12,7 +12,14 @@ var unfilteredIndices = JSON.parse(window.localStorage.getItem('unfilteredIndice
 var repeatUser = window.localStorage.getItem("repeatUser");
 var currentReport, currentReportID;
 
-database.ref('currentlyAccessedIndices').set(null);
+//database.ref('currentlyAccessedIndices').set(null);
+
+if (unfilteredIndices === null || unfilteredIndices === undefined) {
+	database.ref('unfilteredIndices/').once('value').then(function(snapshot){
+		unfilteredIndices = snapshot.val();
+		window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+	});
+}
 
 var landing = document.querySelector('#landing');
 var landingLogin = document.querySelector('#landing-login');
