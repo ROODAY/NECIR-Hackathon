@@ -181,7 +181,7 @@ function firebaseLogout() {
 }
 
 function getNextReport(startIndex) {
-	if (unfilteredIndices != null && != undefined) {
+	if (unfilteredIndices != null && unfilteredIndices != undefined) {
 		currentReportID = unfilteredIndices[Object.keys(unfilteredIndices)[startIndex]];
 		database.ref('currentlyAccessedIndices/' + currentReportID).once('value').then(function(snapshot){
 			if (snapshot.val() === null) {
