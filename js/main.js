@@ -388,4 +388,5 @@ document.querySelector("#view-reports-next").addEventListener('click', function(
 window.onload = function() {
 	document.querySelector('#view-reports-table > tbody').innerHTML = "";
 	fillViewReports(firstResultIndex);
+	hljs.initHighlightingOnLoad();
 }
