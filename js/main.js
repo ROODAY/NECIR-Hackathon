@@ -53,6 +53,10 @@ if (! fullReportDialog.showModal) {
 }
 
 showFullReportButton.addEventListener('click', function() {
+	var tags = document.querySelectorAll('pre');
+	for (var i = 0; i < tags.length; i++) {
+		hljs.highlightBlock(tags[i]);
+	}
 	fullReportDialog.showModal();
 	fullReportDialog.scrollTop = 0;
 });
@@ -358,6 +362,10 @@ function addViewReportsListeners() {
 			console.log(key)
 			database.ref('reports/' + key).once('value').then(function(snapshot){
 				var report = snapshot.val();
+				var tags = document.querySelectorAll('pre');
+				for (var i = 0; i < tags.length; i++) {
+					hljs.highlightBlock(tags[i]);
+				}
 				tablePreElement.innerHTML = JSON.stringify(report, null, 4);
 				tableFullReportDialog.showModal();
 				tableFullReportDialog.scrollTop = 0;
