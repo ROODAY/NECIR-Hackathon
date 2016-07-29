@@ -13,6 +13,10 @@ var landingLogin = document.getElementById('landing-login');
 var logout = document.getElementById('logout');
 var login = document.getElementById('login');
 var tabs = document.getElementsByClassName('necir-tab');
+var adminAuth = document.getElementById('admin-auth');
+var user = JSON.parse(window.localStorage.getItem("user"));
+var unfilteredIndices = JSON.parse(window.localStorage.getItem('unfilteredIndices'));
+var repeatUser = window.localStorage.getItem("repeatUser");
 
 landing.style.margin = "-100vh";
 setTimeout(function(){
@@ -77,11 +81,22 @@ function firebaseLogin() {
 	  }
 	  addClass(login, 'hidden');
 	  removeClass(logout, 'hidden');
+	  database.ref('admins/' + user.uid).on('value', function(snapshot){
+	  	if (snapshot.val() === null) {
+	  		removeClass(adminAuth, 'hidden2');
+	  		addClass(document.querySelector('#approve-reports'), 'hidden2');
+	  	} else {
+	  		removeClass(document.querySelector('#approve-reports'), 'hidden2');
+	  	}
+	  });
 	  var snackbarData = {
 	    message: 'Login Successful',
 	    timeout: 2000
 	  };
 	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	  user.lastLogin = new Date();
+	  window.localStorage.setItem("user", JSON.stringify(user));
+	  window.localStorage.setItem("repeatUser", true);
 	  console.log(user);
 	}).catch(function(error) {
 	  console.error(error);
@@ -105,21 +120,49 @@ function firebaseLogout() {
 		document.getElementById('user-name').innerHTML = "Log In";
 		document.getElementById('propic').src = "images/user.jpg";
 		addClass(logout, 'hidden');
+		addClass(adminAuth, 'hidden2');
+		addClass(document.querySelector('#approve-reports'), 'hidden2');
 		removeClass(login, 'hidden');
 		var snackbarData = {
-	    message: 'Logout Successful',
-	    timeout: 2000
-	  };
-	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		    message: 'Logout Successful',
+		    timeout: 2000
+		  };
+	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	  	window.localStorage.setItem("user", null);
 		console.log("sign out successful");
 	}, function(error) {
 		var snackbarData = {
-	    message: 'Logout Unsuccessful',
-	    timeout: 2000
-	  };
-	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		    message: 'Logout Unsuccessful',
+		    timeout: 2000
+		  };
+	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 		console.error(error);
 	});
+}
+
+if (user != null) {
+	document.getElementById('user-name').innerHTML = user.displayName;
+	if (isReal(user.photoURL)) {
+		document.getElementById('propic').src = user.photoURL;
+	}
+	addClass(login, 'hidden');
+	removeClass(logout, 'hidden');
+	database.ref('admins/' + user.uid).on('value', function(snapshot){
+		if (snapshot.val() === null) {
+			removeClass(adminAuth, 'hidden2');
+			addClass(document.querySelector('#approve-reports'), 'hidden2');
+		} else {
+			removeClass(document.querySelector('#approve-reports'), 'hidden2');
+		}
+	});
+	firebase.auth().currentUser = user;
+}
+
+if (repeatUser != null) {
+	for (var i = 0; i < tabs.length; i++) {
+		addClass(tabs[i], "hidden");
+	}
+	removeClass(document.querySelector("#tab-2"), "hidden");
 }
 
 login.addEventListener('click', firebaseLogin);
@@ -132,9 +175,50 @@ landingLogin.addEventListener('click', function() {
 	}, 500);
 }, false);
 
-document.querySelector(".mdl-navigation__link").addEventListener('click', function(){
-	for (var i = 0; i < tabs.length; i++) {
-		addClass(tabs[i]);
+adminAuth.addEventListener('click', function(){
+	user = firebase.auth().currentUser;
+	if (user) {
+	  swal( {
+		    title: "Authenticate as Admin", 
+		    text: "Enter the NECIR Admin password:", 
+		    type: "input", 
+		    showCancelButton: true, 
+		    closeOnConfirm: false, 
+		    animation: "slide-from-top", 
+		    inputPlaceholder: "xxxxxxxxxx"
+		}, function(inputValue) {
+		    if (inputValue===false) return false;
+		    if (inputValue==="") {
+		        swal.showInputError("You need to write something!");
+		        return false
+		    }
+		    database.ref('adminCode').on('value', function(snapshot) {
+		    	if (inputValue === snapshot.val()) {
+		    		database.ref('admins/' + user.uid).set(true, function(err){
+		    			swal("Success!", "Your account is now an admin account!", "success");
+		    		});
+		    	} else {
+		    		swal("Oops...", "That password wasn't correct!", "error");
+		    	}
+			});
+		});
+	} else {
+	  swal("Oops...", "You must be logged in to authenticate as admin!", "error");
 	}
-	removeClass(document.querySelector(this.href.substring(this.href.indexOf("#") + 1)), "hidden");
 });
+
+var navLinks = document.getElementsByClassName("tab-link");
+
+for (var i = 0; i < navLinks.length; i++) {
+	navLinks[i].addEventListener('click', function(){
+		for (var i = 0; i < tabs.length; i++) {
+			addClass(tabs[i], "hidden");
+		}
+		removeClass(document.querySelector(this.href.substring(this.href.indexOf("#"))), "hidden");
+	});
+}
+
+if (isReal(unfilteredIndices)) {
+	console.log(unfilteredIndices[Object.keys(unfilteredIndices)[0]]);
+	console.log(unfilteredIndices[Object.keys(unfilteredIndices)[Object.keys(unfilteredIndices).length - 1]]);
+}

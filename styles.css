@@ -284,3 +284,7 @@ _:-ms-input-placeholder, :root .necir-graph {
   overflow-y: scroll !important;
   top: 12.5% !important;
 }
+
+.hidden2 {
+  visibility: collapse;
+}
