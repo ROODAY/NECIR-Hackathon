@@ -306,7 +306,9 @@ if (repeatUser != null) {
 login.addEventListener('click', firebaseLogin);
 logout.addEventListener('click', firebaseLogout);
 adminAuth.addEventListener('click', authenticateAsAdmin);
-document.querySelector("#get-report").addEventListener('click', getNextReport(0));
+document.querySelector("#get-report").addEventListener('click', function(){
+	getNextReport(0);
+});
 document.querySelector('#save-categorization').addEventListener('click', saveCategorizations);
 landingLogin.addEventListener('click', function() {
 	firebaseLogin();
