@@ -324,18 +324,26 @@ var firstResultIndex = 0;
 var resultSection = 'unfilteredIndices';
 
 function fillViewReports(index) {
-	var key = unfilteredIndices[Object.keys(unfilteredIndices)[index]];
-	database.ref('reports/' + key).once('value').then(function(snapshot){
-		var report = snapshot.val();
-		var tr = document.createElement('tr');
-		tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon view-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
-		document.querySelector('#view-reports-table > tbody').appendChild(tr);
-		if (index < firstResultIndex + resultsLength) {
-			fillViewReports(index + 1);
-		} else {
-			addViewReportsListeners();
-		}
-	});
+	if (unfilteredIndices != null && unfilteredIndices != undefined) {
+		var key = unfilteredIndices[Object.keys(unfilteredIndices)[index]];
+		database.ref('reports/' + key).once('value').then(function(snapshot){
+			var report = snapshot.val();
+			var tr = document.createElement('tr');
+			tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon view-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
+			document.querySelector('#view-reports-table > tbody').appendChild(tr);
+			if (index < firstResultIndex + resultsLength) {
+				fillViewReports(index + 1);
+			} else {
+				addViewReportsListeners();
+			}
+		});
+	} else {
+		var snackbarData = {
+		    message: 'Please wait as data downloads',
+		    timeout: 2000
+		  };
+	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}
 }
 
 function addViewReportsListeners() {
