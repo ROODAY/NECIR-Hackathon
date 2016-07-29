@@ -181,19 +181,27 @@ function firebaseLogout() {
 }
 
 function getNextReport(startIndex) {
-	currentReportID = unfilteredIndices[Object.keys(unfilteredIndices)[startIndex]];
-	database.ref('currentlyAccessedIndices/' + currentReportID).once('value').then(function(snapshot){
-		if (snapshot.val() === null) {
-			database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function() {
-				database.ref('reports/' + currentReportID).once('value').then(function(snapshot){
-					currentReport = snapshot.val();
-					fillReportData();
+	if (unfilteredIndices != null && != undefined) {
+		currentReportID = unfilteredIndices[Object.keys(unfilteredIndices)[startIndex]];
+		database.ref('currentlyAccessedIndices/' + currentReportID).once('value').then(function(snapshot){
+			if (snapshot.val() === null) {
+				database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function() {
+					database.ref('reports/' + currentReportID).once('value').then(function(snapshot){
+						currentReport = snapshot.val();
+						fillReportData();
+					});
 				});
-			});
-		} else {
-			getNextReport(startIndex + 1);
-		}
-	});
+			} else {
+				getNextReport(startIndex + 1);
+			}
+		});
+	} else {
+		var snackbarData = {
+		    message: 'Please wait as data downloads',
+		    timeout: 2000
+		  };
+	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}
 }
 
 function fillReportData() {
