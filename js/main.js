@@ -357,10 +357,10 @@ document.querySelector("#view-reports-next").addEventListener('click', function(
 });
 
 window.onload = function() {
-	landing.style.margin = "-100vh";
+	/*landing.style.margin = "-100vh";
 	setTimeout(function(){
 		addClass(landing, 'hidden');
-	}, 500);
+	}, 500);*/
 	document.querySelector('#view-reports-table > tbody').innerHTML = "";
 	fillViewReports(firstResultIndex);
 }
