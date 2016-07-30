@@ -15,8 +15,7 @@ var database = firebase.database();
 
 var resultsLength = 9;
 var firstResultIndex = 0;
-var resultsRange = 0;
-var resultSection = unfilteredIndices;
+var resultSection = null;
 
 var user                  = JSON.parse(window.localStorage.getItem("user"));
 var unfilteredIndices     = JSON.parse(window.localStorage.getItem('unfilteredIndices'));
@@ -28,6 +27,8 @@ var landing                     = document.querySelector('#landing');
 var landingLogin                = document.querySelector('#landing-login');
 var logout                      = document.querySelector('#logout');
 var login                       = document.querySelector('#login');
+var userNameSpan                = document.querySelector('#user-name');
+var profilePicture              = document.querySelector('#propic')
 var adminAuth                   = document.querySelector('#admin-auth');
 var reportIDSpan                = document.querySelector('#report-id');
 var reportTypeSpan              = document.querySelector('#report-type');
@@ -50,6 +51,7 @@ var show10ReportsButton         = document.querySelector("#show-10-reports");
 var show25ReportsButton         = document.querySelector("#show-25-reports");
 var show50ReportsButton         = document.querySelector("#show-50-reports");
 var refreshViewReportsButton    = document.querySelector("#refresh-view-reports");
+var refreshApproveReportsButton    = document.querySelector("#refresh-approve-reports");
 var viewReportsPreviousButton   = document.querySelector("#view-reports-previous");
 var viewReportsNextButton       = document.querySelector("#view-reports-next");
 var showUnfilteredReportsButton = document.querySelector("#show-unfiltered-reports");
@@ -58,7 +60,9 @@ var showApprovedReportsButton   = document.querySelector("#show-approved-reports
 var getNextReportButton         = document.querySelector("#get-report");
 var saveCategorizationButton    = document.querySelector('#save-categorization');
 var viewReportsTableBody        = document.querySelector('#view-reports-table > tbody');
-var approveReportsTableBody        = document.querySelector('#approve-reports-table > tbody');
+var approveReportsTableBody     = document.querySelector('#approve-reports-table > tbody');
+var approveReportsNavButton     = document.querySelector('#approve-reports');
+var currentReportDiv            = document.querySelector("#current-report");
 var tabs                        = document.querySelectorAll('.necir-tab');
 var navLinks                    = document.querySelectorAll(".tab-link");
 
@@ -101,18 +105,20 @@ function firebaseLogin() {
 	firebase.auth().signInWithPopup(provider).then(function(result) {
 	  var token = result.credential.accessToken;
 	  var user = result.user;
-	  document.getElementById('user-name').innerHTML = user.displayName;
+	  if (isReal(user.displayName)) {
+	  	userNameSpan.innerHTML = user.displayName;
+	  }
 	  if (isReal(user.photoURL)) {
-	  	document.getElementById('propic').src = user.photoURL;
+	  	profilePicture.src = user.photoURL;
 	  }
 	  addClass(login, 'hidden');
 	  removeClass(logout, 'hidden');
 	  database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 	  	if (snapshot.val() === null) {
 	  		removeClass(adminAuth, 'hidden2');
-	  		addClass(document.querySelector('#approve-reports'), 'hidden2');
+	  		addClass(approveReportsNavButton, 'hidden2');
 	  	} else {
-	  		removeClass(document.querySelector('#approve-reports'), 'hidden2');
+	  		removeClass(approveReportsNavButton, 'hidden2');
 	  	}
 	  });
 	  var snackbarData = {
@@ -142,11 +148,11 @@ function firebaseLogin() {
 
 function firebaseLogout() {
 	firebase.auth().signOut().then(function() {
-		document.getElementById('user-name').innerHTML = "Log In";
-		document.getElementById('propic').src = "images/user.jpg";
+		userNameSpan.innerHTML = "Log In";
+		profilePicture.src = "images/user.jpg";
 		addClass(logout, 'hidden');
 		addClass(adminAuth, 'hidden2');
-		addClass(document.querySelector('#approve-reports'), 'hidden2');
+		addClass(approveReportsNavButton, 'hidden2');
 		removeClass(login, 'hidden');
 		var snackbarData = {
 		    message: 'Logout Successful',
@@ -235,8 +241,8 @@ function fillReportData() {
 	districtSpan.innerHTML = currentReport.District;
 	officeSpan.innerHTML = currentReport.Office;
 	preElement.innerHTML = JSON.stringify(currentReport, null, 4);
-	removeClass(document.querySelector("#current-report"), "hidden");
-	addClass(document.querySelector("#get-report"), 'hidden');
+	removeClass(currentReportDiv, "hidden");
+	addClass(getNextReportButton, 'hidden');
 }
 
 function saveCategorizations() {
@@ -250,8 +256,8 @@ function saveCategorizations() {
 	    closeOnConfirm: true
 	}, function() {
 	    currentReport.Individual_Or_Organization = document.querySelector('input[name="organizationOptions"]:checked').value;
-		currentReport.Location = document.querySelector('input[name="locationOptions"]:checked').value;
-		currentReport.Notable_Contributor = document.querySelector("#switch-notable").checked;
+		currentReport.Location                   = document.querySelector('input[name="locationOptions"]:checked').value;
+		currentReport.Notable_Contributor        = document.querySelector("#switch-notable").checked;
 		database.ref('reports/' + currentReportID).set(currentReport, function(err){
 			database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(){
 				database.ref('unfilteredIndices/' + currentReportID).set(null, function(){
@@ -279,7 +285,6 @@ function fillViewReports(index) {
 				var tr = document.createElement('tr');
 				tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon view-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
 				viewReportsTableBody.appendChild(tr);
-				resultsRange += 1;
 				if (index < firstResultIndex + resultsLength) {
 					fillViewReports(index + 1);
 				} else {
@@ -327,7 +332,7 @@ function fillApproveReports(index) {
 			if (report != null) {
 				var tr = document.createElement('tr');
 				tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon approve-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
-				document.querySelector('#approve-reports-table > tbody').appendChild(tr);
+				approveReportsTableBody.appendChild(tr);
 				if (index < firstResultIndex + resultsLength) {
 					fillViewReports(index + 1);
 				} else {
@@ -377,8 +382,17 @@ for (var i = 0; i < navLinks.length; i++) {
 		var query = this.href.substring(this.href.indexOf("#"));
 		removeClass(document.querySelector(query), "hidden");
 		var num = parseInt(query.substring(query.length - 1));
-		if (num === 3 || num === 4) {
+		if (num === 3) {
+			firstResultIndex = 0;
+			viewReportsTableBody.innerHTML = "";
+			fillViewReports(firstResultIndex);
 			removeClass(reportsFilter, 'hidden');
+			removeClass(resultsLengthWrapper, 'hidden');
+		} else if (num === 4) {
+			firstResultIndex = 0;
+			approveReportsTableBody.innerHTML = "";
+			fillApproveReports(firstResultIndex);
+			addClass(reportsFilter, 'hidden');
 			removeClass(resultsLengthWrapper, 'hidden');
 		} else {
 			addClass(reportsFilter, 'hidden');
@@ -395,12 +409,21 @@ if (unfilteredIndices === null || unfilteredIndices === undefined) {
 	database.ref('unfilteredIndices/').once('value').then(function(snapshot){
 		unfilteredIndices = snapshot.val();
 		window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+		resultSection = unfilteredIndices;
+		viewReportsTableBody.innerHTML = "";
+		fillViewReports(firstResultIndex);
+		getNextReport(0);
 		var snackbarData = {
 			message: 'Unfiltered Report Indices Downloaded',
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	});
+} else {
+	resultSection = unfilteredIndices;
+	viewReportsTableBody.innerHTML = "";
+	fillViewReports(firstResultIndex);
+	getNextReport(0);
 }
 if (filteredIndices === null || filteredIndices === undefined) {
 	database.ref('filteredIndices/').once('value').then(function(snapshot){
@@ -425,18 +448,21 @@ if (adminReviewedIndices === null || adminReviewedIndices === undefined) {
 	});
 }
 if (user != null) {
-	document.getElementById('user-name').innerHTML = user.displayName;
+	
+	if (isReal(user.displayName)) {
+		userNameSpan.innerHTML = user.displayName;
+	}
 	if (isReal(user.photoURL)) {
-		document.getElementById('propic').src = user.photoURL;
+		profilePicture.src = user.photoURL;
 	}
 	addClass(login, 'hidden');
 	removeClass(logout, 'hidden');
 	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			removeClass(adminAuth, 'hidden2');
-			addClass(document.querySelector('#approve-reports'), 'hidden2');
+			addClass(approveReportsNavButton, 'hidden2');
 		} else {
-			removeClass(document.querySelector('#approve-reports'), 'hidden2');
+			removeClass(approveReportsNavButton, 'hidden2');
 		}
 	});
 	landing.style.margin = "-100vh";
@@ -483,18 +509,19 @@ landingLogin.addEventListener('click', function() {
 }, false);
 refreshViewReportsButton.addEventListener('click', function(){
 	viewReportsTableBody.innerHTML = "";
-	resultsRange = firstResultIndex;
 	fillViewReports(firstResultIndex);
+});
+refreshApproveReportsButton.addEventListener('click', function(){
+	approveReportsTableBody.innerHTML = "";
+	fillApproveReports(firstResultIndex);
 });
 viewReportsPreviousButton.addEventListener('click', function(){
 	if ((firstResultIndex - (resultsLength)) >= 0) {
 		firstResultIndex -= (resultsLength);
 		viewReportsTableBody.innerHTML = "";
-		resultsRange = firstResultIndex;
 		fillViewReports(firstResultIndex);
 	} else if (firstResultIndex > 0) {
 		viewReportsTableBody.innerHTML = "";
-		resultsRange = 0;
 		firstResultIndex = 0;
 		fillViewReports(firstResultIndex);
 	} else {
@@ -505,7 +532,6 @@ viewReportsNextButton.addEventListener('click', function(){
 	if ((firstResultIndex + resultsLength) < Object.keys(unfilteredIndices).length) {
 		firstResultIndex += (resultsLength);
 		viewReportsTableBody.innerHTML = "";
-		resultsRange = firstResultIndex;
 		fillViewReports(firstResultIndex);
 		if (viewReportsPreviousButton.disabled) {
 			viewReportsPreviousButton.disabled = false;
@@ -531,21 +557,18 @@ showUnfilteredReportsButton.addEventListener('click', function(){
 	resultSection = unfilteredIndices;
 	viewReportsTableBody.innerHTML = "";
 	firstResultIndex = 0;
-	resultsRange = 0;
 	fillViewReports(firstResultIndex);
 });
 showFilteredReportsButton.addEventListener('click', function(){
 	resultSection = filteredIndices;
 	viewReportsTableBody.innerHTML = "";
 	firstResultIndex = 0;
-	resultsRange = 0;
 	fillViewReports(firstResultIndex);
 });
 showApprovedReportsButton.addEventListener('click', function(){
 	resultSection = adminReviewedIndices;
 	viewReportsTableBody.innerHTML = "";
 	firstResultIndex = 0;
-	resultsRange = 0;
 	fillViewReports(firstResultIndex);
 });
 
@@ -554,7 +577,5 @@ showApprovedReportsButton.addEventListener('click', function(){
 /*/
 
 window.onload = function() {
-	viewReportsTableBody.innerHTML = "";
-	fillViewReports(firstResultIndex);
 	hljs.initHighlightingOnLoad();
 }
