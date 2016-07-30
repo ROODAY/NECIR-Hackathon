@@ -9,17 +9,17 @@
 
     <link rel="shortcut icon" href="images/favicon.png">
 
-    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="css/vendor/normalize.css">
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
     <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="//code.getmdl.io/1.1.3/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/default.min.css">
-    <link rel="stylesheet" href="dialog-polyfill.css">
-    <link rel="stylesheet" href="sweetalert.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/vendor/dialog-polyfill.css">
+    <link rel="stylesheet" href="css/vendor/sweetalert.css">
+    <link rel="stylesheet" href="css/styles.css">
 
-    <script src="js/dialog-polyfill.js"></script>
-    <script src="js/local-storage-polyfill.js"></script>
+    <script src="js/vendor/dialog-polyfill.js"></script>
+    <script src="js/vendor/local-storage-polyfill.js"></script>
   </head>
   <body>
     <div id="landing" class="mdl-grid">
@@ -50,27 +50,18 @@
               <span class="visuallyhidden">Show</span>
             </button>
             <ul id="results-length-list" class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="results-length-button">
-              <li class="mdl-menu__item">10 Reports</li>
-              <li class="mdl-menu__item">25 Reports</li>
-              <li class="mdl-menu__item">50 Reports</li>
+              <li id="show-10-reports" class="mdl-menu__item">10 Reports</li>
+              <li id="show-25-reports" class="mdl-menu__item">25 Reports</li>
+              <li id="show-50-reports" class="mdl-menu__item">50 Reports</li>
             </ul>
-          </div>
-          <div id="search-bar" class="mdl-textfield mdl-js-textfield mdl-textfield--expandable hidden">
-            <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
-              <i class="material-icons">search</i>
-            </label>
-            <div class="mdl-textfield__expandable-holder">
-              <input class="mdl-textfield__input" type="text" id="search">
-              <label class="mdl-textfield__label" for="search">Enter your query...</label>
-            </div>
           </div>
           <button id="reports-filter" class="mdl-button mdl-js-button mdl-button--icon hidden">
             <i class="material-icons">more_vert</i>
           </button>
           <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="reports-filter">
-            <li class="mdl-menu__item">Unreviewed Reports</li>
-            <li class="mdl-menu__item">Reviewed Reports</li>
-            <li class="mdl-menu__item">Admin Approved Reports</li>
+            <li id="show-unfiltered-reports" class="mdl-menu__item">Unreviewed Reports</li>
+            <li id="show-filtered-reports" class="mdl-menu__item">Reviewed Reports</li>
+            <li id="show-approved-reports" class="mdl-menu__item">Admin Approved Reports</li>
           </ul>
         </div>
       </header>
@@ -197,22 +188,24 @@
             </button>
           </div>
           <div id="tab-4" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
-            <table id="view-reports-table" class="necir-table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+            <table id="approve-reports-table" class="necir-table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
               <thead>
                 <tr>
                   <th>Report ID</th>
                   <th class="mdl-data-table__cell--non-numeric">Candidate</th>
                   <th class="mdl-data-table__cell--non-numeric">District</th>
+                  <th class="mdl-data-table__cell--non-numeric"><button id="refresh-approve-reports" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">refresh</i></button></th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>32</td>
-                  <td class="mdl-data-table__cell--non-numeric">Name</td>
-                  <td class="mdl-data-table__cell--non-numeric">taga</td>
-                </tr>
               </tbody>
             </table>
+            <button id="approve-reports-previous" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              Previous
+            </button>
+            <button id="approve-reports-next" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              Next
+            </button>
           </div>
         </div>
       </main>
@@ -250,7 +243,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/highlight.min.js"></script>
     <script src="//code.getmdl.io/1.1.3/material.min.js"></script>
     <script src="//www.gstatic.com/firebasejs/3.2.0/firebase.js"></script>
-    <script src="js/sweetalert.min.js"></script>
+    <script src="js/vendor/sweetalert.min.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>
