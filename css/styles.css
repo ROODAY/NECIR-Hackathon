@@ -340,3 +340,7 @@ pre {
 #tab-3 {
   text-align: center;
 }
+
+.error-message {
+  color: #F44336;
+}

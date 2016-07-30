@@ -29,11 +29,14 @@
             <h2 class="mdl-card__title-text">Welcome to the NECIR Hackathon!</h2>
           </div>
           <div class="mdl-card__supporting-text">
-            To continue to the campaign data, please log in with your Google account. If the login popup does not appear, please allow popups on this page and try again.
+            To continue to the campaign data, please log in with your Google account or an account specific to this webapp (NECIR Login). If the login popup does not appear, please allow popups on this page and try again.
           </div>
           <div class="mdl-card__actions mdl-card--border">
-            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="landing-login">
-              Log In
+            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="google-login">
+              Google Login
+            </a>
+            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="necir-login">
+              NECIR Login
             </a>
           </div>
         </div>
@@ -71,18 +74,15 @@
           <div class="necir-avatar-dropdown">
             <span id="user-name">Log In</span>
             <div class="mdl-layout-spacer"></div>
-            <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon hidden">
-              <i class="material-icons" role="presentation">close</i>
+            <button id="accbtn" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+              <i class="material-icons" role="presentation">arrow_drop_down</i>
+              <span class="visuallyhidden">Login Methods</span>
             </button>
-            <div class="mdl-tooltip" for="logout">
-              Log Out
-            </div>
-            <button id="login" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
-              <i class="material-icons" role="presentation">add</i>
-            </button>
-            <div class="mdl-tooltip" for="login">
-              Log In
-            </div>
+            <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="accbtn">
+              <li id="nav-google-login" class="mdl-menu__item">Google Login</li>
+              <li id="nav-necir-login" class="mdl-menu__item">NECIR Login</li>
+              <li id="nav-logout" class="mdl-menu__item hidden">Logout</li>
+            </ul>
           </div>
         </header>
         <nav class="necir-navigation mdl-navigation mdl-color--blue-grey-800">
@@ -237,6 +237,27 @@
       </div>
       <div class="mdl-dialog__actions">
         <button type="button" class="mdl-button">Close</button>
+      </div>
+    </dialog>
+
+    <dialog id="necir-login-dialog" class="mdl-dialog">
+      <h4 class="mdl-dialog__title">Log In</h4>
+      <div class="mdl-dialog__content">
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="email" id="login-email">
+          <label class="mdl-textfield__label" for="login-email">Email</label>
+          <span class="mdl-textfield__error">Not a valid email</span>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="password" id="login-password">
+          <label class="mdl-textfield__label" for="login-password">Password</label>
+        </div>
+        If this is your first time logging in, an account will be created for you. <br>
+        <span class="error-message hidden"></span>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button id="close" type="button" class="mdl-button">Cancel</button>
+        <button id="necir-login-button" type="button" class="mdl-button">Login</button>
       </div>
     </dialog>
     

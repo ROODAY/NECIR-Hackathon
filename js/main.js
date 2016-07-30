@@ -24,9 +24,11 @@ var adminReviewedIndices  = JSON.parse(window.localStorage.getItem('adminReviewe
 var repeatUser            = window.localStorage.getItem("repeatUser");
 
 var landing                     = document.querySelector('#landing');
-var landingLogin                = document.querySelector('#landing-login');
-var logout                      = document.querySelector('#logout');
-var login                       = document.querySelector('#login');
+var googleLoginButton           = document.querySelector('#google-login');
+var necirLoginButton            = document.querySelector('#necir-login');
+var navGoogleLogin              = document.querySelector('#nav-google-login');
+var navNecirLogin               = document.querySelector('#nav-necir-login');
+var navLogout                   = document.querySelector('#nav-logout');
 var userNameSpan                = document.querySelector('#user-name');
 var profilePicture              = document.querySelector('#propic')
 var adminAuth                   = document.querySelector('#admin-auth');
@@ -45,13 +47,14 @@ var snackbarContainer           = document.querySelector('#necir-snackbar');
 var showFullReportButton        = document.querySelector("#show-full-report");
 var fullReportDialog            = document.querySelector('#full-report-dialog');
 var tableFullReportDialog       = document.querySelector('#table-full-report-dialog');
+var necirLoginDialog            = document.querySelector('#necir-login-dialog');
 var reportsFilter               = document.querySelector('#reports-filter');
 var resultsLengthWrapper        = document.querySelector('#results-length-wrapper')
 var show10ReportsButton         = document.querySelector("#show-10-reports");
 var show25ReportsButton         = document.querySelector("#show-25-reports");
 var show50ReportsButton         = document.querySelector("#show-50-reports");
 var refreshViewReportsButton    = document.querySelector("#refresh-view-reports");
-var refreshApproveReportsButton    = document.querySelector("#refresh-approve-reports");
+var refreshApproveReportsButton = document.querySelector("#refresh-approve-reports");
 var viewReportsPreviousButton   = document.querySelector("#view-reports-previous");
 var viewReportsNextButton       = document.querySelector("#view-reports-next");
 var showUnfilteredReportsButton = document.querySelector("#show-unfiltered-reports");
@@ -101,18 +104,98 @@ function isReal(el) {
 /* Authentication Functions
 /*/
 
-function firebaseLogin() {
+function necirLogin() {
+	var email = necirLoginDialog.querySelector('#login-email').value;
+	var password = necirLoginDialog.querySelector('#login-password').value;
+	if (email === null || email === "", password === null || password === "") {
+		necirLoginDialog.querySelector('.error-message').innerHTML = 'Please enter both a valid email and password.';
+		removeClass(necirLoginDialog.querySelector('.error-message'), 'hidden');
+	} else {
+		addClass(necirLoginDialog.querySelector('.error-message'), 'hidden');
+		firebase.auth().signInWithEmailAndPassword(email, password).then(function(){
+			necirLoginDialog.close();
+			landing.style.margin = "-100vh";
+			setTimeout(function(){
+				addClass(landing, 'hidden');
+			}, 500);
+			var snackbarData = {
+				message: 'Login Successful',
+				timeout: 2000
+			};
+			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+			addClass(navGoogleLogin, 'hidden');
+			addClass(navNecirLogin, 'hidden');
+			removeClass(navLogout, 'hidden');
+			user = firebase.auth().currentUser;
+			if (isReal(user.displayName)) {
+				userNameSpan.innerHTML = user.displayName;
+			} else if (isReal(user.email)) {
+				userNameSpan.innerHTML = user.email;
+			}
+			if (isReal(user.photoURL)) {
+				profilePicture.src = user.photoURL;
+			} else {
+				profilePicture.src = 'images/user.jpg'
+			}
+		}).catch(function(error) {
+		  	if (error) {
+			  	if (error.code === 'auth/user-not-found') {
+					firebase.auth().createUserWithEmailAndPassword(email, password).then(function(){
+						user = firebase.auth().currentUser;
+						if (isReal(user.displayName)) {
+							userNameSpan.innerHTML = user.displayName;
+						} else if (isReal(user.email)) {
+							userNameSpan.innerHTML = user.email;
+						}
+						if (isReal(user.photoURL)) {
+							profilePicture.src = user.photoURL;
+						} else {
+							profilePicture.src = 'images/user.jpg'
+						}
+						addClass(navGoogleLogin, 'hidden');
+						addClass(navNecirLogin, 'hidden');
+						removeClass(navLogout, 'hidden');
+						if (!user.emailVerified) {
+							user.sendEmailVerification();
+							necirLoginDialog.close();
+							landing.style.margin = "-100vh";
+							setTimeout(function(){
+								addClass(landing, 'hidden');
+							}, 500);
+							swal("Success!", "You've registered! Check your email to verify your account!", "success")
+						}
+					}).catch(function(error) {
+						if (error) {
+							console.error(error);
+						}
+					});
+			  	} else {
+			  		console.error(error)
+				  	necirLoginDialog.querySelector('.error-message').innerHTML = error.message;
+					removeClass(necirLoginDialog.querySelector('.error-message'), 'hidden');
+			  	}
+		  	}
+		});
+	}
+}
+
+function googleLogin() {
 	firebase.auth().signInWithPopup(provider).then(function(result) {
 	  var token = result.credential.accessToken;
 	  var user = result.user;
 	  if (isReal(user.displayName)) {
 	  	userNameSpan.innerHTML = user.displayName;
+	  } else if (isReal(user.email)) {
+	  	userNameSpan.innerHTML = user.email;
 	  }
 	  if (isReal(user.photoURL)) {
 	  	profilePicture.src = user.photoURL;
+	  } else {
+	  	profilePicture.src = 'images/user.jpg'
 	  }
-	  addClass(login, 'hidden');
-	  removeClass(logout, 'hidden');
+	  addClass(navGoogleLogin, 'hidden');
+	  addClass(navNecirLogin, 'hidden');
+	  removeClass(navLogout, 'hidden');
 	  database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 	  	if (snapshot.val() === null) {
 	  		removeClass(adminAuth, 'hidden2');
@@ -126,7 +209,6 @@ function firebaseLogin() {
 	    timeout: 2000
 	  };
 	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  user.lastLogin = new Date();
 	  window.localStorage.setItem("user", JSON.stringify(user));
 	  window.localStorage.setItem("repeatUser", true);
 	}).catch(function(error) {
@@ -150,10 +232,11 @@ function firebaseLogout() {
 	firebase.auth().signOut().then(function() {
 		userNameSpan.innerHTML = "Log In";
 		profilePicture.src = "images/user.jpg";
-		addClass(logout, 'hidden');
 		addClass(adminAuth, 'hidden2');
 		addClass(approveReportsNavButton, 'hidden2');
-		removeClass(login, 'hidden');
+		removeClass(navGoogleLogin, 'hidden');
+		removeClass(navNecirLogin, 'hidden');
+		addClass(navLogout, 'hidden');
 		var snackbarData = {
 		    message: 'Logout Successful',
 		    timeout: 2000
@@ -404,6 +487,7 @@ for (var i = 0; i < navLinks.length; i++) {
 if (! fullReportDialog.showModal) {
   dialogPolyfill.registerDialog(fullReportDialog);
   dialogPolyfill.registerDialog(tableFullReportDialog);
+  dialogPolyfill.registerDialog(necirLoginDialog);
 }
 if (unfilteredIndices === null || unfilteredIndices === undefined) {
 	database.ref('unfilteredIndices/').once('value').then(function(snapshot){
@@ -448,15 +532,14 @@ if (adminReviewedIndices === null || adminReviewedIndices === undefined) {
 	});
 }
 if (user != null) {
-	
 	if (isReal(user.displayName)) {
 		userNameSpan.innerHTML = user.displayName;
 	}
 	if (isReal(user.photoURL)) {
 		profilePicture.src = user.photoURL;
 	}
-	addClass(login, 'hidden');
-	removeClass(logout, 'hidden');
+	//addClass(login, 'hidden');
+	//removeClass(logout, 'hidden');
 	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			removeClass(adminAuth, 'hidden2');
@@ -477,13 +560,26 @@ if (repeatUser != null) {
 	}
 	removeClass(document.querySelector("#tab-2"), "hidden");
 }
+/*firebase.auth().onAuthStateChanged(function(user) { 
+  console.log(user)
+  if (user.emailVerified) {
+    console.log('Email is verified');
+  }
+  else {
+    console.log('Email is not verified');
+    user.sendEmailVerification(); 
+  }
+});*/
+
+console.log('1');
+console.log(firebase.auth().currentUser)
 
 /*/
 /* Event Listeners
 /*/
 
-login.addEventListener('click', firebaseLogin);
-logout.addEventListener('click', firebaseLogout);
+//login.addEventListener('click', googleLogin);
+//logout.addEventListener('click', firebaseLogout);
 adminAuth.addEventListener('click', authenticateAsAdmin);
 saveCategorizationButton.addEventListener('click', saveCategorizations);
 showFullReportButton.addEventListener('click', function() {
@@ -497,15 +593,22 @@ fullReportDialog.querySelector('button').addEventListener('click', function() {
 tableFullReportDialog.querySelector('button').addEventListener('click', function() {
 	tableFullReportDialog.close();
 });
+necirLoginDialog.querySelector('#close').addEventListener('click', function() {
+	necirLoginDialog.close();
+});
+necirLoginDialog.querySelector('#necir-login-button').addEventListener('click', necirLogin);
 getNextReportButton.addEventListener('click', function(){
 	getNextReport(0);
 });
-landingLogin.addEventListener('click', function() {
-	firebaseLogin();
+googleLoginButton.addEventListener('click', function() {
+	googleLogin();
 	landing.style.margin = "-100vh";
 	setTimeout(function(){
 		addClass(landing, 'hidden');
 	}, 500);
+}, false);
+necirLoginButton.addEventListener('click', function() {
+	necirLoginDialog.showModal();
 }, false);
 refreshViewReportsButton.addEventListener('click', function(){
 	viewReportsTableBody.innerHTML = "";
