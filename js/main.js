@@ -11,7 +11,6 @@ firebase.initializeApp({
 
 var currentReport, currentReportID;
 var database = firebase.database();
-var provider = new firebase.auth.GoogleAuthProvider();
 
 var firstResultIndex = 0;
 var resultSection = null;
@@ -26,6 +25,7 @@ var repeatUser            = window.localStorage.getItem("repeatUser");
 var adminAuth                   = document.querySelector('#admin-auth');
 var approveReportsNavButton     = document.querySelector('#approve-reports');
 var approveReportsTableBody     = document.querySelector('#approve-reports-table > tbody');
+var approveTableCategorizationButton = document.querySelector('#approve-table-categorization');
 var beginEndDateSpan            = document.querySelector('#begin-end-date');
 var candidateSpan               = document.querySelector('#candidate-name');
 var categorizationOptions = document.querySelector('#categorization-options');
@@ -35,9 +35,7 @@ var districtSpan                = document.querySelector('#district');
 var filingDateSpan              = document.querySelector('#filing-date');
 var fullReportDialog            = document.querySelector('#full-report-dialog');
 var getNextReportButton         = document.querySelector("#get-report");
-var googleLoginButton           = document.querySelector('#google-login');
 var landing                     = document.querySelector('#landing');
-var navGoogleLogin              = document.querySelector('#nav-google-login');
 var navLogout                   = document.querySelector('#nav-logout');
 var navNecirLogin               = document.querySelector('#nav-necir-login');
 var necirLoginButton            = document.querySelector('#necir-login');
@@ -51,6 +49,7 @@ var refreshViewReportsButton    = document.querySelector("#refresh-view-reports"
 var reportIDSpan                = document.querySelector('#report-id');
 var reportsFilter               = document.querySelector('#reports-filter');
 var reportTypeSpan              = document.querySelector('#report-type');
+var resetReportButton = document.querySelector('#reset-report');
 var resultsLengthWrapper        = document.querySelector('#results-length-wrapper')
 var saveCategorizationButton    = document.querySelector('#save-categorization');
 var saveTableCategorizationButton    = document.querySelector('#save-table-categorization');
@@ -69,6 +68,9 @@ var userNameSpan                = document.querySelector('#user-name');
 var viewReportsNextButton       = document.querySelector("#view-reports-next");
 var viewReportsPreviousButton   = document.querySelector("#view-reports-previous");
 var viewReportsTableBody        = document.querySelector('#view-reports-table > tbody');
+var approveReportsNextButton = document.querySelector('#approve-reports-next');
+var approveReportsPreviousButton = document.querySelector('#approve-reports-previous');
+var viewReportsLoader = document.querySelector('#view-reports-loader');
 
 var navLinks                    = document.querySelectorAll(".tab-link");
 var tabs                        = document.querySelectorAll('.necir-tab');
@@ -103,6 +105,16 @@ function isReal(el) {
 		return false;
 	}
 }
+String.prototype.hashCode = function(){
+	var hash = 0;
+	if (this.length == 0) return hash;
+	for (i = 0; i < this.length; i++) {
+		char = this.charCodeAt(i);
+		hash = ((hash<<5)-hash)+char;
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	return hash;
+}
 
 /*/
 /* Authentication Functions
@@ -129,7 +141,6 @@ function necirLogin() {
 			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 			necirLoginDialog.querySelector('#login-email').value ='';
 			necirLoginDialog.querySelector('#login-password').value ='';
-			addClass(navGoogleLogin, 'hidden');
 			addClass(navNecirLogin, 'hidden');
 			removeClass(navLogout, 'hidden');
 			user = firebase.auth().currentUser;
@@ -137,8 +148,12 @@ function necirLogin() {
 				if (snapshot.val() === null) {
 					removeClass(adminAuth, 'hidden2');
 					addClass(approveReportsNavButton, 'hidden2');
+					addClass(approveTableCategorizationButton, 'hidden');
+					addClass(resetReportButton, 'hidden');
 				} else {
 					removeClass(approveReportsNavButton, 'hidden2');
+					removeClass(approveTableCategorizationButton, 'hidden');
+					removeClass(resetReportButton, 'hidden');
 				}
 			});
 			if (isReal(user.displayName)) {
@@ -153,50 +168,73 @@ function necirLogin() {
 			}
 			window.localStorage.setItem("user", JSON.stringify(user));
 	  		window.localStorage.setItem("repeatUser", true);
+	  		getNextReport(0);
 		}).catch(function(error) {
 		  	if (error) {
 			  	if (error.code === 'auth/user-not-found') {
-					firebase.auth().createUserWithEmailAndPassword(email, password).then(function(){
-						user = firebase.auth().currentUser;
-						if (isReal(user.displayName)) {
-							userNameSpan.innerHTML = user.displayName;
-						} else if (isReal(user.email)) {
-							userNameSpan.innerHTML = user.email;
-						}
-						if (isReal(user.photoURL)) {
-							profilePicture.src = user.photoURL;
-						} else {
-							profilePicture.src = 'images/user.jpg'
-						}
-						addClass(navGoogleLogin, 'hidden');
-						addClass(navNecirLogin, 'hidden');
-						removeClass(navLogout, 'hidden');
-						database.ref('admins/' + user.uid).once('value').then(function(snapshot){
-							if (snapshot.val() === null) {
-								removeClass(adminAuth, 'hidden2');
-								addClass(approveReportsNavButton, 'hidden2');
-							} else {
-								removeClass(approveReportsNavButton, 'hidden2');
-							}
-						});
-						window.localStorage.setItem("user", JSON.stringify(user));
-	  					window.localStorage.setItem("repeatUser", true);
-						if (!user.emailVerified) {
-							user.sendEmailVerification();
-							necirLoginDialog.close();
-							landing.style.margin = "-100vh";
-							setTimeout(function(){
-								addClass(landing, 'hidden');
-							}, 500);
-							swal("Success!", "You've registered! Check your email to verify your account!", "success");
-							necirLoginDialog.querySelector('#login-email').value ='';
-							necirLoginDialog.querySelector('#login-password').value ='';
-						}
-					}).catch(function(error) {
-						if (error) {
-							console.error(error);
-						}
-					});
+			  		necirLoginDialog.close();
+			  		swal({
+					    title: "Hello New User!", 
+					    text: "Please enter the Event Code to register:", 
+					    type: "input", 
+					    showCancelButton: true, 
+					    closeOnConfirm: false, 
+					    animation: "slide-from-top", 
+					    inputPlaceholder: "xxxxxxxxxx"
+					}, function(inputValue) {
+					    if (inputValue===false) return false;
+					    if (inputValue==="") {
+					        swal.showInputError("You need to write something!");
+					        return false
+					    }
+				    	if (inputValue.hashCode() === 444786303) {
+				    		firebase.auth().createUserWithEmailAndPassword(email, password).then(function(){
+								user = firebase.auth().currentUser;
+								if (isReal(user.displayName)) {
+									userNameSpan.innerHTML = user.displayName;
+								} else if (isReal(user.email)) {
+									userNameSpan.innerHTML = user.email;
+								}
+								if (isReal(user.photoURL)) {
+									profilePicture.src = user.photoURL;
+								} else {
+									profilePicture.src = 'images/user.jpg'
+								}
+								addClass(navNecirLogin, 'hidden');
+								removeClass(navLogout, 'hidden');
+								database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+									if (snapshot.val() === null) {
+										removeClass(adminAuth, 'hidden2');
+										addClass(approveReportsNavButton, 'hidden2');
+										addClass(approveTableCategorizationButton, 'hidden');
+										addClass(resetReportButton, 'hidden');
+									} else {
+										removeClass(approveReportsNavButton, 'hidden2');
+										removeClass(approveTableCategorizationButton, 'hidden');
+										removeClass(resetReportButton, 'hidden');
+									}
+								});
+								window.localStorage.setItem("user", JSON.stringify(user));
+			  					window.localStorage.setItem("repeatUser", true);
+								if (!user.emailVerified) {
+									user.sendEmailVerification();
+									landing.style.margin = "-100vh";
+									setTimeout(function(){
+										addClass(landing, 'hidden');
+									}, 500);
+									swal("Success!", "You've registered! Check your email to verify your account!", "success");
+									necirLoginDialog.querySelector('#login-email').value ='';
+									necirLoginDialog.querySelector('#login-password').value ='';
+								}
+							}).catch(function(error) {
+								if (error) {
+									console.error(error);
+								}
+							});
+				    	} else {
+				    		swal("Oops...", "That password wasn't correct!", "error");
+				    	}
+					});	
 			  	} else {
 			  		console.error(error)
 				  	necirLoginDialog.querySelector('.error-message').innerHTML = error.message;
@@ -207,62 +245,15 @@ function necirLogin() {
 	}
 }
 
-function googleLogin() {
-	firebase.auth().signInWithPopup(provider).then(function(result) {
-	  var token = result.credential.accessToken;
-	  var user = result.user;
-	  if (isReal(user.displayName)) {
-	  	userNameSpan.innerHTML = user.displayName;
-	  } else if (isReal(user.email)) {
-	  	userNameSpan.innerHTML = user.email;
-	  }
-	  if (isReal(user.photoURL)) {
-	  	profilePicture.src = user.photoURL;
-	  } else {
-	  	profilePicture.src = 'images/user.jpg'
-	  }
-	  addClass(navGoogleLogin, 'hidden');
-	  addClass(navNecirLogin, 'hidden');
-	  removeClass(navLogout, 'hidden');
-	  database.ref('admins/' + user.uid).once('value').then(function(snapshot){
-	  	if (snapshot.val() === null) {
-	  		removeClass(adminAuth, 'hidden2');
-	  		addClass(approveReportsNavButton, 'hidden2');
-	  	} else {
-	  		removeClass(approveReportsNavButton, 'hidden2');
-	  	}
-	  });
-	  var snackbarData = {
-	    message: 'Login Successful',
-	    timeout: 2000
-	  };
-	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  window.localStorage.setItem("user", JSON.stringify(user));
-	  window.localStorage.setItem("repeatUser", true);
-	}).catch(function(error) {
-	  console.error(error);
-	  var err = {
-	  	"Code": error.code,
-	  	"Message": error.message,
-	  	"Email": error.email,
-	  	"Credential": error.credential
-	  }
-	  console.log(err);
-	  var snackbarData = {
-	    message: 'Login Unsuccessful',
-	    timeout: 2000
-	  };
-	  snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	});
-}
-
 function firebaseLogout() {
+	database.ref('currentlyAccessedIndices/' + currentReportID).set(null);
 	firebase.auth().signOut().then(function() {
 		userNameSpan.innerHTML = "Log In";
 		profilePicture.src = "images/user.jpg";
 		addClass(adminAuth, 'hidden2');
 		addClass(approveReportsNavButton, 'hidden2');
-		removeClass(navGoogleLogin, 'hidden');
+		addClass(approveTableCategorizationButton, 'hidden');
+		addClass(resetReportButton, 'hidden');
 		removeClass(navNecirLogin, 'hidden');
 		addClass(navLogout, 'hidden');
 		var snackbarData = {
@@ -284,7 +275,7 @@ function firebaseLogout() {
 function authenticateAsAdmin() {
 	user = firebase.auth().currentUser;
 	if (user) {
-	  swal( {
+	 	swal({
 		    title: "Authenticate as Admin", 
 		    text: "Enter the NECIR Admin password:", 
 		    type: "input", 
@@ -302,6 +293,10 @@ function authenticateAsAdmin() {
 		    	if (inputValue === snapshot.val()) {
 		    		database.ref('admins/' + user.uid).set(true, function(err){
 		    			swal("Success!", "Your account is now an admin account!", "success");
+		    			addClass(adminAuth, 'hidden2');
+						removeClass(approveReportsNavButton, 'hidden2');
+						removeClass(approveTableCategorizationButton, 'hidden');
+						removeClass(resetReportButton, 'hidden');
 		    		});
 		    	} else {
 		    		swal("Oops...", "That password wasn't correct!", "error");
@@ -322,12 +317,19 @@ function getNextReport(startIndex) {
 		currentReportID = unfilteredIndices[Object.keys(unfilteredIndices)[startIndex]];
 		database.ref('currentlyAccessedIndices/' + currentReportID).once('value').then(function(snapshot){
 			if (snapshot.val() === null) {
-				database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function() {
-					database.ref('reports/' + currentReportID).once('value').then(function(snapshot){
-						currentReport = snapshot.val();
-						fillReportData();
-					});
-				});
+				database.ref('unfilteredIndices/' + currentReportID).once('value').then(function(snapshot){
+					if (snapshot.val() != null) {
+						database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function() {
+							database.ref('reports/' + currentReportID).once('value').then(function(snapshot){
+								currentReport = snapshot.val();
+								fillReportData();
+							});
+						});
+					} else {
+						delete unfilteredIndices[currentReportID];
+						getNextReport(startIndex + 1);
+					}
+				});	
 			} else {
 				getNextReport(startIndex + 1);
 			}
@@ -416,6 +418,8 @@ function fillViewReports(index) {
 
 function addViewReportsListeners() {
 	var viewReportIDButtons = document.querySelectorAll(".view-report-idbutton");
+	addClass(viewReportsLoader, 'hidden');
+	removeClass(viewReportsTableBody, 'hidden');
 	for (var i = 0; i < viewReportIDButtons.length; i++) {
 		viewReportIDButtons[i].addEventListener('click', function(){
 			var key = this.dataset.reportid;
@@ -439,18 +443,18 @@ function addViewReportsListeners() {
 }
 
 function saveTableCategorizations() {
-	tableFullReportDialog.close();
-	swal({
-	    title: "Are you sure?", 
-	    text: "Continuing will save the current categorization and mark it as filtered.", 
-	    type: "warning", 
-	    showCancelButton: true, 
-	    confirmButtonColor: "#DD6B55", 
-	    confirmButtonText: "Yes, continue!", 
-	    closeOnConfirm: true
-	}, function() {
-		database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-			if (snapshot.val() === null) {
+	database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+		if (snapshot.val() === null) {
+			tableFullReportDialog.close();
+			swal({
+			    title: "Are you sure?", 
+			    text: "Continuing will save the current categorization and mark it as filtered.", 
+			    type: "warning", 
+			    showCancelButton: true, 
+			    confirmButtonColor: "#DD6B55", 
+			    confirmButtonText: "Yes, continue!", 
+			    closeOnConfirm: true
+			}, function() {
 				database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 					var report = snapshot.val();
 					report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
@@ -462,6 +466,8 @@ function saveTableCategorizations() {
 								delete unfilteredIndices[tableFullReportDialog.dataset.reportid];
 								window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 								viewReportsTableBody.innerHTML = "";
+								addClass(viewReportsTableBody, 'hidden');
+								removeClass(viewReportsLoader, 'hidden');
 								fillViewReports(firstResultIndex);
 								swal("Success!", "Report has been categorized!", "success");
 							});
@@ -470,15 +476,14 @@ function saveTableCategorizations() {
 				}).catch(function(error){
 					console.error(error);
 				});
-			} else {
-				setTimeout(function(){
-					swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
-				}, 100);
-			}
-		}).catch(function(error){
-			console.error(error);
-		});
-	});
+			});
+		} else {
+			tableFullReportDialog.close();
+			swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+		}
+	}).catch(function(error){
+		console.error(error);
+	})
 }
 
 /*/
@@ -495,7 +500,7 @@ function fillApproveReports(index) {
 				tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon approve-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
 				approveReportsTableBody.appendChild(tr);
 				if (index < firstResultIndex + resultsLength) {
-					fillViewReports(index + 1);
+					fillApproveReports(index + 1);
 				} else {
 					addApproveReportsListeners();
 				}
@@ -514,8 +519,8 @@ function fillApproveReports(index) {
 
 function addApproveReportsListeners() {
 	var approveReportIDButtons = document.querySelectorAll(".approve-report-idbutton");
-	for (var i = 0; i < viewReportIDButtons.length; i++) {
-		viewReportIDButtons[i].addEventListener('click', function(){
+	for (var i = 0; i < approveReportIDButtons.length; i++) {
+		approveReportIDButtons[i].addEventListener('click', function(){
 			var key = this.dataset.reportid;
 			console.log(key)
 			database.ref('reports/' + key).once('value').then(function(snapshot){
@@ -533,8 +538,6 @@ function addApproveReportsListeners() {
 /* Main Code
 /*/
 
-database.ref('currentlyAccessedIndices').set(null); // Development setting, remove for production
-
 for (var i = 0; i < navLinks.length; i++) {
 	navLinks[i].addEventListener('click', function(){
 		for (var i = 0; i < tabs.length; i++) {
@@ -546,6 +549,8 @@ for (var i = 0; i < navLinks.length; i++) {
 		if (num === 3) {
 			firstResultIndex = 0;
 			viewReportsTableBody.innerHTML = "";
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
 			fillViewReports(firstResultIndex);
 			removeClass(reportsFilter, 'hidden');
 			removeClass(resultsLengthWrapper, 'hidden');
@@ -573,6 +578,8 @@ if (unfilteredIndices === null || unfilteredIndices === undefined) {
 		window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 		resultSection = unfilteredIndices;
 		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
 		getNextReport(0);
 		var snackbarData = {
@@ -584,6 +591,8 @@ if (unfilteredIndices === null || unfilteredIndices === undefined) {
 } else {
 	resultSection = unfilteredIndices;
 	viewReportsTableBody.innerHTML = "";
+	addClass(viewReportsTableBody, 'hidden');
+	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
 	getNextReport(0);
 }
@@ -620,15 +629,18 @@ if (user != null) {
 	} else {
 	  	profilePicture.src = 'images/user.jpg'
 	}
-	addClass(navGoogleLogin, 'hidden');
 	addClass(navNecirLogin, 'hidden');
 	removeClass(navLogout, 'hidden');
 	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			removeClass(adminAuth, 'hidden2');
 			addClass(approveReportsNavButton, 'hidden2');
+			addClass(approveTableCategorizationButton, 'hidden');
+			addClass(resetReportButton, 'hidden');
 		} else {
 			removeClass(approveReportsNavButton, 'hidden2');
+			removeClass(approveTableCategorizationButton, 'hidden');
+			removeClass(resetReportButton, 'hidden');
 		}
 	});
 	landing.style.margin = "-100vh";
@@ -648,7 +660,6 @@ if (repeatUser != null) {
 /* Event Listeners
 /*/
 
-navGoogleLogin.addEventListener('click', googleLogin);
 navNecirLogin.addEventListener('click', function(){
 	necirLoginDialog.showModal();
 });
@@ -674,18 +685,13 @@ necirLoginDialog.querySelector('#necir-login-button').addEventListener('click', 
 getNextReportButton.addEventListener('click', function(){
 	getNextReport(0);
 });
-googleLoginButton.addEventListener('click', function() {
-	googleLogin();
-	landing.style.margin = "-100vh";
-	setTimeout(function(){
-		addClass(landing, 'hidden');
-	}, 500);
-}, false);
 necirLoginButton.addEventListener('click', function() {
 	necirLoginDialog.showModal();
 }, false);
 refreshViewReportsButton.addEventListener('click', function(){
 	viewReportsTableBody.innerHTML = "";
+	addClass(viewReportsTableBody, 'hidden');
+	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
 });
 refreshApproveReportsButton.addEventListener('click', function(){
@@ -696,42 +702,96 @@ viewReportsPreviousButton.addEventListener('click', function(){
 	if ((firstResultIndex - (resultsLength)) >= 0) {
 		firstResultIndex -= (resultsLength);
 		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		if (viewReportsNextButton.disabled) {
+			viewReportsNextButton.disabled = false;
+		}
 	} else if (firstResultIndex > 0) {
 		viewReportsTableBody.innerHTML = "";
 		firstResultIndex = 0;
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		if (viewReportsNextButton.disabled) {
+			viewReportsNextButton.disabled = false;
+		}
 	} else {
 		viewReportsPreviousButton.disabled = true;
 	}
 });
-
-// Fix below
-
 viewReportsNextButton.addEventListener('click', function(){
-	if ((firstResultIndex + resultsLength) < Object.keys(unfilteredIndices).length) {
+	if ((firstResultIndex + resultsLength) < Object.keys(resultSection).length) {
 		firstResultIndex += (resultsLength);
 		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
 		if (viewReportsPreviousButton.disabled) {
 			viewReportsPreviousButton.disabled = false;
 		}
+	} else {
+		viewReportsNextButton.disabled = true;
+	}
+});
+approveReportsPreviousButton.addEventListener('click', function(){
+	if ((firstResultIndex - (resultsLength)) >= 0) {
+		firstResultIndex -= (resultsLength);
+		approveReportsTableBody.innerHTML = "";
+		fillApproveReports(firstResultIndex);
+		if (approveReportsNextButton.disabled) {
+			approveReportsNextButton.disabled = false;
+		}
+	} else if (firstResultIndex > 0) {
+		approveReportsTableBody.innerHTML = "";
+		firstResultIndex = 0;
+		fillApproveReports(firstResultIndex);
+		if (approveReportsNextButton.disabled) {
+			approveReportsNextButton.disabled = false;
+		}
+	} else {
+		approveReportsPreviousButton.disabled = true;
+	}
+});
+approveReportsNextButton.addEventListener('click', function(){
+	if ((firstResultIndex + resultsLength) < Object.keys(resultSection).length) {
+		firstResultIndex += (resultsLength);
+		approveReportsTableBody.innerHTML = "";
+		fillApproveReports(firstResultIndex);
+		if (approveReportsPreviousButton.disabled) {
+			approveReportsPreviousButton.disabled = false;
+		}
+	} else {
+		approveReportsNextButton.disabled = true;
 	}
 });
 show10ReportsButton.addEventListener('click', function(){
 	resultsLength = 9;
 	viewReportsTableBody.innerHTML = "";
+	addClass(viewReportsTableBody, 'hidden');
+	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
+	approveReportsTableBody.innerHTML = "";
+	fillApproveReports(firstResultIndex);
 });
 show25ReportsButton.addEventListener('click', function(){
 	resultsLength = 24;
 	viewReportsTableBody.innerHTML = "";
+	addClass(viewReportsTableBody, 'hidden');
+	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
+	approveReportsTableBody.innerHTML = "";
+	fillApproveReports(firstResultIndex);
 });
 show50ReportsButton.addEventListener('click', function(){
 	resultsLength = 49;
 	viewReportsTableBody.innerHTML = "";
+	addClass(viewReportsTableBody, 'hidden');
+	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
+	approveReportsTableBody.innerHTML = "";
+	fillApproveReports(firstResultIndex);
 });
 
 // Fix below
@@ -740,6 +800,8 @@ showUnfilteredReportsButton.addEventListener('click', function(){
 	resultSection = unfilteredIndices;
 	viewReportsTableBody.innerHTML = "";
 	firstResultIndex = 0;
+	addClass(viewReportsTableBody, 'hidden');
+	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
 });
 showFilteredReportsButton.addEventListener('click', function(){
@@ -749,6 +811,8 @@ showFilteredReportsButton.addEventListener('click', function(){
 		resultSection = filteredIndices;
 		viewReportsTableBody.innerHTML = "";
 		firstResultIndex = 0;
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
 		var snackbarData = {
 			message: 'Filtered Report Indices Downloaded',
@@ -764,6 +828,8 @@ showApprovedReportsButton.addEventListener('click', function(){
 		resultSection = adminReviewedIndices;
 		viewReportsTableBody.innerHTML = "";
 		firstResultIndex = 0;
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
 		var snackbarData = {
 			message: 'Approved Report Indices Downloaded',
@@ -774,9 +840,16 @@ showApprovedReportsButton.addEventListener('click', function(){
 });
 
 /*/
-/* Run on Page Load
+/* Page Hooks
 /*/
 
 window.onload = function() {
 	hljs.initHighlightingOnLoad();
+}
+
+window.onbeforeunload = confirmExit;
+function confirmExit(){
+	database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(){
+		return false;
+	});
 }

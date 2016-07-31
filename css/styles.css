@@ -344,3 +344,15 @@ pre {
 .error-message {
   color: #F44336;
 }
+
+#view-reports-loader {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+#current-report > h3, #current-report-loader {
+  display: inline-block;
+}
+#current-report-loader {
+  margin-left: 20px;
+}
