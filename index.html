@@ -79,14 +79,14 @@
               <li id="nav-necir-login" class="mdl-menu__item">Login</li>
               <li id="nav-logout" class="mdl-menu__item hidden">Logout</li>
             </ul>
-            <button id="settings-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+            <button id="settings-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon hidden">
               <i class="material-icons" role="presentation">settings</i>
               <span class="visuallyhidden">Settings</span>
             </button>
           </div>
         </header>
         <nav class="necir-navigation mdl-navigation mdl-color--blue-grey-800">
-          <a class="tab-link mdl-navigation__link" href="#tab-2">Review Reports</a>
+          <a class="tab-link mdl-navigation__link active" href="#tab-2">Review Reports</a>
           <a class="tab-link mdl-navigation__link" href="#tab-3">View All Reports</a>
           <a id="approve-reports" class="tab-link mdl-navigation__link hidden2" href="#tab-4">Approve Filtered Reports</a>
           <div class="mdl-layout-spacer"></div>
@@ -198,9 +198,10 @@
                   <th class="mdl-data-table__cell--non-numeric"><button id="refresh-approve-reports" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">refresh</i></button></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class='hidden'>
               </tbody>
             </table>
+            <div id="approve-reports-loader" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
             <button id="approve-reports-previous" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
               Previous
             </button>
@@ -274,9 +275,9 @@
         </div>
       </div>
       <div class="mdl-dialog__actions">
-        <button id="reset-report" type="button" class="mdl-button hidden">Reset Report</button>
-        <button id="approve-table-categorization" type="button" class="mdl-button hidden">Approve Categorization</button>
-        <button id="save-table-categorization" type="button" class="mdl-button">Save Categorization</button>
+        <button id="reset-report" type="button" class="mdl-button hidden danger">Reset Report</button>
+        <button id="approve-table-categorization" type="button" class="mdl-button hidden safe">Approve Categorization</button>
+        <button id="save-table-categorization" type="button" class="mdl-button warning">Save Categorization</button>
         <button id="close" type="button" class="mdl-button">Close</button>
       </div>
     </dialog>

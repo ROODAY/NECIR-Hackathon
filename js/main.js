@@ -15,6 +15,7 @@ var database = firebase.database();
 var firstResultIndex = 0;
 var resultSection = null;
 var resultsLength = 9;
+var resultSectionNum = 1;
 
 var adminReviewedIndices  = JSON.parse(window.localStorage.getItem('adminReviewedIndices'));
 var filteredIndices       = JSON.parse(window.localStorage.getItem('filteredIndices'));
@@ -71,6 +72,9 @@ var viewReportsTableBody        = document.querySelector('#view-reports-table > 
 var approveReportsNextButton = document.querySelector('#approve-reports-next');
 var approveReportsPreviousButton = document.querySelector('#approve-reports-previous');
 var viewReportsLoader = document.querySelector('#view-reports-loader');
+var approveReportsLoader = document.querySelector('#approve-reports-loader');
+var currentReportLoader = document.querySelector('#current-report-loader');
+var settingsButton = document.querySelector('#settings-button');
 
 var navLinks                    = document.querySelectorAll(".tab-link");
 var tabs                        = document.querySelectorAll('.necir-tab');
@@ -143,6 +147,7 @@ function necirLogin() {
 			necirLoginDialog.querySelector('#login-password').value ='';
 			addClass(navNecirLogin, 'hidden');
 			removeClass(navLogout, 'hidden');
+			removeClass(settingsButton, 'hidden');
 			user = firebase.auth().currentUser;
 			database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 				if (snapshot.val() === null) {
@@ -168,6 +173,7 @@ function necirLogin() {
 			}
 			window.localStorage.setItem("user", JSON.stringify(user));
 	  		window.localStorage.setItem("repeatUser", true);
+	  		removeClass(currentReportLoader, 'hidden');
 	  		getNextReport(0);
 		}).catch(function(error) {
 		  	if (error) {
@@ -201,6 +207,7 @@ function necirLogin() {
 									profilePicture.src = 'images/user.jpg'
 								}
 								addClass(navNecirLogin, 'hidden');
+								removeClass(settingsButton, 'hidden');
 								removeClass(navLogout, 'hidden');
 								database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 									if (snapshot.val() === null) {
@@ -255,6 +262,7 @@ function firebaseLogout() {
 		addClass(approveTableCategorizationButton, 'hidden');
 		addClass(resetReportButton, 'hidden');
 		removeClass(navNecirLogin, 'hidden');
+		addClass(settingsButton, 'hidden');
 		addClass(navLogout, 'hidden');
 		var snackbarData = {
 		    message: 'Logout Successful',
@@ -338,7 +346,8 @@ function getNextReport(startIndex) {
 		var snackbarData = {
 		    message: 'Data Does Not Yet Exist',
 		    timeout: 2000
-		  };
+		};
+		addClass(currentReportLoader, 'hidden');
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	}
 }
@@ -355,6 +364,7 @@ function fillReportData() {
 	officeSpan.innerHTML = currentReport.Office;
 	preElement.innerHTML = JSON.stringify(currentReport, null, 4);
 	removeClass(currentReportDiv, "hidden");
+	addClass(currentReportLoader, 'hidden');
 	addClass(getNextReportButton, 'hidden');
 }
 
@@ -377,6 +387,7 @@ function saveCategorizations() {
 					database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(){
 						delete unfilteredIndices[currentReportID];
 						window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+						removeClass(currentReportLoader, 'hidden');
 						getNextReport(0);
 					});
 				});
@@ -411,7 +422,8 @@ function fillViewReports(index) {
 		var snackbarData = {
 		    message: 'Data Does Not Yet Exist',
 		    timeout: 2000
-		  };
+		};
+		addClass(viewReportsLoader, 'hidden');
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	}
 }
@@ -424,12 +436,21 @@ function addViewReportsListeners() {
 		viewReportIDButtons[i].addEventListener('click', function(){
 			var key = this.dataset.reportid;
 			tableFullReportDialog.dataset.reportid = key;
-			if (resultSection === filteredIndices || resultSection === adminReviewedIndices) {
+			if (resultSectionNum === 2) {
 				addClass(tableCategorizationOptions, 'hidden');
 				addClass(saveTableCategorizationButton, 'hidden');
+				removeClass(approveTableCategorizationButton, 'hidden');
+				removeClass(resetReportButton, 'hidden');
+			} else if (resultSectionNum === 3) {
+				addClass(tableCategorizationOptions, 'hidden');
+				addClass(saveTableCategorizationButton, 'hidden');
+				addClass(approveTableCategorizationButton, 'hidden');
+				removeClass(resetReportButton, 'hidden');
 			} else {
 				removeClass(tableCategorizationOptions, 'hidden');
 				removeClass(saveTableCategorizationButton, 'hidden');
+				addClass(approveTableCategorizationButton, 'hidden');
+				addClass(resetReportButton, 'hidden');
 			}
 			database.ref('reports/' + key).once('value').then(function(snapshot){
 				var report = snapshot.val();
@@ -512,13 +533,16 @@ function fillApproveReports(index) {
 		var snackbarData = {
 		    message: 'Data Does Not Yet Exist',
 		    timeout: 2000
-		  };
+		};
+		addClass(approveReportsLoader, 'hidden');
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	}
 }
 
 function addApproveReportsListeners() {
 	var approveReportIDButtons = document.querySelectorAll(".approve-report-idbutton");
+	removeClass(approveReportsTableBody, 'hidden');
+	addClass(approveReportsLoader, 'hidden');
 	for (var i = 0; i < approveReportIDButtons.length; i++) {
 		approveReportIDButtons[i].addEventListener('click', function(){
 			var key = this.dataset.reportid;
@@ -534,6 +558,145 @@ function addApproveReportsListeners() {
 	}
 }
 
+function approveReport() {
+	database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+		if (snapshot.val() != null) {
+			database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(){
+				database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
+					resyncData();
+					addClass(viewReportsTableBody, 'hidden');
+					removeClass(viewReportsLoader, 'hidden');
+					addClass(approveReportsTableBody, 'hidden');
+					removeClass(approveReportsLoader, 'hidden');
+					tableFullReportDialog.close();
+					swal("Success!", "Report has been approved!", "success");
+				});
+			});
+		} else {
+			console.log('report is not filtered')
+		}
+	}).catch(function(error){
+		console.error(error);
+	});
+}
+
+function resetReport() {
+	database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+		if (snapshot.val() === null) {
+			swal({
+			    title: "Are you sure?", 
+			    text: "Continuing will reset the current report's categorizations and mark it as unfiltered.", 
+			    type: "warning", 
+			    showCancelButton: true, 
+			    confirmButtonColor: "#DD6B55", 
+			    confirmButtonText: "Yes, continue!", 
+			    closeOnConfirm: true
+			}, function() {
+				database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
+					database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
+						database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(){
+							database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+								var report = snapshot.val();
+								report.Individual_Or_Organization = '';
+								report.Location                   = '';
+								report.Notable_Contributor        = '';
+								addClass(viewReportsTableBody, 'hidden');
+								removeClass(viewReportsLoader, 'hidden');
+								addClass(approveReportsTableBody, 'hidden');
+								removeClass(approveReportsLoader, 'hidden');
+								resyncData();
+								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(){
+									swal("Success!", "Report has successfully been reset!", "success");
+								});
+							});
+						}).catch(function(error){
+							console.error(error);
+						});
+					}).catch(function(error){
+						console.error(error);
+					});
+				}).catch(function(error){
+					console.error(error);
+				});
+			});
+		} else {
+			swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+		}
+	}).catch(function(error){
+		console.error(error);
+	});
+}
+
+function resyncData() {
+	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
+		adminReviewedIndices = snapshot.val();
+		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
+		database.ref('filteredIndices').once('value').then(function(snapshot){
+			filteredIndices = snapshot.val();
+			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
+			if (resultSectionNum === 1) {
+				resultSection = unfilteredIndices;
+			} else if (resultSectionNum === 2) {
+				resultSection = filteredIndices;
+			} else if (resultSectionNum === 3) {
+				resultSection = adminReviewedIndices;
+			}
+			viewReportsTableBody.innerHTML = "";
+			fillViewReports(firstResultIndex);
+			approveReportsTableBody.innerHTML = "";
+			fillApproveReports(firstResultIndex);
+			var snackbarData = {
+				message: 'Data Synced',
+				timeout: 2000
+			};
+			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		}).catch(function(error){
+			console.log(error);
+		});
+	}).catch(function(error){
+		console.log(error);
+	});
+}
+
+function resyncAllData() {
+	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
+		adminReviewedIndices = snapshot.val();
+		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
+		database.ref('filteredIndices').once('value').then(function(snapshot){
+			filteredIndices = snapshot.val();
+			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
+			database.ref('unfilteredIndices').once('value').then(function(snapshot){
+				unfilteredIndices = snapshot.val();
+				window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+				if (resultSectionNum === 1) {
+					resultSection = unfilteredIndices;
+				} else if (resultSectionNum === 2) {
+					resultSection = filteredIndices;
+				} else if (resultSectionNum === 3) {
+					resultSection = adminReviewedIndices;
+				}
+				viewReportsTableBody.innerHTML = "";
+				fillViewReports(firstResultIndex);
+				approveReportsTableBody.innerHTML = "";
+				fillApproveReports(firstResultIndex);
+				var snackbarData = {
+					message: 'All Data Synced',
+					timeout: 2000
+				};
+				snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+			}).catch(function(error){
+				console.log(error);
+			});
+		}).catch(function(error){
+			console.log(error);
+		});
+	}).catch(function(error){
+		console.log(error);
+	});
+}
+
+	
+
 /*/
 /* Main Code
 /*/
@@ -543,8 +706,12 @@ for (var i = 0; i < navLinks.length; i++) {
 		for (var i = 0; i < tabs.length; i++) {
 			addClass(tabs[i], "hidden");
 		}
+		for (var i = 0; i < navLinks.length; i++) {
+			removeClass(navLinks[i], 'active');
+		}
 		var query = this.href.substring(this.href.indexOf("#"));
 		removeClass(document.querySelector(query), "hidden");
+		addClass(this, 'active');
 		var num = parseInt(query.substring(query.length - 1));
 		if (num === 3) {
 			firstResultIndex = 0;
@@ -557,6 +724,8 @@ for (var i = 0; i < navLinks.length; i++) {
 		} else if (num === 4) {
 			firstResultIndex = 0;
 			approveReportsTableBody.innerHTML = "";
+			addClass(approveReportsTableBody, 'hidden');
+			removeClass(approveReportsLoader, 'hidden');
 			fillApproveReports(firstResultIndex);
 			addClass(reportsFilter, 'hidden');
 			removeClass(resultsLengthWrapper, 'hidden');
@@ -581,6 +750,7 @@ if (unfilteredIndices === null || unfilteredIndices === undefined) {
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		removeClass(currentReportLoader, 'hidden');
 		getNextReport(0);
 		var snackbarData = {
 			message: 'Unfiltered Report Indices Downloaded',
@@ -594,6 +764,7 @@ if (unfilteredIndices === null || unfilteredIndices === undefined) {
 	addClass(viewReportsTableBody, 'hidden');
 	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
+	removeClass(currentReportLoader, 'hidden');
 	getNextReport(0);
 }
 if (filteredIndices === null || filteredIndices === undefined) {
@@ -631,6 +802,7 @@ if (user != null) {
 	}
 	addClass(navNecirLogin, 'hidden');
 	removeClass(navLogout, 'hidden');
+	removeClass(settingsButton, 'hidden');
 	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			removeClass(adminAuth, 'hidden2');
@@ -683,6 +855,7 @@ necirLoginDialog.querySelector('#close').addEventListener('click', function() {
 });
 necirLoginDialog.querySelector('#necir-login-button').addEventListener('click', necirLogin);
 getNextReportButton.addEventListener('click', function(){
+	removeClass(currentReportLoader, 'hidden');
 	getNextReport(0);
 });
 necirLoginButton.addEventListener('click', function() {
@@ -697,6 +870,8 @@ refreshViewReportsButton.addEventListener('click', function(){
 refreshApproveReportsButton.addEventListener('click', function(){
 	approveReportsTableBody.innerHTML = "";
 	fillApproveReports(firstResultIndex);
+	addClass(approveReportsTableBody, 'hidden');
+	removeClass(approveReportsLoader, 'hidden');
 });
 viewReportsPreviousButton.addEventListener('click', function(){
 	if ((firstResultIndex - (resultsLength)) >= 0) {
@@ -740,6 +915,8 @@ approveReportsPreviousButton.addEventListener('click', function(){
 		firstResultIndex -= (resultsLength);
 		approveReportsTableBody.innerHTML = "";
 		fillApproveReports(firstResultIndex);
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
 		if (approveReportsNextButton.disabled) {
 			approveReportsNextButton.disabled = false;
 		}
@@ -747,6 +924,8 @@ approveReportsPreviousButton.addEventListener('click', function(){
 		approveReportsTableBody.innerHTML = "";
 		firstResultIndex = 0;
 		fillApproveReports(firstResultIndex);
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
 		if (approveReportsNextButton.disabled) {
 			approveReportsNextButton.disabled = false;
 		}
@@ -759,6 +938,8 @@ approveReportsNextButton.addEventListener('click', function(){
 		firstResultIndex += (resultsLength);
 		approveReportsTableBody.innerHTML = "";
 		fillApproveReports(firstResultIndex);
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
 		if (approveReportsPreviousButton.disabled) {
 			approveReportsPreviousButton.disabled = false;
 		}
@@ -774,6 +955,8 @@ show10ReportsButton.addEventListener('click', function(){
 	fillViewReports(firstResultIndex);
 	approveReportsTableBody.innerHTML = "";
 	fillApproveReports(firstResultIndex);
+	addClass(approveReportsTableBody, 'hidden');
+	removeClass(approveReportsLoader, 'hidden');
 });
 show25ReportsButton.addEventListener('click', function(){
 	resultsLength = 24;
@@ -783,6 +966,8 @@ show25ReportsButton.addEventListener('click', function(){
 	fillViewReports(firstResultIndex);
 	approveReportsTableBody.innerHTML = "";
 	fillApproveReports(firstResultIndex);
+	addClass(approveReportsTableBody, 'hidden');
+	removeClass(approveReportsLoader, 'hidden');
 });
 show50ReportsButton.addEventListener('click', function(){
 	resultsLength = 49;
@@ -792,12 +977,15 @@ show50ReportsButton.addEventListener('click', function(){
 	fillViewReports(firstResultIndex);
 	approveReportsTableBody.innerHTML = "";
 	fillApproveReports(firstResultIndex);
+	addClass(approveReportsTableBody, 'hidden');
+	removeClass(approveReportsLoader, 'hidden');
 });
 
 // Fix below
 
 showUnfilteredReportsButton.addEventListener('click', function(){
 	resultSection = unfilteredIndices;
+	resultSectionNum = 1;
 	viewReportsTableBody.innerHTML = "";
 	firstResultIndex = 0;
 	addClass(viewReportsTableBody, 'hidden');
@@ -809,6 +997,7 @@ showFilteredReportsButton.addEventListener('click', function(){
 		filteredIndices = snapshot.val();
 		window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
 		resultSection = filteredIndices;
+		resultSectionNum = 2;
 		viewReportsTableBody.innerHTML = "";
 		firstResultIndex = 0;
 		addClass(viewReportsTableBody, 'hidden');
@@ -826,6 +1015,7 @@ showApprovedReportsButton.addEventListener('click', function(){
 		adminReviewedIndices = snapshot.val();
 		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
 		resultSection = adminReviewedIndices;
+		resultSectionNum = 3;
 		viewReportsTableBody.innerHTML = "";
 		firstResultIndex = 0;
 		addClass(viewReportsTableBody, 'hidden');
@@ -836,6 +1026,25 @@ showApprovedReportsButton.addEventListener('click', function(){
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	});
+});
+approveTableCategorizationButton.addEventListener('click', function(){
+	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+		if (snapshot.val() != null) {
+			approveReport();
+		} else {
+			swal("Oops...", "You must be an admin to do that!", "error");
+		}
+	});
+});
+resetReportButton.addEventListener('click', function(){
+	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+		if (snapshot.val() != null) {
+			tableFullReportDialog.close();
+			resetReport();
+		} else {
+			swal("Oops...", "You must be an admin to do that!", "error");
+		}
 	});
 });
 

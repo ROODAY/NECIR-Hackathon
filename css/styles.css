@@ -349,10 +349,49 @@ pre {
   width: 100%;
   margin-bottom: 20px;
 }
+#approve-reports-loader {
+  width: 100%;
+  margin-bottom: 20px;
+}
 
 #current-report > h3, #current-report-loader {
   display: inline-block;
 }
 #current-report-loader {
   margin-left: 20px;
+}
+
+.danger:hover {
+  background-color: rgba(244,67,54, 0.75);
+}
+.danger:focus:not(:active) {
+  background-color: rgba(244,67,54, 0.5);
+}
+.danger:focus:not(:active) {
+  background-color: rgba(244,67,54, 0.5);
+}
+
+.warning:hover {
+  background-color: rgba(255,152,0, 0.75);
+}
+.warning:focus:not(:active) {
+  background-color: rgba(255,152,0, 0.5);
+}
+.warning:focus:not(:active) {
+  background-color: rgba(255,152,0, 0.5);
+}
+
+.safe:hover {
+  background-color: rgba(76,175,80, 0.75);
+}
+.safe:focus:not(:active) {
+  background-color: rgba(76,175,80, 0.5);
+}
+.safe:focus:not(:active) {
+  background-color: rgba(76,175,80, 0.5);
+}
+
+.mdl-navigation__link.active {
+  background-color: #036a77;
+  color: #fff !important;
 }
