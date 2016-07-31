@@ -228,15 +228,53 @@
       </div>
     </dialog>
 
-    <dialog id="table-full-report-dialog" class="mdl-dialog">
+    <dialog id="table-full-report-dialog" data-reportid="" class="mdl-dialog">
       <h4 class="mdl-dialog__title">Full Report Data</h4>
       <div class="mdl-dialog__content">
         <div id="table-raw-data-wrapper">
           <pre id="table-raw-data" class="lang-js"></pre>
         </div>
+        <div id="table-categorization-options">
+          <h4>Categories: </h4>
+          <div id="table-organization-options">
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-individual">
+              <input type="radio" id="table-option-individual" class="mdl-radio__button" name="tableOrganizationOptions" value="individual" checked>
+              <span class="mdl-radio__label">Individual</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-organization">
+              <input type="radio" id="table-option-organization" class="mdl-radio__button" name="tableOrganizationOptions" value="organization">
+              <span class="mdl-radio__label">Organization</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-unknown-o">
+              <input type="radio" id="table-option-unknown-o" class="mdl-radio__button" name="tableOrganizationOptions" value="unknown">
+              <span class="mdl-radio__label">Unknown</span>
+            </label>
+          </div>
+          <div id="table-location-options">
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-in">
+              <input type="radio" id="table-option-in" class="mdl-radio__button" name="tableLocationOptions" value="in-state" checked>
+              <span class="mdl-radio__label">In State</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-out">
+              <input type="radio" id="table-option-out" class="mdl-radio__button" name="tableLocationOptions" value="out-of-state">
+              <span class="mdl-radio__label">Out of State</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-unknown-l">
+              <input type="radio" id="table-option-unknown-l" class="mdl-radio__button" name="tableLocationOptions" value="unknown">
+              <span class="mdl-radio__label">Unknown</span>
+            </label>
+          </div>
+          <div id="table-contributor-options">
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="table-switch-notable">
+              <input type="checkbox" id="table-switch-notable" class="mdl-switch__input">
+              <span class="mdl-switch__label">Notable Contributor</span>
+            </label>
+          </div>
+        </div>
       </div>
       <div class="mdl-dialog__actions">
-        <button type="button" class="mdl-button">Close</button>
+        <button id="save-table-categorization" type="button" class="mdl-button">Save Categorization</button>
+        <button id="close" type="button" class="mdl-button">Close</button>
       </div>
     </dialog>
 

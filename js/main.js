@@ -10,64 +10,68 @@ firebase.initializeApp({
 });
 
 var currentReport, currentReportID;
-var provider = new firebase.auth.GoogleAuthProvider();
 var database = firebase.database();
+var provider = new firebase.auth.GoogleAuthProvider();
 
-var resultsLength = 9;
 var firstResultIndex = 0;
 var resultSection = null;
+var resultsLength = 9;
 
-var user                  = JSON.parse(window.localStorage.getItem("user"));
-var unfilteredIndices     = JSON.parse(window.localStorage.getItem('unfilteredIndices'));
-var filteredIndices       = JSON.parse(window.localStorage.getItem('filteredIndices'));
 var adminReviewedIndices  = JSON.parse(window.localStorage.getItem('adminReviewedIndices'));
+var filteredIndices       = JSON.parse(window.localStorage.getItem('filteredIndices'));
+var unfilteredIndices     = JSON.parse(window.localStorage.getItem('unfilteredIndices'));
+var user                  = JSON.parse(window.localStorage.getItem("user"));
 var repeatUser            = window.localStorage.getItem("repeatUser");
 
-var landing                     = document.querySelector('#landing');
-var googleLoginButton           = document.querySelector('#google-login');
-var necirLoginButton            = document.querySelector('#necir-login');
-var navGoogleLogin              = document.querySelector('#nav-google-login');
-var navNecirLogin               = document.querySelector('#nav-necir-login');
-var navLogout                   = document.querySelector('#nav-logout');
-var userNameSpan                = document.querySelector('#user-name');
-var profilePicture              = document.querySelector('#propic')
 var adminAuth                   = document.querySelector('#admin-auth');
-var reportIDSpan                = document.querySelector('#report-id');
-var reportTypeSpan              = document.querySelector('#report-type');
-var filingDateSpan              = document.querySelector('#filing-date');
+var approveReportsNavButton     = document.querySelector('#approve-reports');
+var approveReportsTableBody     = document.querySelector('#approve-reports-table > tbody');
 var beginEndDateSpan            = document.querySelector('#begin-end-date');
-var receiptsSpan                = document.querySelector('#receipts');
 var candidateSpan               = document.querySelector('#candidate-name');
+var categorizationOptions = document.querySelector('#categorization-options');
 var committeeSpan               = document.querySelector('#committee-name');
+var currentReportDiv            = document.querySelector("#current-report");
 var districtSpan                = document.querySelector('#district');
+var filingDateSpan              = document.querySelector('#filing-date');
+var fullReportDialog            = document.querySelector('#full-report-dialog');
+var getNextReportButton         = document.querySelector("#get-report");
+var googleLoginButton           = document.querySelector('#google-login');
+var landing                     = document.querySelector('#landing');
+var navGoogleLogin              = document.querySelector('#nav-google-login');
+var navLogout                   = document.querySelector('#nav-logout');
+var navNecirLogin               = document.querySelector('#nav-necir-login');
+var necirLoginButton            = document.querySelector('#necir-login');
+var necirLoginDialog            = document.querySelector('#necir-login-dialog');
 var officeSpan                  = document.querySelector('#office');
 var preElement                  = document.querySelector('#raw-data');
-var tablePreElement             = document.querySelector('#table-raw-data');
-var snackbarContainer           = document.querySelector('#necir-snackbar');
-var showFullReportButton        = document.querySelector("#show-full-report");
-var fullReportDialog            = document.querySelector('#full-report-dialog');
-var tableFullReportDialog       = document.querySelector('#table-full-report-dialog');
-var necirLoginDialog            = document.querySelector('#necir-login-dialog');
+var profilePicture              = document.querySelector('#propic')
+var receiptsSpan                = document.querySelector('#receipts');
+var refreshApproveReportsButton = document.querySelector("#refresh-approve-reports");
+var refreshViewReportsButton    = document.querySelector("#refresh-view-reports");
+var reportIDSpan                = document.querySelector('#report-id');
 var reportsFilter               = document.querySelector('#reports-filter');
+var reportTypeSpan              = document.querySelector('#report-type');
 var resultsLengthWrapper        = document.querySelector('#results-length-wrapper')
+var saveCategorizationButton    = document.querySelector('#save-categorization');
+var saveTableCategorizationButton    = document.querySelector('#save-table-categorization');
 var show10ReportsButton         = document.querySelector("#show-10-reports");
 var show25ReportsButton         = document.querySelector("#show-25-reports");
 var show50ReportsButton         = document.querySelector("#show-50-reports");
-var refreshViewReportsButton    = document.querySelector("#refresh-view-reports");
-var refreshApproveReportsButton = document.querySelector("#refresh-approve-reports");
-var viewReportsPreviousButton   = document.querySelector("#view-reports-previous");
-var viewReportsNextButton       = document.querySelector("#view-reports-next");
-var showUnfilteredReportsButton = document.querySelector("#show-unfiltered-reports");
-var showFilteredReportsButton   = document.querySelector("#show-filtered-reports");
 var showApprovedReportsButton   = document.querySelector("#show-approved-reports");
-var getNextReportButton         = document.querySelector("#get-report");
-var saveCategorizationButton    = document.querySelector('#save-categorization');
+var showFilteredReportsButton   = document.querySelector("#show-filtered-reports");
+var showFullReportButton        = document.querySelector("#show-full-report");
+var showUnfilteredReportsButton = document.querySelector("#show-unfiltered-reports");
+var snackbarContainer           = document.querySelector('#necir-snackbar');
+var tableCategorizationOptions = document.querySelector('#table-categorization-options');
+var tableFullReportDialog       = document.querySelector('#table-full-report-dialog');
+var tablePreElement             = document.querySelector('#table-raw-data');
+var userNameSpan                = document.querySelector('#user-name');
+var viewReportsNextButton       = document.querySelector("#view-reports-next");
+var viewReportsPreviousButton   = document.querySelector("#view-reports-previous");
 var viewReportsTableBody        = document.querySelector('#view-reports-table > tbody');
-var approveReportsTableBody     = document.querySelector('#approve-reports-table > tbody');
-var approveReportsNavButton     = document.querySelector('#approve-reports');
-var currentReportDiv            = document.querySelector("#current-report");
-var tabs                        = document.querySelectorAll('.necir-tab');
+
 var navLinks                    = document.querySelectorAll(".tab-link");
+var tabs                        = document.querySelectorAll('.necir-tab');
 
 /*/
 /* Helper Functions
@@ -362,9 +366,9 @@ function saveCategorizations() {
 	    confirmButtonText: "Yes, continue!", 
 	    closeOnConfirm: true
 	}, function() {
-	    currentReport.Individual_Or_Organization = document.querySelector('input[name="organizationOptions"]:checked').value;
-		currentReport.Location                   = document.querySelector('input[name="locationOptions"]:checked').value;
-		currentReport.Notable_Contributor        = document.querySelector("#switch-notable").checked;
+	    currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
+		currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
+		currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
 		database.ref('reports/' + currentReportID).set(currentReport, function(err){
 			database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(){
 				database.ref('unfilteredIndices/' + currentReportID).set(null, function(){
@@ -415,7 +419,14 @@ function addViewReportsListeners() {
 	for (var i = 0; i < viewReportIDButtons.length; i++) {
 		viewReportIDButtons[i].addEventListener('click', function(){
 			var key = this.dataset.reportid;
-			console.log(key)
+			tableFullReportDialog.dataset.reportid = key;
+			if (resultSection === filteredIndices || resultSection === adminReviewedIndices) {
+				addClass(tableCategorizationOptions, 'hidden');
+				addClass(saveTableCategorizationButton, 'hidden');
+			} else {
+				removeClass(tableCategorizationOptions, 'hidden');
+				removeClass(saveTableCategorizationButton, 'hidden');
+			}
 			database.ref('reports/' + key).once('value').then(function(snapshot){
 				var report = snapshot.val();
 				tablePreElement.innerHTML = JSON.stringify(report, null, 4);
@@ -425,6 +436,49 @@ function addViewReportsListeners() {
 			});
 		});
 	}
+}
+
+function saveTableCategorizations() {
+	tableFullReportDialog.close();
+	swal({
+	    title: "Are you sure?", 
+	    text: "Continuing will save the current categorization and mark it as filtered.", 
+	    type: "warning", 
+	    showCancelButton: true, 
+	    confirmButtonColor: "#DD6B55", 
+	    confirmButtonText: "Yes, continue!", 
+	    closeOnConfirm: true
+	}, function() {
+		database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+			if (snapshot.val() === null) {
+				database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+					var report = snapshot.val();
+					report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
+					report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
+					report.Notable_Contributor        = tableFullReportDialog.querySelector("#table-switch-notable").checked;
+					database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(){
+						database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(){
+							database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
+								delete unfilteredIndices[tableFullReportDialog.dataset.reportid];
+								window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+								viewReportsTableBody.innerHTML = "";
+								fillViewReports(firstResultIndex);
+								swal("Success!", "Report has been categorized!", "success");
+							});
+						});		
+					});
+				}).catch(function(error){
+					console.error(error);
+				});
+			} else {
+				setTimeout(function(){
+					swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+				}, 100);
+			}
+		}).catch(function(error){
+			console.error(error);
+		});
+	});
 }
 
 /*/
@@ -589,19 +643,6 @@ if (repeatUser != null) {
 	}
 	removeClass(document.querySelector("#tab-2"), "hidden");
 }
-/*firebase.auth().onAuthStateChanged(function(user) { 
-  console.log(user)
-  if (user.emailVerified) {
-    console.log('Email is verified');
-  }
-  else {
-    console.log('Email is not verified');
-    user.sendEmailVerification(); 
-  }
-});*/
-
-console.log('1');
-console.log(firebase.auth().currentUser)
 
 /*/
 /* Event Listeners
@@ -614,6 +655,7 @@ navNecirLogin.addEventListener('click', function(){
 navLogout.addEventListener('click', firebaseLogout);
 adminAuth.addEventListener('click', authenticateAsAdmin);
 saveCategorizationButton.addEventListener('click', saveCategorizations);
+saveTableCategorizationButton.addEventListener('click', saveTableCategorizations);
 showFullReportButton.addEventListener('click', function() {
 	hljs.highlightBlock(preElement);
 	fullReportDialog.showModal();
@@ -622,7 +664,7 @@ showFullReportButton.addEventListener('click', function() {
 fullReportDialog.querySelector('button').addEventListener('click', function() {
 	fullReportDialog.close();
 });
-tableFullReportDialog.querySelector('button').addEventListener('click', function() {
+tableFullReportDialog.querySelector('#close').addEventListener('click', function() {
 	tableFullReportDialog.close();
 });
 necirLoginDialog.querySelector('#close').addEventListener('click', function() {
@@ -663,6 +705,9 @@ viewReportsPreviousButton.addEventListener('click', function(){
 		viewReportsPreviousButton.disabled = true;
 	}
 });
+
+// Fix below
+
 viewReportsNextButton.addEventListener('click', function(){
 	if ((firstResultIndex + resultsLength) < Object.keys(unfilteredIndices).length) {
 		firstResultIndex += (resultsLength);
@@ -688,6 +733,9 @@ show50ReportsButton.addEventListener('click', function(){
 	viewReportsTableBody.innerHTML = "";
 	fillViewReports(firstResultIndex);
 });
+
+// Fix below
+
 showUnfilteredReportsButton.addEventListener('click', function(){
 	resultSection = unfilteredIndices;
 	viewReportsTableBody.innerHTML = "";
@@ -695,16 +743,34 @@ showUnfilteredReportsButton.addEventListener('click', function(){
 	fillViewReports(firstResultIndex);
 });
 showFilteredReportsButton.addEventListener('click', function(){
-	resultSection = filteredIndices;
-	viewReportsTableBody.innerHTML = "";
-	firstResultIndex = 0;
-	fillViewReports(firstResultIndex);
+	database.ref('filteredIndices/').once('value').then(function(snapshot){
+		filteredIndices = snapshot.val();
+		window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
+		resultSection = filteredIndices;
+		viewReportsTableBody.innerHTML = "";
+		firstResultIndex = 0;
+		fillViewReports(firstResultIndex);
+		var snackbarData = {
+			message: 'Filtered Report Indices Downloaded',
+			timeout: 2000
+		};
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	});
 });
 showApprovedReportsButton.addEventListener('click', function(){
-	resultSection = adminReviewedIndices;
-	viewReportsTableBody.innerHTML = "";
-	firstResultIndex = 0;
-	fillViewReports(firstResultIndex);
+	database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+		adminReviewedIndices = snapshot.val();
+		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
+		resultSection = adminReviewedIndices;
+		viewReportsTableBody.innerHTML = "";
+		firstResultIndex = 0;
+		fillViewReports(firstResultIndex);
+		var snackbarData = {
+			message: 'Approved Report Indices Downloaded',
+			timeout: 2000
+		};
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	});
 });
 
 /*/

@@ -32,6 +32,8 @@ root
     + Contribution report Report_IDs. IDs here indicate the report is currently being accessed by a user/admin.
 - adminCode
     + Salt and Hashed code that is checked against admin code provided by users attempting to authenticate as admins.
+- eventCode
+    + code to register an account
 - admins
     + UIDs of users marked as admins.
 
