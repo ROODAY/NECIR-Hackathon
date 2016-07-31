@@ -123,6 +123,7 @@
               <div id="categorization-options">
                 <h4>Categories: </h4>
                 <div id="organization-options">
+                  Contributor Type:
                   <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-individual">
                     <input type="radio" id="option-individual" class="mdl-radio__button" name="organizationOptions" value="individual" checked>
                     <span class="mdl-radio__label">Individual</span>
@@ -137,6 +138,7 @@
                   </label>
                 </div>
                 <div id="location-options">
+                  Contributor Location:
                   <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-in">
                     <input type="radio" id="option-in" class="mdl-radio__button" name="locationOptions" value="in-state" checked>
                     <span class="mdl-radio__label">In State</span>
@@ -168,6 +170,7 @@
             </button>
           </div>
           <div id="tab-3" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
+            <h3 id="view-reports-header">Unfiltered Reports</h3>
             <table id="view-reports-table" class="necir-table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
               <thead>
                 <tr>
@@ -189,6 +192,7 @@
             </button>
           </div>
           <div id="tab-4" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
+            <h3>Filtered Reports</h3>
             <table id="approve-reports-table" class="necir-table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
               <thead>
                 <tr>
@@ -239,6 +243,7 @@
         <div id="table-categorization-options">
           <h4>Categories: </h4>
           <div id="table-organization-options">
+            Contributor Type:
             <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-individual">
               <input type="radio" id="table-option-individual" class="mdl-radio__button" name="tableOrganizationOptions" value="individual" checked>
               <span class="mdl-radio__label">Individual</span>
@@ -253,6 +258,7 @@
             </label>
           </div>
           <div id="table-location-options">
+            Contributor Location:
             <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-in">
               <input type="radio" id="table-option-in" class="mdl-radio__button" name="tableLocationOptions" value="in-state" checked>
               <span class="mdl-radio__label">In State</span>
@@ -272,6 +278,12 @@
               <span class="mdl-switch__label">Notable Contributor</span>
             </label>
           </div>
+        </div>
+        <div id="table-categories" class="hidden">
+          <h4>Categories: </h4>
+          Contributor Type: <strong id="table-categories-type"></strong><br>
+          Contributor Location: <strong id="table-categories-location"></strong><br>
+          Notable Contributor: <strong id="table-categories-notable"></strong><br>
         </div>
       </div>
       <div class="mdl-dialog__actions">

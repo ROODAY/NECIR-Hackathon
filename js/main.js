@@ -75,6 +75,12 @@ var viewReportsLoader = document.querySelector('#view-reports-loader');
 var approveReportsLoader = document.querySelector('#approve-reports-loader');
 var currentReportLoader = document.querySelector('#current-report-loader');
 var settingsButton = document.querySelector('#settings-button');
+var viewReportsHeader = document.querySelector('#view-reports-header');
+var tableCategories = document.querySelector('#table-categories');
+var tableCategoriesType = document.querySelector('#table-categories-type');
+var tableCategoriesLocation = document.querySelector('#table-categories-location');
+var tableCategoriesNotable = document.querySelector('#table-categories-notable');
+
 
 var navLinks                    = document.querySelectorAll(".tab-link");
 var tabs                        = document.querySelectorAll('.necir-tab');
@@ -441,20 +447,26 @@ function addViewReportsListeners() {
 				addClass(saveTableCategorizationButton, 'hidden');
 				removeClass(approveTableCategorizationButton, 'hidden');
 				removeClass(resetReportButton, 'hidden');
+				removeClass(tableCategories, 'hidden');
 			} else if (resultSectionNum === 3) {
 				addClass(tableCategorizationOptions, 'hidden');
 				addClass(saveTableCategorizationButton, 'hidden');
 				addClass(approveTableCategorizationButton, 'hidden');
 				removeClass(resetReportButton, 'hidden');
+				removeClass(tableCategories, 'hidden');
 			} else {
 				removeClass(tableCategorizationOptions, 'hidden');
 				removeClass(saveTableCategorizationButton, 'hidden');
 				addClass(approveTableCategorizationButton, 'hidden');
 				addClass(resetReportButton, 'hidden');
+				addClass(tableCategories, 'hidden');
 			}
 			database.ref('reports/' + key).once('value').then(function(snapshot){
 				var report = snapshot.val();
 				tablePreElement.innerHTML = JSON.stringify(report, null, 4);
+				tableCategoriesType.innerHTML = report.Individual_Or_Organization;
+				tableCategoriesLocation.innerHTML = report.Location;
+				tableCategoriesNotable.innerHTML = report.Notable_Contributor;
 				hljs.highlightBlock(tablePreElement);
 				tableFullReportDialog.showModal();
 				tableFullReportDialog.scrollTop = 0;
@@ -604,7 +616,7 @@ function resetReport() {
 								removeClass(viewReportsLoader, 'hidden');
 								addClass(approveReportsTableBody, 'hidden');
 								removeClass(approveReportsLoader, 'hidden');
-								resyncData();
+								resyncAllData();
 								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(){
 									swal("Success!", "Report has successfully been reset!", "success");
 								});
@@ -980,9 +992,6 @@ show50ReportsButton.addEventListener('click', function(){
 	addClass(approveReportsTableBody, 'hidden');
 	removeClass(approveReportsLoader, 'hidden');
 });
-
-// Fix below
-
 showUnfilteredReportsButton.addEventListener('click', function(){
 	resultSection = unfilteredIndices;
 	resultSectionNum = 1;
@@ -991,6 +1000,7 @@ showUnfilteredReportsButton.addEventListener('click', function(){
 	addClass(viewReportsTableBody, 'hidden');
 	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
+	viewReportsHeader.innerHTML = 'Unfiltered Reports';
 });
 showFilteredReportsButton.addEventListener('click', function(){
 	database.ref('filteredIndices/').once('value').then(function(snapshot){
@@ -1003,6 +1013,7 @@ showFilteredReportsButton.addEventListener('click', function(){
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		viewReportsHeader.innerHTML = 'Filtered Reports';
 		var snackbarData = {
 			message: 'Filtered Report Indices Downloaded',
 			timeout: 2000
@@ -1021,6 +1032,7 @@ showApprovedReportsButton.addEventListener('click', function(){
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		viewReportsHeader.innerHTML = 'Approved Reports';
 		var snackbarData = {
 			message: 'Approved Report Indices Downloaded',
 			timeout: 2000
