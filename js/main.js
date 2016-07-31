@@ -123,10 +123,20 @@ function necirLogin() {
 				timeout: 2000
 			};
 			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+			necirLoginDialog.querySelector('#login-email').value ='';
+			necirLoginDialog.querySelector('#login-password').value ='';
 			addClass(navGoogleLogin, 'hidden');
 			addClass(navNecirLogin, 'hidden');
 			removeClass(navLogout, 'hidden');
 			user = firebase.auth().currentUser;
+			database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+				if (snapshot.val() === null) {
+					removeClass(adminAuth, 'hidden2');
+					addClass(approveReportsNavButton, 'hidden2');
+				} else {
+					removeClass(approveReportsNavButton, 'hidden2');
+				}
+			});
 			if (isReal(user.displayName)) {
 				userNameSpan.innerHTML = user.displayName;
 			} else if (isReal(user.email)) {
@@ -137,6 +147,8 @@ function necirLogin() {
 			} else {
 				profilePicture.src = 'images/user.jpg'
 			}
+			window.localStorage.setItem("user", JSON.stringify(user));
+	  		window.localStorage.setItem("repeatUser", true);
 		}).catch(function(error) {
 		  	if (error) {
 			  	if (error.code === 'auth/user-not-found') {
@@ -155,6 +167,16 @@ function necirLogin() {
 						addClass(navGoogleLogin, 'hidden');
 						addClass(navNecirLogin, 'hidden');
 						removeClass(navLogout, 'hidden');
+						database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+							if (snapshot.val() === null) {
+								removeClass(adminAuth, 'hidden2');
+								addClass(approveReportsNavButton, 'hidden2');
+							} else {
+								removeClass(approveReportsNavButton, 'hidden2');
+							}
+						});
+						window.localStorage.setItem("user", JSON.stringify(user));
+	  					window.localStorage.setItem("repeatUser", true);
 						if (!user.emailVerified) {
 							user.sendEmailVerification();
 							necirLoginDialog.close();
@@ -162,7 +184,9 @@ function necirLogin() {
 							setTimeout(function(){
 								addClass(landing, 'hidden');
 							}, 500);
-							swal("Success!", "You've registered! Check your email to verify your account!", "success")
+							swal("Success!", "You've registered! Check your email to verify your account!", "success");
+							necirLoginDialog.querySelector('#login-email').value ='';
+							necirLoginDialog.querySelector('#login-password').value ='';
 						}
 					}).catch(function(error) {
 						if (error) {
@@ -534,12 +558,17 @@ if (adminReviewedIndices === null || adminReviewedIndices === undefined) {
 if (user != null) {
 	if (isReal(user.displayName)) {
 		userNameSpan.innerHTML = user.displayName;
+	} else if (isReal(user.email)) {
+		userNameSpan.innerHTML = user.email;
 	}
 	if (isReal(user.photoURL)) {
 		profilePicture.src = user.photoURL;
+	} else {
+	  	profilePicture.src = 'images/user.jpg'
 	}
-	//addClass(login, 'hidden');
-	//removeClass(logout, 'hidden');
+	addClass(navGoogleLogin, 'hidden');
+	addClass(navNecirLogin, 'hidden');
+	removeClass(navLogout, 'hidden');
 	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			removeClass(adminAuth, 'hidden2');
@@ -578,8 +607,11 @@ console.log(firebase.auth().currentUser)
 /* Event Listeners
 /*/
 
-//login.addEventListener('click', googleLogin);
-//logout.addEventListener('click', firebaseLogout);
+navGoogleLogin.addEventListener('click', googleLogin);
+navNecirLogin.addEventListener('click', function(){
+	necirLoginDialog.showModal();
+});
+navLogout.addEventListener('click', firebaseLogout);
 adminAuth.addEventListener('click', authenticateAsAdmin);
 saveCategorizationButton.addEventListener('click', saveCategorizations);
 showFullReportButton.addEventListener('click', function() {
