@@ -26,10 +26,10 @@
       <div class="mdl-cell--middle landing-wrapper">
         <div class="landing-card-wide mdl-card mdl-shadow--2dp">
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text">Welcome to the NECIR Hackathon!</h2>
+            <h2 class="mdl-card__title-text"></h2>
           </div>
           <div class="mdl-card__supporting-text">
-            To continue to the campaign data, please create an account. To create an account, you must also provide a code unique to this event. If you do not have this code, request it from the nearest event staff.
+            To continue to the campaign data, please login or create an account. To create an account, you must also provide a code unique to this event. If you do not have this code, request it from the nearest event staff.
           </div>
           <div class="mdl-card__actions mdl-card--border">
             <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="necir-login">
@@ -97,9 +97,22 @@
         <div class="mdl-grid necir-content">
           <div id="tab-1" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col">
             <div id="first-time-intro">
-              Welcome to the NECIR Hackathon! Here's how you use this app: etc etc. Are you ready to start reviewing? Put button here. Note: This message will not appear on subsequent visits, unless you clear your cache.
+              <h3>Welcome to the Bay State Ballot Question Hackathon!</h3> 
+              <p>
+                The presidential election gets all the attention, but Massachusetts voters are poised to vote this November on charter schools, animal welfare, marijuana legalization and gambling — all in the form of ballot questions.
+              </p>
+              <p>
+                The results will dictate policy for years to come, impacting everyone from Boston to the Berkshires. But how do these questions make it onto your ballot? Who is paying to get them there? Who is working to sway your vote?
+              </p>
+              <p>
+                Through this webapp, you will be able to gain a better understanding of the funding sources behind voter initiatives that will be on the Massachusetts ballot this fall. To do so, simply review campaign contribution reports and categorize them based on contributor type, location, and status. Are you ready to begin reviewing?
+              </p>
+              <div class="center">
+                <button id="start-button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                  Let's Do This!
+                </button>
+              </div>
             </div>
-            
           </div>
           <div id="tab-2" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
             <div id="current-report" class="hidden">
@@ -312,6 +325,45 @@
       <div class="mdl-dialog__actions">
         <button id="close" type="button" class="mdl-button">Cancel</button>
         <button id="necir-login-button" type="button" class="mdl-button">Login</button>
+        <button id="forgot-password" type="button" class="mdl-button">Forgot Password?</button>
+      </div>
+    </dialog>
+
+    <dialog id="reset-password-dialog" class="mdl-dialog">
+      <h4 class="mdl-dialog__title">Reset Password</h4>
+      <div class="mdl-dialog__content">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input class="mdl-textfield__input" type="email" id="reset-password-email">
+          <label class="mdl-textfield__label" for="reset-password-email">Email</label>
+          <span class="mdl-textfield__error">Not a valid email</span>
+        </div>
+        <span class="error-message hidden"></span>
+      </div>
+      <div class="mdl-dialog__actions">
+        <button id="close" type="button" class="mdl-button">Cancel</button>
+        <button id="reset-password-button" type="button" class="mdl-button">Send Reset Email</button>
+      </div>
+    </dialog>
+
+    <dialog id="settings-dialog" class="mdl-dialog">
+      <h4 class="mdl-dialog__title">User Preferences</h4>
+      <div class="mdl-dialog__content">
+        Change Display Name:
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input class="mdl-textfield__input" type="text" id="settings-display-name">
+          <label class="mdl-textfield__label" for="settings-display-name">Display Name</label>
+        </div>
+        Change Photo URL:
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input class="mdl-textfield__input" type="text" id="settings-photo-url">
+          <label class="mdl-textfield__label" for="settings-photo-url">Photo URL</label>
+        </div>
+        <button id="resend-verification" type="button" class="mdl-button hidden">Resend Email Verification</button>
+      </div>
+      <span id="settings-message"></span>
+      <div class="mdl-dialog__actions">
+        <button id="settings-update" type="button" class="mdl-button">Update</button>
+        <button id="close" type="button" class="mdl-button">Close</button>
       </div>
     </dialog>
     

@@ -244,7 +244,8 @@ _:-ms-input-placeholder, :root .necir-graph {
 .landing-card-wide > .mdl-card__title {
   color: #fff;
   height: 176px;
-  background: url('../images/welcome_card.jpg') center / cover;
+  background: url('../images/necir-hack.jpg') center / cover;
+  background-position: center top;
   text-align: center;
 }
 .landing-card-wide > .mdl-card__title > .mdl-card__title-text {
@@ -394,4 +395,12 @@ pre {
 .mdl-navigation__link.active {
   background-color: #036a77;
   color: #fff !important;
+}
+
+p {
+  font-size: 16px;
+}
+
+.center {
+  text-align: center;
 }

@@ -80,6 +80,9 @@ var tableCategories = document.querySelector('#table-categories');
 var tableCategoriesType = document.querySelector('#table-categories-type');
 var tableCategoriesLocation = document.querySelector('#table-categories-location');
 var tableCategoriesNotable = document.querySelector('#table-categories-notable');
+var startButton = document.querySelector('#start-button');
+var settingsDialog = document.querySelector('#settings-dialog');
+var resetPasswordDialog = document.querySelector('#reset-password-dialog');
 
 
 var navLinks                    = document.querySelectorAll(".tab-link");
@@ -178,7 +181,6 @@ function necirLogin() {
 				profilePicture.src = 'images/user.jpg'
 			}
 			window.localStorage.setItem("user", JSON.stringify(user));
-	  		window.localStorage.setItem("repeatUser", true);
 	  		removeClass(currentReportLoader, 'hidden');
 	  		getNextReport(0);
 		}).catch(function(error) {
@@ -228,7 +230,6 @@ function necirLogin() {
 									}
 								});
 								window.localStorage.setItem("user", JSON.stringify(user));
-			  					window.localStorage.setItem("repeatUser", true);
 								if (!user.emailVerified) {
 									user.sendEmailVerification();
 									landing.style.margin = "-100vh";
@@ -752,6 +753,8 @@ if (! fullReportDialog.showModal) {
   dialogPolyfill.registerDialog(fullReportDialog);
   dialogPolyfill.registerDialog(tableFullReportDialog);
   dialogPolyfill.registerDialog(necirLoginDialog);
+  dialogPolyfill.registerDialog(settingsDialog);
+  dialogPolyfill.registerDialog(resetPasswordDialog);
 }
 if (unfilteredIndices === null || unfilteredIndices === undefined) {
 	database.ref('unfilteredIndices/').once('value').then(function(snapshot){
@@ -844,6 +847,13 @@ if (repeatUser != null) {
 /* Event Listeners
 /*/
 
+startButton.addEventListener('click', function(){
+	window.localStorage.setItem("repeatUser", true);
+	for (var i = 0; i < tabs.length; i++) {
+		addClass(tabs[i], "hidden");
+	}
+	removeClass(document.querySelector("#tab-2"), "hidden");
+});
 navNecirLogin.addEventListener('click', function(){
 	necirLoginDialog.showModal();
 });
@@ -1058,6 +1068,79 @@ resetReportButton.addEventListener('click', function(){
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
 	});
+});
+settingsButton.addEventListener('click', function(){
+	if (!firebase.auth().currentUser.emailVerified) {
+		removeClass(settingsDialog.querySelector('#resend-verification'), 'hidden');
+	} else {
+		addClass(settingsDialog.querySelector('#resend-verification'), 'hidden');
+	}
+	if (isReal(user.displayName)) {
+		settingsDialog.querySelector('#settings-display-name').value = user.displayName;
+	} else if (isReal(user.email)) {
+		settingsDialog.querySelector('#settings-display-name').value = user.email;
+	}
+	if (isReal(user.photoURL)) {
+		settingsDialog.querySelector('#settings-photo-url').value = user.photoURL;
+	} else {
+	  	settingsDialog.querySelector('#settings-photo-url').value = 'images/user.jpg';
+	}
+	settingsDialog.showModal();
+});
+settingsDialog.querySelector('#close').addEventListener('click', function() {
+	settingsDialog.close();
+});
+settingsDialog.querySelector('#settings-update').addEventListener('click', function() {
+	user = firebase.auth().currentUser;
+	var name = settingsDialog.querySelector('#settings-display-name').value;
+	var pURL = settingsDialog.querySelector('#settings-photo-url').value;
+	user.updateProfile({
+	  displayName: name,
+	  photoURL: pURL
+	}).then(function() {
+		settingsDialog.close();
+		firebase.auth().currentUser = user;
+		window.localStorage.setItem("user", JSON.stringify(user));
+	 	swal("Success!", "Preferences updated!", "success");
+	 	if (isReal(user.displayName)) {
+			userNameSpan.innerHTML = user.displayName;
+		} else if (isReal(user.email)) {
+			userNameSpan.innerHTML = user.email;
+		}
+		if (isReal(user.photoURL)) {
+			profilePicture.src = user.photoURL;
+		} else {
+		  	profilePicture.src = 'images/user.jpg'
+		}
+	}, function(error) {
+	  console.error(error);
+	});
+});
+settingsDialog.querySelector('#resend-verification').addEventListener('click', function(){
+	user.sendEmailVerification()
+});
+necirLoginDialog.querySelector('#forgot-password').addEventListener('click', function(){
+	necirLoginDialog.close();
+	resetPasswordDialog.showModal();
+});
+resetPasswordDialog.querySelector('#reset-password-button').addEventListener('click', function(){
+	var email = resetPasswordDialog.querySelector('#reset-password-email').value;
+	if (isReal(email)){
+		resetPasswordDialog.querySelector('.error-message').value = ''
+		removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
+		var auth = firebase.auth();
+		auth.sendPasswordResetEmail(email).then(function() {
+			resetPasswordDialog.close();
+			swal("Success!", "A password reset has been sent to the email you provided!", "success");
+		}, function(error) {
+			resetPasswordDialog.querySelector('.error-message').innerHTML = error.message;
+			removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
+			console.error(error);
+		});
+	} else {
+		resetPasswordDialog.querySelector('.error-message').innerHTML = 'You must enter a valid email!'
+		removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
+	}
 });
 
 /*/
