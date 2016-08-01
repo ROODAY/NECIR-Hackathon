@@ -23,67 +23,66 @@ var unfilteredIndices     = JSON.parse(window.localStorage.getItem('unfilteredIn
 var user                  = JSON.parse(window.localStorage.getItem("user"));
 var repeatUser            = window.localStorage.getItem("repeatUser");
 
-var adminAuth                   = document.querySelector('#admin-auth');
-var approveReportsNavButton     = document.querySelector('#approve-reports');
-var approveReportsTableBody     = document.querySelector('#approve-reports-table > tbody');
+var adminAuth                        = document.querySelector('#admin-auth');
+var approveReportsLoader             = document.querySelector('#approve-reports-loader');
+var approveReportsNavButton          = document.querySelector('#approve-reports');
+var approveReportsNextButton         = document.querySelector('#approve-reports-next');
+var approveReportsPreviousButton     = document.querySelector('#approve-reports-previous');
+var approveReportsTableBody          = document.querySelector('#approve-reports-table > tbody');
 var approveTableCategorizationButton = document.querySelector('#approve-table-categorization');
-var beginEndDateSpan            = document.querySelector('#begin-end-date');
-var candidateSpan               = document.querySelector('#candidate-name');
-var categorizationOptions = document.querySelector('#categorization-options');
-var committeeSpan               = document.querySelector('#committee-name');
-var currentReportDiv            = document.querySelector("#current-report");
-var districtSpan                = document.querySelector('#district');
-var filingDateSpan              = document.querySelector('#filing-date');
-var fullReportDialog            = document.querySelector('#full-report-dialog');
-var getNextReportButton         = document.querySelector("#get-report");
-var landing                     = document.querySelector('#landing');
-var navLogout                   = document.querySelector('#nav-logout');
-var navNecirLogin               = document.querySelector('#nav-necir-login');
-var necirLoginButton            = document.querySelector('#necir-login');
-var necirLoginDialog            = document.querySelector('#necir-login-dialog');
-var officeSpan                  = document.querySelector('#office');
-var preElement                  = document.querySelector('#raw-data');
-var profilePicture              = document.querySelector('#propic')
-var receiptsSpan                = document.querySelector('#receipts');
-var refreshApproveReportsButton = document.querySelector("#refresh-approve-reports");
-var refreshViewReportsButton    = document.querySelector("#refresh-view-reports");
-var reportIDSpan                = document.querySelector('#report-id');
-var reportsFilter               = document.querySelector('#reports-filter');
-var reportTypeSpan              = document.querySelector('#report-type');
-var resetReportButton = document.querySelector('#reset-report');
-var resultsLengthWrapper        = document.querySelector('#results-length-wrapper')
-var saveCategorizationButton    = document.querySelector('#save-categorization');
+var beginEndDateSpan                 = document.querySelector('#begin-end-date');
+var candidateSpan                    = document.querySelector('#candidate-name');
+var categorizationOptions            = document.querySelector('#categorization-options');
+var committeeSpan                    = document.querySelector('#committee-name');
+var currentReportDiv                 = document.querySelector("#current-report");
+var currentReportLoader              = document.querySelector('#current-report-loader');
+var districtSpan                     = document.querySelector('#district');
+var filingDateSpan                   = document.querySelector('#filing-date');
+var fullReportDialog                 = document.querySelector('#full-report-dialog');
+var getNextReportButton              = document.querySelector("#get-report");
+var landing                          = document.querySelector('#landing');
+var navLogout                        = document.querySelector('#nav-logout');
+var navNecirLogin                    = document.querySelector('#nav-necir-login');
+var necirLoginButton                 = document.querySelector('#necir-login');
+var necirLoginDialog                 = document.querySelector('#necir-login-dialog');
+var officeSpan                       = document.querySelector('#office');
+var preElement                       = document.querySelector('#raw-data');
+var profilePicture                   = document.querySelector('#propic')
+var receiptsSpan                     = document.querySelector('#receipts');
+var refreshApproveReportsButton      = document.querySelector("#refresh-approve-reports");
+var refreshViewReportsButton         = document.querySelector("#refresh-view-reports");
+var reportIDSpan                     = document.querySelector('#report-id');
+var reportsFilter                    = document.querySelector('#reports-filter');
+var reportTypeSpan                   = document.querySelector('#report-type');
+var resetPasswordDialog              = document.querySelector('#reset-password-dialog');
+var resetReportButton                = document.querySelector('#reset-report');
+var resultsLengthWrapper             = document.querySelector('#results-length-wrapper')
+var saveCategorizationButton         = document.querySelector('#save-categorization');
 var saveTableCategorizationButton    = document.querySelector('#save-table-categorization');
-var show10ReportsButton         = document.querySelector("#show-10-reports");
-var show25ReportsButton         = document.querySelector("#show-25-reports");
-var show50ReportsButton         = document.querySelector("#show-50-reports");
-var showApprovedReportsButton   = document.querySelector("#show-approved-reports");
-var showFilteredReportsButton   = document.querySelector("#show-filtered-reports");
-var showFullReportButton        = document.querySelector("#show-full-report");
-var showUnfilteredReportsButton = document.querySelector("#show-unfiltered-reports");
-var snackbarContainer           = document.querySelector('#necir-snackbar');
-var tableCategorizationOptions = document.querySelector('#table-categorization-options');
-var tableFullReportDialog       = document.querySelector('#table-full-report-dialog');
-var tablePreElement             = document.querySelector('#table-raw-data');
-var userNameSpan                = document.querySelector('#user-name');
-var viewReportsNextButton       = document.querySelector("#view-reports-next");
-var viewReportsPreviousButton   = document.querySelector("#view-reports-previous");
-var viewReportsTableBody        = document.querySelector('#view-reports-table > tbody');
-var approveReportsNextButton = document.querySelector('#approve-reports-next');
-var approveReportsPreviousButton = document.querySelector('#approve-reports-previous');
-var viewReportsLoader = document.querySelector('#view-reports-loader');
-var approveReportsLoader = document.querySelector('#approve-reports-loader');
-var currentReportLoader = document.querySelector('#current-report-loader');
-var settingsButton = document.querySelector('#settings-button');
-var viewReportsHeader = document.querySelector('#view-reports-header');
-var tableCategories = document.querySelector('#table-categories');
-var tableCategoriesType = document.querySelector('#table-categories-type');
-var tableCategoriesLocation = document.querySelector('#table-categories-location');
-var tableCategoriesNotable = document.querySelector('#table-categories-notable');
-var startButton = document.querySelector('#start-button');
-var settingsDialog = document.querySelector('#settings-dialog');
-var resetPasswordDialog = document.querySelector('#reset-password-dialog');
-
+var settingsButton                   = document.querySelector('#settings-button');
+var settingsDialog                   = document.querySelector('#settings-dialog');
+var show10ReportsButton              = document.querySelector("#show-10-reports");
+var show25ReportsButton              = document.querySelector("#show-25-reports");
+var show50ReportsButton              = document.querySelector("#show-50-reports");
+var showApprovedReportsButton        = document.querySelector("#show-approved-reports");
+var showFilteredReportsButton        = document.querySelector("#show-filtered-reports");
+var showFullReportButton             = document.querySelector("#show-full-report");
+var showUnfilteredReportsButton      = document.querySelector("#show-unfiltered-reports");
+var snackbarContainer                = document.querySelector('#necir-snackbar');
+var startButton                      = document.querySelector('#start-button');
+var tableCategories                  = document.querySelector('#table-categories');
+var tableCategoriesLocation          = document.querySelector('#table-categories-location');
+var tableCategoriesNotable           = document.querySelector('#table-categories-notable');
+var tableCategoriesType              = document.querySelector('#table-categories-type');
+var tableCategorizationOptions       = document.querySelector('#table-categorization-options');
+var tableFullReportDialog            = document.querySelector('#table-full-report-dialog');
+var tablePreElement                  = document.querySelector('#table-raw-data');
+var userNameSpan                     = document.querySelector('#user-name');
+var viewReportsHeader                = document.querySelector('#view-reports-header');
+var viewReportsLoader                = document.querySelector('#view-reports-loader');
+var viewReportsNextButton            = document.querySelector("#view-reports-next");
+var viewReportsPreviousButton        = document.querySelector("#view-reports-previous");
+var viewReportsTableBody             = document.querySelector('#view-reports-table > tbody');
 
 var navLinks                    = document.querySelectorAll(".tab-link");
 var tabs                        = document.querySelectorAll('.necir-tab');
@@ -243,6 +242,9 @@ function necirLogin() {
 							}).catch(function(error) {
 								if (error) {
 									console.error(error);
+									necirLoginDialog.showModal();
+									necirLoginDialog.querySelector('.error-message').innerHTML = error.message;
+									removeClass(necirLoginDialog.querySelector('.error-message'), 'hidden');
 								}
 							});
 				    	} else {
@@ -427,12 +429,37 @@ function fillViewReports(index) {
 			}
 		});
 	} else {
+		addClass(viewReportsLoader, 'hidden');
 		var snackbarData = {
-		    message: 'Data Does Not Yet Exist',
+		    message: 'Waiting for Data...',
 		    timeout: 2000
 		};
-		addClass(viewReportsLoader, 'hidden');
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	  	if (resultSectionNum === 2) {
+	  		database.ref('filteredIndices/').once('value').then(function(snapshot){
+	  			if (snapshot.val() === null) {
+					var snackbarData = {
+					    message: 'Data Does Not Yet Exist',
+					    timeout: 2000
+					};
+				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	  			} else {
+	  				resyncData();
+	  			}
+	  		});
+	  	} else if (resultSectionNum === 3) {
+			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+				if (snapshot.val() === null) {
+					var snackbarData = {
+					    message: 'Data Does Not Yet Exist',
+					    timeout: 2000
+					};
+				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+				} else {
+					resyncData();
+				}
+	  		});
+	  	}
 	}
 }
 
@@ -544,12 +571,37 @@ function fillApproveReports(index) {
 			}
 		});
 	} else {
-		var snackbarData = {
-		    message: 'Data Does Not Yet Exist',
+		addClass(approveReportsLoader, 'hidden');
+	  	var snackbarData = {
+		    message: 'Waiting for Data...',
 		    timeout: 2000
 		};
-		addClass(approveReportsLoader, 'hidden');
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	  	if (resultSectionNum === 2) {
+	  		database.ref('filteredIndices/').once('value').then(function(snapshot){
+	  			if (snapshot.val() === null) {
+					var snackbarData = {
+					    message: 'Data Does Not Yet Exist',
+					    timeout: 2000
+					};
+				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	  			} else {
+	  				resyncData();
+	  			}
+	  		});
+	  	} else if (resultSectionNum === 3) {
+			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+				if (snapshot.val() === null) {
+					var snackbarData = {
+					    message: 'Data Does Not Yet Exist',
+					    timeout: 2000
+					};
+				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+				} else {
+					resyncData();
+				}
+	  		});
+	  	}
 	}
 }
 
@@ -560,7 +612,12 @@ function addApproveReportsListeners() {
 	for (var i = 0; i < approveReportIDButtons.length; i++) {
 		approveReportIDButtons[i].addEventListener('click', function(){
 			var key = this.dataset.reportid;
-			console.log(key)
+			tableFullReportDialog.dataset.reportid = key;
+			addClass(tableCategorizationOptions, 'hidden');
+			addClass(saveTableCategorizationButton, 'hidden');
+			removeClass(approveTableCategorizationButton, 'hidden');
+			removeClass(resetReportButton, 'hidden');
+			removeClass(tableCategories, 'hidden');
 			database.ref('reports/' + key).once('value').then(function(snapshot){
 				var report = snapshot.val();
 				tablePreElement.innerHTML = JSON.stringify(report, null, 4);
@@ -642,6 +699,7 @@ function resetReport() {
 }
 
 function resyncData() {
+	console.log('Resyncing')
 	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
 		adminReviewedIndices = snapshot.val();
 		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
@@ -735,17 +793,19 @@ for (var i = 0; i < navLinks.length; i++) {
 			viewReportsTableBody.innerHTML = "";
 			addClass(viewReportsTableBody, 'hidden');
 			removeClass(viewReportsLoader, 'hidden');
-			fillViewReports(firstResultIndex);
+			//fillViewReports(firstResultIndex);
 			removeClass(reportsFilter, 'hidden');
 			removeClass(resultsLengthWrapper, 'hidden');
+			resyncData();
 		} else if (num === 4) {
 			firstResultIndex = 0;
 			approveReportsTableBody.innerHTML = "";
 			addClass(approveReportsTableBody, 'hidden');
 			removeClass(approveReportsLoader, 'hidden');
-			fillApproveReports(firstResultIndex);
+			//fillApproveReports(firstResultIndex);
 			addClass(reportsFilter, 'hidden');
 			removeClass(resultsLengthWrapper, 'hidden');
+			resyncData();
 		} else {
 			addClass(reportsFilter, 'hidden');
 			addClass(resultsLengthWrapper, 'hidden');
