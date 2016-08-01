@@ -351,7 +351,7 @@ function getNextReport(startIndex) {
 		});
 	} else {
 		var snackbarData = {
-		    message: 'Data Does Not Yet Exist',
+		    message: 'Downloading Data...',
 		    timeout: 2000
 		};
 		addClass(currentReportLoader, 'hidden');
@@ -698,6 +698,9 @@ function resyncAllData() {
 					timeout: 2000
 				};
 				snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+				if (currentReport === undefined || currentReport === null) {
+					getNextReport(0);
+				}
 			}).catch(function(error){
 				console.log(error);
 			});
