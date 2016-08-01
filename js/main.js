@@ -56,6 +56,7 @@ var reportsFilter                    = document.querySelector('#reports-filter')
 var reportTypeSpan                   = document.querySelector('#report-type');
 var resetPasswordDialog              = document.querySelector('#reset-password-dialog');
 var resetReportButton                = document.querySelector('#reset-report');
+var resyncDataButton                 = document.querySelector('#resync-data-button');
 var resultsLengthWrapper             = document.querySelector('#results-length-wrapper')
 var saveCategorizationButton         = document.querySelector('#save-categorization');
 var saveTableCategorizationButton    = document.querySelector('#save-table-categorization');
@@ -123,9 +124,79 @@ String.prototype.hashCode = function(){
 	for (i = 0; i < this.length; i++) {
 		char = this.charCodeAt(i);
 		hash = ((hash<<5)-hash)+char;
-		hash = hash & hash; // Convert to 32bit integer
+		hash = hash & hash;
 	}
 	return hash;
+}
+function resyncData() {
+	console.log('Resyncing')
+	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
+		adminReviewedIndices = snapshot.val();
+		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
+		database.ref('filteredIndices').once('value').then(function(snapshot){
+			filteredIndices = snapshot.val();
+			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
+			if (resultSectionNum === 1) {
+				resultSection = unfilteredIndices;
+			} else if (resultSectionNum === 2) {
+				resultSection = filteredIndices;
+			} else if (resultSectionNum === 3) {
+				resultSection = adminReviewedIndices;
+			}
+			viewReportsTableBody.innerHTML = "";
+			fillViewReports(firstResultIndex);
+			approveReportsTableBody.innerHTML = "";
+			fillApproveReports(firstResultIndex);
+			var snackbarData = {
+				message: 'Data Synced',
+				timeout: 2000
+			};
+			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		}).catch(function(error){
+			console.log(error);
+		});
+	}).catch(function(error){
+		console.log(error);
+	});
+}
+function resyncAllData() {
+	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
+		adminReviewedIndices = snapshot.val();
+		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
+		database.ref('filteredIndices').once('value').then(function(snapshot){
+			filteredIndices = snapshot.val();
+			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
+			database.ref('unfilteredIndices').once('value').then(function(snapshot){
+				unfilteredIndices = snapshot.val();
+				window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+				if (resultSectionNum === 1) {
+					resultSection = unfilteredIndices;
+				} else if (resultSectionNum === 2) {
+					resultSection = filteredIndices;
+				} else if (resultSectionNum === 3) {
+					resultSection = adminReviewedIndices;
+				}
+				viewReportsTableBody.innerHTML = "";
+				fillViewReports(firstResultIndex);
+				approveReportsTableBody.innerHTML = "";
+				fillApproveReports(firstResultIndex);
+				var snackbarData = {
+					message: 'All Data Synced',
+					timeout: 2000
+				};
+				snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+				if (currentReport === undefined || currentReport === null) {
+					getNextReport(0);
+				}
+			}).catch(function(error){
+				console.log(error);
+			});
+		}).catch(function(error){
+			console.log(error);
+		});
+	}).catch(function(error){
+		console.log(error);
+	});
 }
 
 /*/
@@ -698,80 +769,6 @@ function resetReport() {
 	});
 }
 
-function resyncData() {
-	console.log('Resyncing')
-	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
-		adminReviewedIndices = snapshot.val();
-		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
-		database.ref('filteredIndices').once('value').then(function(snapshot){
-			filteredIndices = snapshot.val();
-			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
-			if (resultSectionNum === 1) {
-				resultSection = unfilteredIndices;
-			} else if (resultSectionNum === 2) {
-				resultSection = filteredIndices;
-			} else if (resultSectionNum === 3) {
-				resultSection = adminReviewedIndices;
-			}
-			viewReportsTableBody.innerHTML = "";
-			fillViewReports(firstResultIndex);
-			approveReportsTableBody.innerHTML = "";
-			fillApproveReports(firstResultIndex);
-			var snackbarData = {
-				message: 'Data Synced',
-				timeout: 2000
-			};
-			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-		}).catch(function(error){
-			console.log(error);
-		});
-	}).catch(function(error){
-		console.log(error);
-	});
-}
-
-function resyncAllData() {
-	database.ref('adminReviewedIndices').once('value').then(function(snapshot){
-		adminReviewedIndices = snapshot.val();
-		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
-		database.ref('filteredIndices').once('value').then(function(snapshot){
-			filteredIndices = snapshot.val();
-			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
-			database.ref('unfilteredIndices').once('value').then(function(snapshot){
-				unfilteredIndices = snapshot.val();
-				window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
-				if (resultSectionNum === 1) {
-					resultSection = unfilteredIndices;
-				} else if (resultSectionNum === 2) {
-					resultSection = filteredIndices;
-				} else if (resultSectionNum === 3) {
-					resultSection = adminReviewedIndices;
-				}
-				viewReportsTableBody.innerHTML = "";
-				fillViewReports(firstResultIndex);
-				approveReportsTableBody.innerHTML = "";
-				fillApproveReports(firstResultIndex);
-				var snackbarData = {
-					message: 'All Data Synced',
-					timeout: 2000
-				};
-				snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-				if (currentReport === undefined || currentReport === null) {
-					getNextReport(0);
-				}
-			}).catch(function(error){
-				console.log(error);
-			});
-		}).catch(function(error){
-			console.log(error);
-		});
-	}).catch(function(error){
-		console.log(error);
-	});
-}
-
-	
-
 /*/
 /* Main Code
 /*/
@@ -960,8 +957,8 @@ refreshApproveReportsButton.addEventListener('click', function(){
 	removeClass(approveReportsLoader, 'hidden');
 });
 viewReportsPreviousButton.addEventListener('click', function(){
-	if ((firstResultIndex - (resultsLength)) >= 0) {
-		firstResultIndex -= (resultsLength);
+	if ((firstResultIndex - (resultsLength + 1)) >= 0) {
+		firstResultIndex -= (resultsLength + 1);
 		viewReportsTableBody.innerHTML = "";
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
@@ -983,8 +980,8 @@ viewReportsPreviousButton.addEventListener('click', function(){
 	}
 });
 viewReportsNextButton.addEventListener('click', function(){
-	if ((firstResultIndex + resultsLength) < Object.keys(resultSection).length) {
-		firstResultIndex += (resultsLength);
+	if ((firstResultIndex + resultsLength + 1) < Object.keys(resultSection).length) {
+		firstResultIndex += (resultsLength + 1);
 		viewReportsTableBody.innerHTML = "";
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
@@ -997,8 +994,8 @@ viewReportsNextButton.addEventListener('click', function(){
 	}
 });
 approveReportsPreviousButton.addEventListener('click', function(){
-	if ((firstResultIndex - (resultsLength)) >= 0) {
-		firstResultIndex -= (resultsLength);
+	if ((firstResultIndex - (resultsLength + 1)) >= 0) {
+		firstResultIndex -= (resultsLength + 1);
 		approveReportsTableBody.innerHTML = "";
 		fillApproveReports(firstResultIndex);
 		addClass(approveReportsTableBody, 'hidden');
@@ -1020,8 +1017,8 @@ approveReportsPreviousButton.addEventListener('click', function(){
 	}
 });
 approveReportsNextButton.addEventListener('click', function(){
-	if ((firstResultIndex + resultsLength) < Object.keys(resultSection).length) {
-		firstResultIndex += (resultsLength);
+	if ((firstResultIndex + resultsLength + 1) < Object.keys(resultSection).length) {
+		firstResultIndex += (resultsLength + 1);
 		approveReportsTableBody.innerHTML = "";
 		fillApproveReports(firstResultIndex);
 		addClass(approveReportsTableBody, 'hidden');
@@ -1206,7 +1203,25 @@ resetPasswordDialog.querySelector('#reset-password-button').addEventListener('cl
 		removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
 	}
 });
-
+resyncDataButton.addEventListener('click', function(){
+	settingsDialog.close();
+	swal({
+	    title: "Are you sure?", 
+	    text: "Resyncing data might take a bit, so be prepared to wait. (The webpage may also become unresponsive for a few seconds.)", 
+	    type: "warning", 
+	    showCancelButton: true, 
+	    confirmButtonColor: "#DD6B55", 
+	    confirmButtonText: "Resync Data", 
+	    closeOnConfirm: true
+	}, function() {
+		resyncAllData();
+		var snackbarData = {
+			message: 'Beginning Resync...',
+			timeout: 2000
+		};
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	});
+});
 /*/
 /* Page Hooks
 /*/
