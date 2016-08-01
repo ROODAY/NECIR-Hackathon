@@ -3,7 +3,7 @@
 /*/
 
 firebase.initializeApp({
-	apiKey: "AIzaSyBbzmALixt_f1-i0qP41JBi_X74bp-ly68",
+	apiKey: "AIzaSyBbzmALixt_f1-i0qP41JBi_X74bp-ly68", // Take this if you want, but the api calls are restricted to specific domains :p
 	authDomain: "necir-hackathon.firebaseapp.com",
 	databaseURL: "https://necir-hackathon.firebaseio.com",
 	storageBucket: ""
