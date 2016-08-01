@@ -355,6 +355,7 @@ function getNextReport(startIndex) {
 		    timeout: 2000
 		};
 		addClass(currentReportLoader, 'hidden');
+		resyncAllData();
 	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	}
 }
