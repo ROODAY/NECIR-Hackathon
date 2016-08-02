@@ -94,21 +94,21 @@ var tabs                        = document.querySelectorAll('.necir-tab');
 
 function hasClass(el, className) {
   if (el.classList)
-    return el.classList.contains(className)
+	return el.classList.contains(className)
   else
-    return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'))
+	return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'))
 }
 function addClass(el, className) {
   if (el.classList)
-    el.classList.add(className)
+	el.classList.add(className)
   else if (!hasClass(el, className)) el.className += " " + className
 }
 function removeClass(el, className) {
   if (el.classList)
-    el.classList.remove(className)
+	el.classList.remove(className)
   else if (hasClass(el, className)) {
-    var reg = new RegExp('(\\s|^)' + className + '(\\s|$)')
-    el.className=el.className.replace(reg, ' ')
+	var reg = new RegExp('(\\s|^)' + className + '(\\s|$)')
+	el.className=el.className.replace(reg, ' ')
   }
 }
 function isReal(el) {
@@ -239,6 +239,8 @@ function necirLogin() {
 					removeClass(approveTableCategorizationButton, 'hidden');
 					removeClass(resetReportButton, 'hidden');
 				}
+			}).catch(function(error){
+				console.error(error);
 			});
 			if (isReal(user.displayName)) {
 				userNameSpan.innerHTML = user.displayName;
@@ -251,28 +253,28 @@ function necirLogin() {
 				profilePicture.src = 'images/user.jpg'
 			}
 			window.localStorage.setItem("user", JSON.stringify(user));
-	  		removeClass(currentReportLoader, 'hidden');
-	  		getNextReport(0);
+			removeClass(currentReportLoader, 'hidden');
+			getNextReport(0);
 		}).catch(function(error) {
-		  	if (error) {
-			  	if (error.code === 'auth/user-not-found') {
-			  		necirLoginDialog.close();
-			  		swal({
-					    title: "Hello New User!", 
-					    text: "Please enter the Event Code to register:", 
-					    type: "input", 
-					    showCancelButton: true, 
-					    closeOnConfirm: false, 
-					    animation: "slide-from-top", 
-					    inputPlaceholder: "xxxxxxxxxx"
+			if (error) {
+				if (error.code === 'auth/user-not-found') {
+					necirLoginDialog.close();
+					swal({
+						title: "Hello New User!", 
+						text: "Please enter the Event Code to register:", 
+						type: "input", 
+						showCancelButton: true, 
+						closeOnConfirm: false, 
+						animation: "slide-from-top", 
+						inputPlaceholder: "xxxxxxxxxx"
 					}, function(inputValue) {
-					    if (inputValue===false) return false;
-					    if (inputValue==="") {
-					        swal.showInputError("You need to write something!");
-					        return false
-					    }
-				    	if (inputValue.hashCode() === 444786303) {
-				    		firebase.auth().createUserWithEmailAndPassword(email, password).then(function(){
+						if (inputValue===false) return false;
+						if (inputValue==="") {
+							swal.showInputError("You need to write something!");
+							return false
+						}
+						if (inputValue.hashCode() === 444786303) {
+							firebase.auth().createUserWithEmailAndPassword(email, password).then(function(){
 								user = firebase.auth().currentUser;
 								if (isReal(user.displayName)) {
 									userNameSpan.innerHTML = user.displayName;
@@ -298,6 +300,8 @@ function necirLogin() {
 										removeClass(approveTableCategorizationButton, 'hidden');
 										removeClass(resetReportButton, 'hidden');
 									}
+								}).catch(function(error){
+									console.error(error);
 								});
 								window.localStorage.setItem("user", JSON.stringify(user));
 								if (!user.emailVerified) {
@@ -318,22 +322,26 @@ function necirLogin() {
 									removeClass(necirLoginDialog.querySelector('.error-message'), 'hidden');
 								}
 							});
-				    	} else {
-				    		swal("Oops...", "That password wasn't correct!", "error");
-				    	}
+						} else {
+							swal("Oops...", "That password wasn't correct!", "error");
+						}
 					});	
-			  	} else {
-			  		console.error(error)
-				  	necirLoginDialog.querySelector('.error-message').innerHTML = error.message;
+				} else {
+					console.error(error)
+					necirLoginDialog.querySelector('.error-message').innerHTML = error.message;
 					removeClass(necirLoginDialog.querySelector('.error-message'), 'hidden');
-			  	}
-		  	}
+				}
+			}
 		});
 	}
 }
 
 function firebaseLogout() {
-	database.ref('currentlyAccessedIndices/' + currentReportID).set(null);
+	database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(err){
+		if (err) {
+			console.error(err);
+		}
+	});
 	firebase.auth().signOut().then(function() {
 		userNameSpan.innerHTML = "Log In";
 		profilePicture.src = "images/user.jpg";
@@ -345,17 +353,17 @@ function firebaseLogout() {
 		addClass(settingsButton, 'hidden');
 		addClass(navLogout, 'hidden');
 		var snackbarData = {
-		    message: 'Logout Successful',
-		    timeout: 2000
+			message: 'Logout Successful',
+			timeout: 2000
 		  };
-	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  	window.localStorage.setItem("user", null);
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		window.localStorage.setItem("user", null);
 	}, function(error) {
 		var snackbarData = {
-		    message: 'Logout Unsuccessful',
-		    timeout: 2000
+			message: 'Logout Unsuccessful',
+			timeout: 2000
 		  };
-	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 		console.error(error);
 	});
 }
@@ -363,32 +371,37 @@ function firebaseLogout() {
 function authenticateAsAdmin() {
 	user = firebase.auth().currentUser;
 	if (user) {
-	 	swal({
-		    title: "Authenticate as Admin", 
-		    text: "Enter the NECIR Admin password:", 
-		    type: "input", 
-		    showCancelButton: true, 
-		    closeOnConfirm: false, 
-		    animation: "slide-from-top", 
-		    inputPlaceholder: "xxxxxxxxxx"
+		swal({
+			title: "Authenticate as Admin", 
+			text: "Enter the NECIR Admin password:", 
+			type: "input", 
+			showCancelButton: true, 
+			closeOnConfirm: false, 
+			animation: "slide-from-top", 
+			inputPlaceholder: "xxxxxxxxxx"
 		}, function(inputValue) {
-		    if (inputValue===false) return false;
-		    if (inputValue==="") {
-		        swal.showInputError("You need to write something!");
-		        return false
-		    }
-		    database.ref('adminCode').once('value').then(function(snapshot) {
-		    	if (inputValue === snapshot.val()) {
-		    		database.ref('admins/' + user.uid).set(true, function(err){
-		    			swal("Success!", "Your account is now an admin account!", "success");
-		    			addClass(adminAuth, 'hidden2');
+			if (inputValue===false) return false;
+			if (inputValue==="") {
+				swal.showInputError("You need to write something!");
+				return false
+			}
+			database.ref('adminCode').once('value').then(function(snapshot) {
+				if (inputValue === snapshot.val()) {
+					database.ref('admins/' + user.uid).set(true, function(err){
+						swal("Success!", "Your account is now an admin account!", "success");
+						addClass(adminAuth, 'hidden2');
 						removeClass(approveReportsNavButton, 'hidden2');
 						removeClass(approveTableCategorizationButton, 'hidden');
 						removeClass(resetReportButton, 'hidden');
-		    		});
-		    	} else {
-		    		swal("Oops...", "That password wasn't correct!", "error");
-		    	}
+						if (err) {
+							console.error(err);
+						}
+					});
+				} else {
+					swal("Oops...", "That password wasn't correct!", "error");
+				}
+			}).catch(function(error){
+				console.error(error);
 			});
 		});
 	} else {
@@ -407,29 +420,38 @@ function getNextReport(startIndex) {
 			if (snapshot.val() === null) {
 				database.ref('unfilteredIndices/' + currentReportID).once('value').then(function(snapshot){
 					if (snapshot.val() != null) {
-						database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function() {
+						database.ref('currentlyAccessedIndices/' + currentReportID).set(true, function(err) {
+							if (err) {
+								console.error(err);
+							}
 							database.ref('reports/' + currentReportID).once('value').then(function(snapshot){
 								currentReport = snapshot.val();
 								fillReportData();
+							}).catch(function(error){
+								console.error(error);
 							});
 						});
 					} else {
 						delete unfilteredIndices[currentReportID];
 						getNextReport(startIndex + 1);
 					}
+				}).catch(function(error){
+					console.error(error);
 				});	
 			} else {
 				getNextReport(startIndex + 1);
 			}
+		}).catch(function(error){
+			console.error(error);
 		});
 	} else {
 		var snackbarData = {
-		    message: 'Downloading Data...',
-		    timeout: 2000
+			message: 'Downloading Data...',
+			timeout: 2000
 		};
 		addClass(currentReportLoader, 'hidden');
 		resyncAllData();
-	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	}
 }
 
@@ -451,21 +473,33 @@ function fillReportData() {
 
 function saveCategorizations() {
 	swal({
-	    title: "Are you sure?", 
-	    text: "Continuing will save the current categorization and move on to the next report.", 
-	    type: "warning", 
-	    showCancelButton: true, 
-	    confirmButtonColor: "#DD6B55", 
-	    confirmButtonText: "Yes, continue!", 
-	    closeOnConfirm: true
+		title: "Are you sure?", 
+		text: "Continuing will save the current categorization and move on to the next report.", 
+		type: "warning", 
+		showCancelButton: true, 
+		confirmButtonColor: "#DD6B55", 
+		confirmButtonText: "Yes, continue!", 
+		closeOnConfirm: true
 	}, function() {
-	    currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
+		currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
 		currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
 		currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
 		database.ref('reports/' + currentReportID).set(currentReport, function(err){
-			database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(){
-				database.ref('unfilteredIndices/' + currentReportID).set(null, function(){
-					database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(){
+			if (err) {
+				console.error(err);
+			}
+			database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(err){
+				if (err) {
+					console.error(err);
+				}
+				database.ref('unfilteredIndices/' + currentReportID).set(null, function(err){
+					if (err) {
+						console.error(err);
+					}
+					database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(err){
+						if (err) {
+							console.error(err);
+						}
 						delete unfilteredIndices[currentReportID];
 						window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 						removeClass(currentReportLoader, 'hidden');
@@ -498,39 +532,45 @@ function fillViewReports(index) {
 			} else {
 				addViewReportsListeners();
 			}
+		}).catch(function(error){
+			console.log(error);
 		});
 	} else {
 		addClass(viewReportsLoader, 'hidden');
 		var snackbarData = {
-		    message: 'Waiting for Data...',
-		    timeout: 2000
+			message: 'Waiting for Data...',
+			timeout: 2000
 		};
-	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  	if (resultSectionNum === 2) {
-	  		database.ref('filteredIndices/').once('value').then(function(snapshot){
-	  			if (snapshot.val() === null) {
-					var snackbarData = {
-					    message: 'Data Does Not Yet Exist',
-					    timeout: 2000
-					};
-				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  			} else {
-	  				resyncData();
-	  			}
-	  		});
-	  	} else if (resultSectionNum === 3) {
-			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		if (resultSectionNum === 2) {
+			database.ref('filteredIndices/').once('value').then(function(snapshot){
 				if (snapshot.val() === null) {
 					var snackbarData = {
-					    message: 'Data Does Not Yet Exist',
-					    timeout: 2000
+						message: 'Data Does Not Yet Exist',
+						timeout: 2000
 					};
-				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+					snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 				} else {
 					resyncData();
 				}
-	  		});
-	  	}
+			}).catch(function(error){
+				console.log(error);
+			});
+		} else if (resultSectionNum === 3) {
+			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+				if (snapshot.val() === null) {
+					var snackbarData = {
+						message: 'Data Does Not Yet Exist',
+						timeout: 2000
+					};
+					snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+				} else {
+					resyncData();
+				}
+			}).catch(function(error){
+				console.log(error);
+			});
+		}
 	}
 }
 
@@ -570,6 +610,8 @@ function addViewReportsListeners() {
 				hljs.highlightBlock(tablePreElement);
 				tableFullReportDialog.showModal();
 				tableFullReportDialog.scrollTop = 0;
+			}).catch(function(error){
+				console.log(error);
 			});
 		});
 	}
@@ -580,22 +622,31 @@ function saveTableCategorizations() {
 		if (snapshot.val() === null) {
 			tableFullReportDialog.close();
 			swal({
-			    title: "Are you sure?", 
-			    text: "Continuing will save the current categorization and mark it as filtered.", 
-			    type: "warning", 
-			    showCancelButton: true, 
-			    confirmButtonColor: "#DD6B55", 
-			    confirmButtonText: "Yes, continue!", 
-			    closeOnConfirm: true
+				title: "Are you sure?", 
+				text: "Continuing will save the current categorization and mark it as filtered.", 
+				type: "warning", 
+				showCancelButton: true, 
+				confirmButtonColor: "#DD6B55", 
+				confirmButtonText: "Yes, continue!", 
+				closeOnConfirm: true
 			}, function() {
 				database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 					var report = snapshot.val();
 					report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
 					report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
 					report.Notable_Contributor        = tableFullReportDialog.querySelector("#table-switch-notable").checked;
-					database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(){
-						database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(){
-							database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
+					database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
+						if (err) {
+							console.error(err);
+						}
+						database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
+							if (err) {
+								console.error(err);
+							}
+							database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+								if (err) {
+									console.error(err);
+								}
 								delete unfilteredIndices[tableFullReportDialog.dataset.reportid];
 								window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 								viewReportsTableBody.innerHTML = "";
@@ -640,39 +691,45 @@ function fillApproveReports(index) {
 			} else {
 				addApproveReportsListeners();
 			}
+		}).catch(function(error){
+			console.log(error);
 		});
 	} else {
 		addClass(approveReportsLoader, 'hidden');
-	  	var snackbarData = {
-		    message: 'Waiting for Data...',
-		    timeout: 2000
+		var snackbarData = {
+			message: 'Waiting for Data...',
+			timeout: 2000
 		};
-	  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  	if (resultSectionNum === 2) {
-	  		database.ref('filteredIndices/').once('value').then(function(snapshot){
-	  			if (snapshot.val() === null) {
-					var snackbarData = {
-					    message: 'Data Does Not Yet Exist',
-					    timeout: 2000
-					};
-				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	  			} else {
-	  				resyncData();
-	  			}
-	  		});
-	  	} else if (resultSectionNum === 3) {
-			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		if (resultSectionNum === 2) {
+			database.ref('filteredIndices/').once('value').then(function(snapshot){
 				if (snapshot.val() === null) {
 					var snackbarData = {
-					    message: 'Data Does Not Yet Exist',
-					    timeout: 2000
+						message: 'Data Does Not Yet Exist',
+						timeout: 2000
 					};
-				  	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+					snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 				} else {
 					resyncData();
 				}
-	  		});
-	  	}
+			}).catch(function(error){
+				console.log(error);
+			});
+		} else if (resultSectionNum === 3) {
+			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+				if (snapshot.val() === null) {
+					var snackbarData = {
+						message: 'Data Does Not Yet Exist',
+						timeout: 2000
+					};
+					snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+				} else {
+					resyncData();
+				}
+			}).catch(function(error){
+				console.log(error);
+			});
+		}
 	}
 }
 
@@ -695,6 +752,8 @@ function addApproveReportsListeners() {
 				hljs.highlightBlock(tablePreElement);
 				tableFullReportDialog.showModal();
 				tableFullReportDialog.scrollTop = 0;
+			}).catch(function(error){
+				console.log(error);
 			});
 		});
 	}
@@ -703,8 +762,14 @@ function addApproveReportsListeners() {
 function approveReport() {
 	database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 		if (snapshot.val() != null) {
-			database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(){
-				database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
+			database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
+				if (err) {
+					console.error(err);
+				}
+				database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+					if (err) {
+						console.error(err);
+					}
 					resyncData();
 					addClass(viewReportsTableBody, 'hidden');
 					removeClass(viewReportsLoader, 'hidden');
@@ -726,17 +791,26 @@ function resetReport() {
 	database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 		if (snapshot.val() === null) {
 			swal({
-			    title: "Are you sure?", 
-			    text: "Continuing will reset the current report's categorizations and mark it as unfiltered.", 
-			    type: "warning", 
-			    showCancelButton: true, 
-			    confirmButtonColor: "#DD6B55", 
-			    confirmButtonText: "Yes, continue!", 
-			    closeOnConfirm: true
+				title: "Are you sure?", 
+				text: "Continuing will reset the current report's categorizations and mark it as unfiltered.", 
+				type: "warning", 
+				showCancelButton: true, 
+				confirmButtonColor: "#DD6B55", 
+				confirmButtonText: "Yes, continue!", 
+				closeOnConfirm: true
 			}, function() {
-				database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
-					database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(){
-						database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(){
+				database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+					if (err) {
+						console.error(err);
+					}
+					database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+						if (err) {
+							console.error(err);
+						}
+						database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
+							if (err) {
+								console.error(err);
+							}
 							database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 								var report = snapshot.val();
 								report.Individual_Or_Organization = '';
@@ -747,9 +821,14 @@ function resetReport() {
 								addClass(approveReportsTableBody, 'hidden');
 								removeClass(approveReportsLoader, 'hidden');
 								resyncAllData();
-								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(){
+								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
+									if (err) {
+										console.error(err);
+									}
 									swal("Success!", "Report has successfully been reset!", "success");
 								});
+							}).catch(function(error){
+								console.log(error);
 							});
 						}).catch(function(error){
 							console.error(error);
@@ -833,6 +912,8 @@ if (unfilteredIndices === null || unfilteredIndices === undefined) {
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}).catch(function(error){
+		console.log(error);
 	});
 } else {
 	resultSection = unfilteredIndices;
@@ -852,6 +933,8 @@ if (filteredIndices === null || filteredIndices === undefined) {
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}).catch(function(error){
+		console.log(error);
 	});
 }
 if (adminReviewedIndices === null || adminReviewedIndices === undefined) {
@@ -863,6 +946,8 @@ if (adminReviewedIndices === null || adminReviewedIndices === undefined) {
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}).catch(function(error){
+		console.log(error);
 	});
 }
 if (user != null) {
@@ -874,7 +959,7 @@ if (user != null) {
 	if (isReal(user.photoURL)) {
 		profilePicture.src = user.photoURL;
 	} else {
-	  	profilePicture.src = 'images/user.jpg'
+		profilePicture.src = 'images/user.jpg'
 	}
 	addClass(navNecirLogin, 'hidden');
 	removeClass(navLogout, 'hidden');
@@ -890,6 +975,8 @@ if (user != null) {
 			removeClass(approveTableCategorizationButton, 'hidden');
 			removeClass(resetReportButton, 'hidden');
 		}
+	}).catch(function(error){
+		console.log(error);
 	});
 	landing.style.margin = "-100vh";
 	setTimeout(function(){
@@ -1102,6 +1189,8 @@ showFilteredReportsButton.addEventListener('click', function(){
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}).catch(function(error){
+		console.log(error);
 	});
 });
 showApprovedReportsButton.addEventListener('click', function(){
@@ -1127,6 +1216,8 @@ showApprovedReportsButton.addEventListener('click', function(){
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	}).catch(function(error){
+		console.log(error);
 	});
 });
 approveTableCategorizationButton.addEventListener('click', function(){
@@ -1136,6 +1227,8 @@ approveTableCategorizationButton.addEventListener('click', function(){
 		} else {
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
+	}).catch(function(error){
+		console.log(error);
 	});
 });
 resetReportButton.addEventListener('click', function(){
@@ -1146,6 +1239,8 @@ resetReportButton.addEventListener('click', function(){
 		} else {
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
+	}).catch(function(error){
+		console.log(error);
 	});
 });
 settingsButton.addEventListener('click', function(){
@@ -1162,7 +1257,7 @@ settingsButton.addEventListener('click', function(){
 	if (isReal(user.photoURL)) {
 		settingsDialog.querySelector('#settings-photo-url').value = user.photoURL;
 	} else {
-	  	settingsDialog.querySelector('#settings-photo-url').value = 'images/user.jpg';
+		settingsDialog.querySelector('#settings-photo-url').value = 'images/user.jpg';
 	}
 	settingsDialog.showModal();
 });
@@ -1180,8 +1275,8 @@ settingsDialog.querySelector('#settings-update').addEventListener('click', funct
 		settingsDialog.close();
 		firebase.auth().currentUser = user;
 		window.localStorage.setItem("user", JSON.stringify(user));
-	 	swal("Success!", "Preferences updated!", "success");
-	 	if (isReal(user.displayName)) {
+		swal("Success!", "Preferences updated!", "success");
+		if (isReal(user.displayName)) {
 			userNameSpan.innerHTML = user.displayName;
 		} else if (isReal(user.email)) {
 			userNameSpan.innerHTML = user.email;
@@ -1189,7 +1284,7 @@ settingsDialog.querySelector('#settings-update').addEventListener('click', funct
 		if (isReal(user.photoURL)) {
 			profilePicture.src = user.photoURL;
 		} else {
-		  	profilePicture.src = 'images/user.jpg'
+			profilePicture.src = 'images/user.jpg'
 		}
 	}, function(error) {
 	  console.error(error);
@@ -1224,13 +1319,13 @@ resetPasswordDialog.querySelector('#reset-password-button').addEventListener('cl
 resyncDataButton.addEventListener('click', function(){
 	settingsDialog.close();
 	swal({
-	    title: "Are you sure?", 
-	    text: "Resyncing data might take a bit, so be prepared to wait. (The webpage may also become unresponsive for a few seconds.)", 
-	    type: "warning", 
-	    showCancelButton: true, 
-	    confirmButtonColor: "#DD6B55", 
-	    confirmButtonText: "Resync Data", 
-	    closeOnConfirm: true
+		title: "Are you sure?", 
+		text: "Resyncing data might take a bit, so be prepared to wait. (The webpage may also become unresponsive for a few seconds.)", 
+		type: "warning", 
+		showCancelButton: true, 
+		confirmButtonColor: "#DD6B55", 
+		confirmButtonText: "Resync Data", 
+		closeOnConfirm: true
 	}, function() {
 		resyncAllData();
 		var snackbarData = {
@@ -1250,7 +1345,10 @@ window.onload = function() {
 
 window.onbeforeunload = confirmExit;
 function confirmExit(){
-	database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(){
+	database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(err){
+		if (err) {
+			console.error(err);
+		}
 		return false;
 	});
 }

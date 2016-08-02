@@ -51,8 +51,8 @@ html, body {
   display: -ms-flexbox;
   display: flex;
   -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+	  -ms-flex-align: center;
+		  align-items: center;
 }
 .necir-drawer-header {
   box-sizing: border-box;
@@ -60,11 +60,11 @@ html, body {
   display: -ms-flexbox;
   display: flex;
   -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
+	  -ms-flex-direction: column;
+		  flex-direction: column;
   -webkit-justify-content: flex-end;
-      -ms-flex-pack: end;
-          justify-content: flex-end;
+	  -ms-flex-pack: end;
+		  justify-content: flex-end;
   padding: 16px;
   height: 151px;
 }
@@ -74,29 +74,29 @@ html, body {
   display: flex;
   position: relative;
   -webkit-flex-direction: row;
-      -ms-flex-direction: row;
-          flex-direction: row;
+	  -ms-flex-direction: row;
+		  flex-direction: row;
   -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+	  -ms-flex-align: center;
+		  align-items: center;
   width: 100%;
 }
 
 .necir-navigation {
   -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
+	  -ms-flex-positive: 1;
+		  flex-grow: 1;
 }
 .necir-layout .necir-navigation .mdl-navigation__link {
   display: -webkit-flex !important;
   display: -ms-flexbox !important;
   display: flex !important;
   -webkit-flex-direction: row;
-      -ms-flex-direction: row;
-          flex-direction: row;
+	  -ms-flex-direction: row;
+		  flex-direction: row;
   -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+	  -ms-flex-align: center;
+		  align-items: center;
   color: rgba(255, 255, 255, 0.56);
   font-weight: 500;
 }
@@ -116,9 +116,9 @@ html, body {
 
 .necir-charts {
   -webkit-align-items: center;
-      -ms-flex-align: center;
-              -ms-grid-row-align: center;
-          align-items: center;
+	  -ms-flex-align: center;
+			  -ms-grid-row-align: center;
+		  align-items: center;
 }
 .necir-chart:nth-child(1) {
   color: #ACEC00;
@@ -138,11 +138,11 @@ html, body {
   display: -ms-flexbox;
   display: flex;
   -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
+	  -ms-flex-direction: column;
+		  flex-direction: column;
   -webkit-align-items: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
+	  -ms-flex-align: stretch;
+		  align-items: stretch;
 }
 /* TODO: Find a proper solution to have the graphs
  * not float around outside their container in IE10/11.
@@ -164,12 +164,12 @@ _:-ms-input-placeholder, :root .necir-graph {
 
 .necir-cards {
   -webkit-align-items: flex-start;
-      -ms-flex-align: start;
-              -ms-grid-row-align: flex-start;
-          align-items: flex-start;
+	  -ms-flex-align: start;
+			  -ms-grid-row-align: flex-start;
+		  align-items: flex-start;
   -webkit-align-content: flex-start;
-      -ms-flex-line-pack: start;
-          align-content: flex-start;
+	  -ms-flex-line-pack: start;
+		  align-content: flex-start;
 }
 .necir-cards .necir-separator {
   height: 32px;
@@ -219,8 +219,8 @@ _:-ms-input-placeholder, :root .necir-graph {
   display: flex;
   box-sizing: border-box;
   -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
+	  -ms-flex-align: center;
+		  align-items: center;
 }
 
 
@@ -276,7 +276,7 @@ _:-ms-input-placeholder, :root .necir-graph {
 }
 
 .mdl-list__item--three-line .mdl-list__item-secondary-content {
-    height: auto !important;
+	height: auto !important;
 }
 
 #full-report-dialog {
@@ -314,13 +314,13 @@ html, body {
   margin-bottom: 20px !important;
 }
 .mdl-data-table__cell--non-numeric.mdl-data-table__cell--non-numeric {
-    text-align: center !important;
-    font-size: 16px!important;
+	text-align: center !important;
+	font-size: 16px!important;
 }
 .mdl-data-table td:first-of-type, .mdl-data-table th:first-of-type {
-    padding-left: 0 !important;
-    text-align: center !important;
-    font-size: 16px !important;
+	padding-left: 0 !important;
+	text-align: center !important;
+	font-size: 16px !important;
 }
 
 #view-reports-previous, #approve-reports-previous {
@@ -403,4 +403,8 @@ p {
 
 .center {
   text-align: center;
+}
+
+.necir-drawer {
+	overflow-y: hidden;
 }
