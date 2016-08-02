@@ -1071,6 +1071,12 @@ showUnfilteredReportsButton.addEventListener('click', function(){
 	addClass(viewReportsTableBody, 'hidden');
 	removeClass(viewReportsLoader, 'hidden');
 	fillViewReports(firstResultIndex);
+	if (viewReportsNextButton.disabled) {
+			viewReportsNextButton.disabled = false;
+		}
+		if (viewReportsPreviousButton.disabled) {
+			viewReportsPreviousButton.disabled = false;
+		}
 	viewReportsHeader.innerHTML = 'Unfiltered Reports';
 });
 showFilteredReportsButton.addEventListener('click', function(){
@@ -1084,6 +1090,12 @@ showFilteredReportsButton.addEventListener('click', function(){
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		if (viewReportsNextButton.disabled) {
+			viewReportsNextButton.disabled = false;
+		}
+		if (viewReportsPreviousButton.disabled) {
+			viewReportsPreviousButton.disabled = false;
+		}
 		viewReportsHeader.innerHTML = 'Filtered Reports';
 		var snackbarData = {
 			message: 'Filtered Report Indices Downloaded',
@@ -1103,6 +1115,12 @@ showApprovedReportsButton.addEventListener('click', function(){
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
 		fillViewReports(firstResultIndex);
+		if (viewReportsNextButton.disabled) {
+			viewReportsNextButton.disabled = false;
+		}
+		if (viewReportsPreviousButton.disabled) {
+			viewReportsPreviousButton.disabled = false;
+		}
 		viewReportsHeader.innerHTML = 'Approved Reports';
 		var snackbarData = {
 			message: 'Approved Report Indices Downloaded',
