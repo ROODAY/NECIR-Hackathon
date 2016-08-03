@@ -560,6 +560,7 @@ function firebaseLogout() {
 		removeClass(navNecirLogin, 'hidden');
 		addClass(settingsButton, 'hidden');
 		addClass(navLogout, 'hidden');
+		userCounter.innerHTML = 0 + ' Reports Categorized';
 		var snackbarData = {
 			message: 'Logout Successful',
 			timeout: 2000
@@ -908,6 +909,8 @@ function addViewReportsListeners() {
 							addClass(tableFullReportDialog.querySelector("#table-admin-approvedby"), 'hidden');
 						}
 					} else {
+						addClass(approveTableCategorizationButton, 'hidden');
+						addClass(resetReportButton, 'hidden');
 						tableFullReportDialog.querySelector("#table-span-reportid").innerHTML = '';
 						addClass(tableFullReportDialog.querySelector("#table-admin-reportid"), 'hidden');
 						addClass(tableFullReportDialog.querySelector("#table-raw-data-wrapper"), 'hidden');
@@ -1055,15 +1058,17 @@ function addApproveReportsListeners() {
 				tableCategoriesType.innerHTML = report.Individual_Or_Organization;
 				tableCategoriesLocation.innerHTML = report.Location;
 				tableCategoriesNotable.innerHTML = report.Notable_Contributor;
-				tableFullReportDialog.querySelector("#table-span-question").innerHTML = report.Question;
-				tableFullReportDialog.querySelector("#table-span-recipient").innerHTML = report.Recipient;
-				tableFullReportDialog.querySelector("#table-span-contributor").innerHTML = report.Contributor;
-				tableFullReportDialog.querySelector("#table-span-citystate").innerHTML = report.City + ', ' + report.State;
-				tableFullReportDialog.querySelector("#table-span-amount").innerHTML = report.Amount;
-				tableFullReportDialog.querySelector("#table-span-date").innerHTML = report.Date;
 				tableFullReportDialog.querySelector("#table-span-reportid").innerHTML = report.Report_ID;
+				tableFullReportDialog.querySelector("#table-span-admin-question").innerHTML = report.Question;
+				tableFullReportDialog.querySelector("#table-span-admin-recipient").innerHTML = report.Recipient;
+				tableFullReportDialog.querySelector("#table-span-admin-contributor").innerHTML = report.Contributor;
+				tableFullReportDialog.querySelector("#table-span-admin-citystate").innerHTML = report.City + ', ' + report.State;
+				tableFullReportDialog.querySelector("#table-span-admin-amount").innerHTML = report.Amount;
+				tableFullReportDialog.querySelector("#table-span-admin-date").innerHTML = report.Date;
 				removeClass(tableFullReportDialog.querySelector("#table-admin-reportid"), 'hidden');
 				removeClass(tableFullReportDialog.querySelector("#table-raw-data-wrapper"), 'hidden');
+				removeClass(tableFullReportDialog.querySelector("#table-admin-spans"), 'hidden');
+				addClass(tableFullReportDialog.querySelector("#table-user-spans"), 'hidden');
 				if (isReal(report.Categorized_By)) {
 					tableFullReportDialog.querySelector("#table-span-categorizedby").innerHTML = report.Categorized_By;
 					removeClass(tableFullReportDialog.querySelector("#table-admin-categorizedby"), 'hidden');
@@ -1128,6 +1133,7 @@ function approveReport() {
 				console.error(error);
 			});
 		} else {
+			tableFullReportDialog.close();
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
 	}).catch(function(error){
@@ -1206,12 +1212,14 @@ function resetReport() {
 						});
 					});
 				} else {
+					tableFullReportDialog.close();
 					swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
 				}
 			}).catch(function(error){
 				console.error(error);
 			});
 		} else {
+			tableFullReportDialog.close();
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
 	}).catch(function(error){
@@ -1463,6 +1471,7 @@ approveTableCategorizationButton.addEventListener('click', function(){
 		if (snapshot.val() != null) {
 			approveReport();
 		} else {
+			tableFullReportDialog.close();
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
 	}).catch(function(error){
@@ -1475,6 +1484,7 @@ resetReportButton.addEventListener('click', function(){
 			tableFullReportDialog.close();
 			resetReport();
 		} else {
+			tableFullReportDialog.close();
 			swal("Oops...", "You must be an admin to do that!", "error");
 		}
 	}).catch(function(error){
@@ -1594,10 +1604,6 @@ database.ref('filteredIndices').on('value', function(snapshot){
 			}
 		});
 	}
-});
-database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
-	console.log('report categorized');
-	userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
 });
 
 /*/
@@ -1796,6 +1802,10 @@ window.onload = function() {
 		}
 	}).catch(function(error){
 		console.error(error);
+	});
+	database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
+		console.log('report categorized');
+		userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
 	});
 }
 
