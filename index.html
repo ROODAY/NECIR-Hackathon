@@ -97,15 +97,15 @@
         <div class="mdl-grid necir-content">
           <div id="tab-1" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col">
             <div id="first-time-intro">
-              <h3>Welcome to the Bay State Ballot Question Hackathon!</h3> 
+              <h3>The Bay State Ballot Question Hackathon</h3> 
               <p>
-                The presidential election gets all the attention, but Massachusetts voters are poised to vote this November on charter schools, animal welfare, marijuana legalization and gambling — all in the form of ballot questions.
+                This November, Massachusetts voters are poised to vote on charter schools, animal welfare, marijuana legalization and gambling — all in the form of ballot questions.
               </p>
               <p>
-                The results will dictate policy for years to come, impacting everyone from Boston to the Berkshires. But how do these questions make it onto your ballot? Who is paying to get them there? Who is working to sway your vote?
+                The results will dictate policy for years to come, impacting everyone from Boston to the Berkshires. But who pays for ballot question campaigns?
               </p>
               <p>
-                Through this webapp, you will be able to gain a better understanding of the funding sources behind voter initiatives that will be on the Massachusetts ballot this fall. To do so, simply review campaign contribution reports and categorize them based on contributor type, location, and status. Are you ready to begin reviewing?
+                Help The Eye gain a better understanding of the cash flow behind voter initiatives by helping us review campaign contribution records.
               </p>
               <div class="center">
                 <button id="start-button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
@@ -118,18 +118,15 @@
             <div id="current-report" class="hidden">
               <h3>Report Summary</h1> <div id="current-report-loader" class="mdl-spinner mdl-js-spinner is-active"></div>
               <div id="span-wrapper">
-                Report ID: <span id="report-id"></span> <br>
-                Report Type: <span id="report-type"></span> <br>
-                Filing Date: <span id="filing-date"></span> <br>
-                Begin and End Dates: <span id="begin-end-date"></span> <br>
-                Receipts: <span id="receipts"></span> <br>
-                Candidate: <span id="candidate-name"></span> <br>
-                Committee: <span id="committee-name"></span> <br>
-                District: <span id="district"></span> <br>
-                Office: <span id="office"></span> <br>
+                <strong>Question:</strong> <span id="span-question"></span> <br>
+                <strong>Recipient:</strong> <span id="span-recipient"></span> <br>
+                <strong>Contributor:</strong> <span id="span-contributor"></span> <br>
+                <strong>City, State:</strong> <span id="span-citystate"></span> <br>
+                <strong>Amount:</strong> <span id="span-amount"></span> <br>
+                <strong>Date:</strong> <span id="span-date"></span> <br>
               </div>
 
-              <button id="show-full-report" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              <button id="show-full-report" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect hidden">
                 View Full Report
               </button>
 
@@ -188,8 +185,9 @@
               <thead>
                 <tr>
                   <th>Report ID</th>
-                  <th class="mdl-data-table__cell--non-numeric">Candidate</th>
-                  <th class="mdl-data-table__cell--non-numeric">District</th>
+                  <th class="mdl-data-table__cell--non-numeric">Recipient</th>
+                  <th class="mdl-data-table__cell--non-numeric">Amount</th>
+                  <th class="mdl-data-table__cell--non-numeric">Date</th>
                   <th class="mdl-data-table__cell--non-numeric"><button id="refresh-view-reports" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">refresh</i></button></th>
                 </tr>
               </thead>
@@ -205,13 +203,14 @@
             </button>
           </div>
           <div id="tab-4" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
-            <h3>Filtered Reports</h3>
+            <h3>Reviewed Reports</h3>
             <table id="approve-reports-table" class="necir-table mdl-data-table mdl-js-data-table mdl-shadow--2dp">
               <thead>
                 <tr>
                   <th>Report ID</th>
-                  <th class="mdl-data-table__cell--non-numeric">Candidate</th>
-                  <th class="mdl-data-table__cell--non-numeric">District</th>
+                  <th class="mdl-data-table__cell--non-numeric">Recipient</th>
+                  <th class="mdl-data-table__cell--non-numeric">Amount</th>
+                  <th class="mdl-data-table__cell--non-numeric">Date</th>
                   <th class="mdl-data-table__cell--non-numeric"><button id="refresh-approve-reports" class="mdl-button mdl-js-button mdl-button--icon"><i class="material-icons">refresh</i></button></th>
                 </tr>
               </thead>
@@ -248,10 +247,21 @@
     </dialog>
 
     <dialog id="table-full-report-dialog" data-reportid="" class="mdl-dialog">
-      <h4 class="mdl-dialog__title">Full Report Data</h4>
+      <h4 class="mdl-dialog__title">Report Data</h4>
       <div class="mdl-dialog__content">
-        <div id="table-raw-data-wrapper">
+        <div id="table-raw-data-wrapper" class="hidden">
           <pre id="table-raw-data" class="lang-js"></pre>
+        </div>
+        <div id="table-span-wrapper">
+          <strong>Question:</strong> <span id="table-span-question"></span> <br>
+          <strong>Recipient:</strong> <span id="table-span-recipient"></span> <br>
+          <strong>Contributor:</strong> <span id="table-span-contributor"></span> <br>
+          <strong>City, State:</strong> <span id="table-span-citystate"></span> <br>
+          <strong>Amount:</strong> <span id="table-span-amount"></span> <br>
+          <strong>Date:</strong> <span id="table-span-date"></span> <br>
+          <span id="table-admin-reportid" class="hidden"><strong>Report ID:</strong> <span id="table-span-reportid"></span></span> <br>
+          <span id="table-admin-categorizedby" class="hidden"><strong>Categorized By:</strong> <span id="table-span-categorizedby"></span></span> <br>
+          <span id="table-admin-approvedby" class="hidden"><strong>Approved By:</strong> <span id="table-span-approvedby"></span></span> <br>
         </div>
         <div id="table-categorization-options">
           <h4>Categories: </h4>
@@ -291,12 +301,13 @@
               <span class="mdl-switch__label">Notable Contributor</span>
             </label>
           </div>
+          <span class="error-message hidden"></span>
         </div>
         <div id="table-categories" class="hidden">
           <h4>Categories: </h4>
-          Contributor Type: <strong id="table-categories-type"></strong><br>
-          Contributor Location: <strong id="table-categories-location"></strong><br>
-          Notable Contributor: <strong id="table-categories-notable"></strong><br>
+          <strong>Contributor Type:</strong> <span id="table-categories-type"></span><br>
+          <strong>Contributor Location:</strong> <span id="table-categories-location"></span><br>
+          <strong>Notable Contributor:</strong> <span id="table-categories-notable"></span><br>
         </div>
       </div>
       <div class="mdl-dialog__actions">
@@ -311,6 +322,10 @@
       <h4 class="mdl-dialog__title">Log In</h4>
       <div class="mdl-dialog__content">
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <input class="mdl-textfield__input" type="text" id="login-username">
+          <label class="mdl-textfield__label" for="login-username">Username</label>
+        </div>
+        <div id="login-email-wrapper" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label hidden">
           <input class="mdl-textfield__input" type="email" id="login-email">
           <label class="mdl-textfield__label" for="login-email">Email</label>
           <span class="mdl-textfield__error">Not a valid email</span>
@@ -318,8 +333,9 @@
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
           <input class="mdl-textfield__input" type="password" id="login-password">
           <label class="mdl-textfield__label" for="login-password">Password</label>
+          <span class="mdl-textfield__error">Password must be at least 6 characters</span>
         </div>
-        If this is your first time logging in, an account will be created for you. <br>
+        If this is your first time logging in, you will be prompted for your email and an account will be created for you. (Passwords must be at least 6 characters)<br>
         <span class="error-message hidden"></span>
       </div>
       <div class="mdl-dialog__actions">
@@ -358,8 +374,7 @@
           <input class="mdl-textfield__input" type="text" id="settings-photo-url">
           <label class="mdl-textfield__label" for="settings-photo-url">Photo URL</label>
         </div>
-        <button id="resend-verification" type="button" class="mdl-button hidden">Resend Email Verification</button>
-        <button id="resync-data-button" type="button" class="mdl-button">Resync Data</button>
+        <button id="resync-data-button" type="button" class="mdl-button danger">Resync Data</button>
       </div>
       <span id="settings-message"></span>
       <div class="mdl-dialog__actions">
