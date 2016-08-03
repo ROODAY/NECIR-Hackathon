@@ -214,6 +214,10 @@ function resyncAllData() {
 }
 function weDidIt() {
 	if (!confettiHappened) {
+		confettiHappened = true;
+		window.localStorage.setItem("confettiHappened", confettiHappened);
+		removeClass(document.querySelector('#confetti-wrapper'), 'hidden');
+		swal("We Did It!", "All reports have been categorized!", "success");
 		var COLORS, Confetti, NUM_CONFETTI, PI_2, canvas, confetti, context, drawCircle, i, range, resizeWindow, xpos;
 
 		NUM_CONFETTI = 350;
@@ -234,12 +238,9 @@ function weDidIt() {
 		window.w = canvas.width = window.innerWidth;
 		return window.h = canvas.height = window.innerHeight;
 		};
+		resizeWindow();
 
 		window.addEventListener('resize', resizeWindow, false);
-
-		window.onload = function() {
-		return setTimeout(resizeWindow, 0);
-		};
 
 		range = function(a, b) {
 		return (b - a) * Math.random() + a;
@@ -338,7 +339,7 @@ function weDidIt() {
 function necirLogin() {
 	var username = necirLoginDialog.querySelector('#login-username').value;
 	database.ref('users/' + username).once('value').then(function(snapshot){
-		var userData = snapshot.val();
+		userData = snapshot.val();
 		if (userData === null) {
 			var newusername = necirLoginDialog.querySelector('#login-username').value;
 			var newuserpassword = necirLoginDialog.querySelector('#login-password').value;
@@ -1530,21 +1531,21 @@ eventProgress.addEventListener('mdl-componentupgraded', function() {
   this.MaterialProgress.setProgress(0);
 });
 database.ref('filteredIndices').on('value', function(snapshot){
-	var filteredLength = Object.keys(snapshot.val()).length;
-	database.ref('adminReviewedIndices').on('value', function(snapshot){
-		var approvedLength = Object.keys(snapshot.val()).length;
-		var totalLength = filteredLength + approvedLength;
-		if (totalLength >= 3602) {
-			eventProgress.MaterialProgress.setProgress(100);
-			weDidIt();
-		} else {
-			eventProgress.MaterialProgress.setProgress(Math.round((totalLength / 3602) * 100));
-		}
-	}).catch(function(error){
-		console.error(error);
-	});
-}).catch(function(error){
-	console.error(error);
+	if (isReal(snapshot.val())) {
+		var filteredLength = Object.keys(snapshot.val()).length;
+		database.ref('adminReviewedIndices').on('value', function(snapshot){
+			if (isReal(snapshot.val())) {
+				var approvedLength = Object.keys(snapshot.val()).length;
+				var totalLength = filteredLength + approvedLength;
+				if (totalLength >= 3602) {
+					eventProgress.MaterialProgress.setProgress(100);
+					weDidIt();
+				} else {
+					eventProgress.MaterialProgress.setProgress(Math.round((totalLength / 3602) * 100));
+				}
+			}
+		});
+	}
 });
 
 /*/
@@ -1733,8 +1734,7 @@ window.onload = function() {
 	}
 }
 
-window.onbeforeunload = confirmExit;
-function confirmExit(){
+window.onbeforeunload = function confirmExit() {
 	database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(err){
 		if (err) {
 			console.error(err);
