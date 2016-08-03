@@ -24,6 +24,7 @@ var user                  = JSON.parse(window.localStorage.getItem('user'));
 var userData                  = JSON.parse(window.localStorage.getItem('userData'));
 var currentTab                  = window.localStorage.getItem('currentTab');
 var repeatUser            = window.localStorage.getItem('repeatUser');
+var confettiHappened            = window.localStorage.getItem('confettiHappened');
 
 var adminAuth                        = document.querySelector('#admin-auth');
 var approveReportsLoader             = document.querySelector('#approve-reports-loader');
@@ -84,6 +85,8 @@ var spanContributor = document.querySelector('#span-contributor');
 var spanCitystate = document.querySelector('#span-citystate');
 var spanAmount = document.querySelector('#span-amount');
 var spanDate = document.querySelector('#span-date');
+var eventProgress = document.querySelector('#event-progress');
+var userCounter = document.querySelector('#user-counter');
 
 var newUserEmail;
 
@@ -208,6 +211,124 @@ function resyncAllData() {
 	}).catch(function(error){
 		console.log(error);
 	});
+}
+function weDidIt() {
+	if (!confettiHappened) {
+		var COLORS, Confetti, NUM_CONFETTI, PI_2, canvas, confetti, context, drawCircle, i, range, resizeWindow, xpos;
+
+		NUM_CONFETTI = 350;
+
+		COLORS = [[85, 71, 106], [174, 61, 99], [219, 56, 83], [244, 92, 68], [248, 182, 70]];
+
+		PI_2 = 2 * Math.PI;
+
+		canvas = document.getElementById("world");
+
+		context = canvas.getContext("2d");
+
+		window.w = 0;
+
+		window.h = 0;
+
+		resizeWindow = function() {
+		window.w = canvas.width = window.innerWidth;
+		return window.h = canvas.height = window.innerHeight;
+		};
+
+		window.addEventListener('resize', resizeWindow, false);
+
+		window.onload = function() {
+		return setTimeout(resizeWindow, 0);
+		};
+
+		range = function(a, b) {
+		return (b - a) * Math.random() + a;
+		};
+
+		drawCircle = function(x, y, r, style) {
+		context.beginPath();
+		context.arc(x, y, r, 0, PI_2, false);
+		context.fillStyle = style;
+		return context.fill();
+		};
+
+		xpos = 0.5;
+
+		document.onmousemove = function(e) {
+		return xpos = e.pageX / w;
+		};
+
+		window.requestAnimationFrame = (function() {
+		return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
+		  return window.setTimeout(callback, 1000 / 60);
+		};
+		})();
+
+		Confetti = (function() {
+		function Confetti() {
+		  this.style = COLORS[~~range(0, 5)];
+		  this.rgb = "rgba(" + this.style[0] + "," + this.style[1] + "," + this.style[2];
+		  this.r = ~~range(2, 6);
+		  this.r2 = 2 * this.r;
+		  this.replace();
+		}
+
+		Confetti.prototype.replace = function() {
+		  this.opacity = 0;
+		  this.dop = 0.03 * range(1, 4);
+		  this.x = range(-this.r2, w - this.r2);
+		  this.y = range(-20, h - this.r2);
+		  this.xmax = w - this.r;
+		  this.ymax = h - this.r;
+		  this.vx = range(0, 2) + 8 * xpos - 5;
+		  return this.vy = 0.7 * this.r + range(-1, 1);
+		};
+
+		Confetti.prototype.draw = function() {
+		  var ref;
+		  this.x += this.vx;
+		  this.y += this.vy;
+		  this.opacity += this.dop;
+		  if (this.opacity > 1) {
+		    this.opacity = 1;
+		    this.dop *= -1;
+		  }
+		  if (this.opacity < 0 || this.y > this.ymax) {
+		    this.replace();
+		  }
+		  if (!((0 < (ref = this.x) && ref < this.xmax))) {
+		    this.x = (this.x + this.xmax) % this.xmax;
+		  }
+		  return drawCircle(~~this.x, ~~this.y, this.r, this.rgb + "," + this.opacity + ")");
+		};
+
+		return Confetti;
+
+		})();
+
+		confetti = (function() {
+		var j, ref, results;
+		results = [];
+		for (i = j = 1, ref = NUM_CONFETTI; 1 <= ref ? j <= ref : j >= ref; i = 1 <= ref ? ++j : --j) {
+		  results.push(new Confetti);
+		}
+		return results;
+		})();
+
+		window.step = function() {
+		var c, j, len, results;
+		requestAnimationFrame(step);
+		context.clearRect(0, 0, w, h);
+		results = [];
+		for (j = 0, len = confetti.length; j < len; j++) {
+		  c = confetti[j];
+		  results.push(c.draw());
+		}
+		return results;
+		};
+
+		step();
+	}
 }
 
 /*/
@@ -559,56 +680,65 @@ function fillReportData() {
 
 function saveCategorizations() {
 	if (categorizationOptions.querySelector('input[name="organizationOptions"]:checked') != null && categorizationOptions.querySelector('input[name="locationOptions"]:checked') != null) {
-		swal({
-			title: "Are you sure?", 
-			text: "Continuing will save the current categorization and move on to the next report.", 
-			type: "warning", 
-			showCancelButton: true, 
-			confirmButtonColor: "#DD6B55", 
-			confirmButtonText: "Yes, continue!", 
-			closeOnConfirm: true
-		}, function() {
-			currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
-			currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
-			currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
-			currentReport.Categorized_By             = userData.username;
-			database.ref('reports/' + currentReportID).set(currentReport, function(err){
-				if (err) {
-					console.error(err);
-				}
-				database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(err){
-					if (err) {
-						console.error(err);
-					}
-					database.ref('unfilteredIndices/' + currentReportID).set(null, function(err){
+		database.ref('unfilteredIndices/' + currentReportID).once('value').then(function(snapshot){
+			if (snapshot.val() != null) {
+				swal({
+					title: "Are you sure?", 
+					text: "Continuing will save the current categorization and move on to the next report.", 
+					type: "warning", 
+					showCancelButton: true, 
+					confirmButtonColor: "#DD6B55", 
+					confirmButtonText: "Yes, continue!", 
+					closeOnConfirm: true
+				}, function() {
+					currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
+					currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
+					currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
+					currentReport.Categorized_By             = userData.username;
+					database.ref('reports/' + currentReportID).set(currentReport, function(err){
 						if (err) {
 							console.error(err);
 						}
-						database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(err){
+						database.ref('filteredIndices/' + currentReportID).set(currentReportID, function(err){
 							if (err) {
 								console.error(err);
 							}
-							delete unfilteredIndices[currentReportID];
-							window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
-							userData.reportsCategorized += 1;
-							database.ref('users/' + userData.username).set(userData, function(err){
+							database.ref('unfilteredIndices/' + currentReportID).set(null, function(err){
 								if (err) {
 									console.error(err);
-								} else {
-									removeClass(currentReportLoader, 'hidden');
-									getNextReport(0);
-									var snackbarData = {
-										message: 'Fetching report...',
-										timeout: 2000
-									};
-									snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 								}
-							});	
-						});
+								database.ref('currentlyAccessedIndices/' + currentReportID).set(null, function(err){
+									if (err) {
+										console.error(err);
+									}
+									delete unfilteredIndices[currentReportID];
+									window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+									userData.reportsCategorized += 1;
+									userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+									database.ref('users/' + userData.username + '/reportsCategorized').set(userData.reportsCategorized, function(err){
+										if (err) {
+											console.error(err);
+										} else {
+											removeClass(currentReportLoader, 'hidden');
+											getNextReport(0);
+											var snackbarData = {
+												message: 'Fetching report...',
+												timeout: 2000
+											};
+											snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+										}
+									});	
+								});
+							});
+						});		
 					});
-				});		
-			});
-		});	
+				});	
+			} else {
+				swal("Oops...", "Looks like this report has already been reviewed!", "error");
+			}
+		}).catch(function(error){
+			console.error(error);
+		});
 	} else {
 		swal("Oops...", "Looks like you didn't select some categorizations!", "error");
 	}	
@@ -763,59 +893,75 @@ function addViewReportsListeners() {
 
 function saveTableCategorizations() {
 	if (tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked') != null && tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked') != null) {
-		tableFullReportDialog.querySelector('.error-message').innerHTML = '';
-		addClass(tableFullReportDialog.querySelector('.error-message'), 'hidden');
-		database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-			if (snapshot.val() === null) {
-				tableFullReportDialog.close();
-				swal({
-					title: "Are you sure?", 
-					text: "Continuing will save the current categorization and mark it as filtered.", 
-					type: "warning", 
-					showCancelButton: true, 
-					confirmButtonColor: "#DD6B55", 
-					confirmButtonText: "Yes, continue!", 
-					closeOnConfirm: true
-				}, function() {
-					database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-						var report = snapshot.val();
-						report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
-						report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
-						report.Notable_Contributor        = tableFullReportDialog.querySelector("#table-switch-notable").checked;
-						report.Categorized_By             = userData.username;
-						database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
-							if (err) {
-								console.error(err);
-							}
-							database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
-								if (err) {
-									console.error(err);
-								}
-								database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+		database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+			if (snapshot.val() != null) {
+				tableFullReportDialog.querySelector('.error-message').innerHTML = '';
+				addClass(tableFullReportDialog.querySelector('.error-message'), 'hidden');
+				database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+					if (snapshot.val() === null) {
+						tableFullReportDialog.close();
+						swal({
+							title: "Are you sure?", 
+							text: "Continuing will save the current categorization and mark it as filtered.", 
+							type: "warning", 
+							showCancelButton: true, 
+							confirmButtonColor: "#DD6B55", 
+							confirmButtonText: "Yes, continue!", 
+							closeOnConfirm: true
+						}, function() {
+							database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+								var report = snapshot.val();
+								report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
+								report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
+								report.Notable_Contributor        = tableFullReportDialog.querySelector("#table-switch-notable").checked;
+								report.Categorized_By             = userData.username;
+								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
 									if (err) {
 										console.error(err);
 									}
-									delete unfilteredIndices[tableFullReportDialog.dataset.reportid];
-									window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
-									viewReportsTableBody.innerHTML = "";
-									addClass(viewReportsTableBody, 'hidden');
-									removeClass(viewReportsLoader, 'hidden');
-									fillViewReports(firstResultIndex);
-									swal("Success!", "Report has been categorized!", "success");
+									database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
+										if (err) {
+											console.error(err);
+										}
+										database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+											if (err) {
+												console.error(err);
+											}
+											delete unfilteredIndices[tableFullReportDialog.dataset.reportid];
+											window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
+											viewReportsTableBody.innerHTML = "";
+											addClass(viewReportsTableBody, 'hidden');
+											removeClass(viewReportsLoader, 'hidden');
+											userData.reportsCategorized += 1;
+											userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+											database.ref('users/' + userData.username + '/reportsCategorized').set(userData.reportsCategorized, function(err){
+												if (err) {
+													console.error(err);
+												} else {
+													fillViewReports(firstResultIndex);
+													swal("Success!", "Report has been categorized!", "success");
+												}
+											});	
+										});
+									});		
 								});
-							});		
+							}).catch(function(error){
+								console.error(error);
+							});
 						});
-					}).catch(function(error){
-						console.error(error);
-					});
+					} else {
+						tableFullReportDialog.close();
+						swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+					}
+				}).catch(function(error){
+					console.error(error);
 				});
 			} else {
-				tableFullReportDialog.close();
-				swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+				swal("Oops...", "Looks like this report has already been reviewed!", "error");
 			}
 		}).catch(function(error){
 			console.error(error);
-		});
+		});	
 	} else {
 		tableFullReportDialog.querySelector('.error-message').innerHTML = 'Looks like you didn\'t select some categorizations!';
 		removeClass(tableFullReportDialog.querySelector('.error-message'), 'hidden');
@@ -833,7 +979,7 @@ function fillApproveReports(index) {
 			var report = snapshot.val();
 			if (report != null) {
 				var tr = document.createElement('tr');
-				tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Full_Name + '</td><td class="mdl-data-table__cell--non-numeric">' + report.District + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon approve-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
+				tr.innerHTML = '<td>' + report.Report_ID + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Recipient + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Amount + '</td><td class="mdl-data-table__cell--non-numeric">' + report.Date + '</td><td class="mdl-data-table__cell--non-numeric"><button data-reportid="' + report.Report_ID + '" class="mdl-button mdl-js-button mdl-button--icon approve-report-idbutton"><i class="material-icons">zoom_out_map</i></button></td>'
 				approveReportsTableBody.appendChild(tr);
 				if (index < firstResultIndex + resultsLength) {
 					fillApproveReports(index + 1);
@@ -853,35 +999,6 @@ function fillApproveReports(index) {
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-		if (resultSectionNum === 2) {
-			database.ref('filteredIndices/').once('value').then(function(snapshot){
-				if (snapshot.val() === null) {
-					var snackbarData = {
-						message: 'Data Does Not Yet Exist',
-						timeout: 2000
-					};
-					snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-				} else {
-					resyncData();
-				}
-			}).catch(function(error){
-				console.log(error);
-			});
-		} else if (resultSectionNum === 3) {
-			database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
-				if (snapshot.val() === null) {
-					var snackbarData = {
-						message: 'Data Does Not Yet Exist',
-						timeout: 2000
-					};
-					snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-				} else {
-					resyncData();
-				}
-			}).catch(function(error){
-				console.log(error);
-			});
-		}
 	}
 }
 
@@ -902,6 +1019,32 @@ function addApproveReportsListeners() {
 				var report = snapshot.val();
 				tablePreElement.innerHTML = JSON.stringify(report, null, 4);
 				hljs.highlightBlock(tablePreElement);
+				tableCategoriesType.innerHTML = report.Individual_Or_Organization;
+				tableCategoriesLocation.innerHTML = report.Location;
+				tableCategoriesNotable.innerHTML = report.Notable_Contributor;
+				tableFullReportDialog.querySelector("#table-span-question").innerHTML = report.Question;
+				tableFullReportDialog.querySelector("#table-span-recipient").innerHTML = report.Recipient;
+				tableFullReportDialog.querySelector("#table-span-contributor").innerHTML = report.Contributor;
+				tableFullReportDialog.querySelector("#table-span-citystate").innerHTML = report.City + ', ' + report.State;
+				tableFullReportDialog.querySelector("#table-span-amount").innerHTML = report.Amount;
+				tableFullReportDialog.querySelector("#table-span-date").innerHTML = report.Date;
+				tableFullReportDialog.querySelector("#table-span-reportid").innerHTML = report.Report_ID;
+				removeClass(tableFullReportDialog.querySelector("#table-admin-reportid"), 'hidden');
+				removeClass(tableFullReportDialog.querySelector("#table-raw-data-wrapper"), 'hidden');
+				if (isReal(report.Categorized_By)) {
+					tableFullReportDialog.querySelector("#table-span-categorizedby").innerHTML = report.Categorized_By;
+					removeClass(tableFullReportDialog.querySelector("#table-admin-categorizedby"), 'hidden');
+				} else {
+					tableFullReportDialog.querySelector("#table-span-categorizedby").innerHTML = '';
+					addClass(tableFullReportDialog.querySelector("#table-admin-categorizedby"), 'hidden');
+				}
+				if (isReal(report.Approved_By)) {
+					tableFullReportDialog.querySelector("#table-span-approvedby").innerHTML = report.Approved_By;
+					removeClass(tableFullReportDialog.querySelector("#table-admin-approvedby"), 'hidden');
+				} else {
+					tableFullReportDialog.querySelector("#table-span-approvedby").innerHTML = '';
+					addClass(tableFullReportDialog.querySelector("#table-admin-approvedby"), 'hidden');
+				}
 				tableFullReportDialog.showModal();
 				tableFullReportDialog.scrollTop = 0;
 			}).catch(function(error){
@@ -912,16 +1055,68 @@ function addApproveReportsListeners() {
 }
 
 function approveReport() {
-	database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-		var report = snapshot.val();
-		report.Approved_By = userData.username;
-		database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
-			if (err) {
+	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+		if (snapshot.val() != null) {
+			database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+				var report = snapshot.val();
+				report.Approved_By = userData.username;
+				database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
+					if (err) {
+						console.error(error);
+					} else {
+						database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+							if (snapshot.val() != null) {
+								database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
+									if (err) {
+										console.error(err);
+									}
+									database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
+										if (err) {
+											console.error(err);
+										}
+										resyncData();
+										addClass(viewReportsTableBody, 'hidden');
+										removeClass(viewReportsLoader, 'hidden');
+										addClass(approveReportsTableBody, 'hidden');
+										removeClass(approveReportsLoader, 'hidden');
+										tableFullReportDialog.close();
+										swal("Success!", "Report has been approved!", "success");
+									});
+								});
+							} else {
+								console.log('report is not filtered')
+							}
+						}).catch(function(error){
+							console.error(error);
+						});
+					}
+				})
+			}).catch(function(error){
 				console.error(error);
-			} else {
-				database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-					if (snapshot.val() != null) {
-						database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
+			});
+		} else {
+			swal("Oops...", "You must be an admin to do that!", "error");
+		}
+	}).catch(function(error){
+		console.error(error);
+	});	
+}
+
+function resetReport() {
+	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+		if (snapshot.val() != null) {
+			database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+				if (snapshot.val() === null) {
+					swal({
+						title: "Are you sure?", 
+						text: "Continuing will reset the current report's categorizations and mark it as unfiltered.", 
+						type: "warning", 
+						showCancelButton: true, 
+						confirmButtonColor: "#DD6B55", 
+						confirmButtonText: "Yes, continue!", 
+						closeOnConfirm: true
+					}, function() {
+						database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
 							if (err) {
 								console.error(err);
 							}
@@ -929,83 +1124,50 @@ function approveReport() {
 								if (err) {
 									console.error(err);
 								}
-								resyncData();
-								addClass(viewReportsTableBody, 'hidden');
-								removeClass(viewReportsLoader, 'hidden');
-								addClass(approveReportsTableBody, 'hidden');
-								removeClass(approveReportsLoader, 'hidden');
-								tableFullReportDialog.close();
-								swal("Success!", "Report has been approved!", "success");
-							});
-						});
-					} else {
-						console.log('report is not filtered')
-					}
-				}).catch(function(error){
-					console.error(error);
-				});
-			}
-		})
-	}).catch(function(error){
-		console.error(error);
-	});	
-}
-
-function resetReport() {
-	database.ref('currentlyAccessedIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-		if (snapshot.val() === null) {
-			swal({
-				title: "Are you sure?", 
-				text: "Continuing will reset the current report's categorizations and mark it as unfiltered.", 
-				type: "warning", 
-				showCancelButton: true, 
-				confirmButtonColor: "#DD6B55", 
-				confirmButtonText: "Yes, continue!", 
-				closeOnConfirm: true
-			}, function() {
-				database.ref('adminReviewedIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
-					if (err) {
-						console.error(err);
-					}
-					database.ref('filteredIndices/' + tableFullReportDialog.dataset.reportid).set(null, function(err){
-						if (err) {
-							console.error(err);
-						}
-						database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
-							if (err) {
-								console.error(err);
-							}
-							database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
-								var report = snapshot.val();
-								report.Individual_Or_Organization = '';
-								report.Location                   = '';
-								report.Notable_Contributor        = '';
-								addClass(viewReportsTableBody, 'hidden');
-								removeClass(viewReportsLoader, 'hidden');
-								addClass(approveReportsTableBody, 'hidden');
-								removeClass(approveReportsLoader, 'hidden');
-								resyncAllData();
-								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
+								database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).set(tableFullReportDialog.dataset.reportid, function(err){
 									if (err) {
 										console.error(err);
 									}
-									swal("Success!", "Report has successfully been reset!", "success");
+									database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
+										var report = snapshot.val();
+										report.Individual_Or_Organization = '';
+										report.Location                   = '';
+										report.Notable_Contributor        = '';
+										report.Categorized_By             = '';
+										report.Approved_By                = '';
+										addClass(viewReportsTableBody, 'hidden');
+										removeClass(viewReportsLoader, 'hidden');
+										addClass(approveReportsTableBody, 'hidden');
+										removeClass(approveReportsLoader, 'hidden');
+										database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
+											if (err) {
+												console.error(err);
+											} else {
+												swal("Success!", "Report has successfully been reset!", "success");
+												resyncAllData();
+											}
+										});
+									}).catch(function(error){
+										console.log(error);
+									});
+								}).catch(function(error){
+									console.error(error);
 								});
 							}).catch(function(error){
-								console.log(error);
+								console.error(error);
 							});
 						}).catch(function(error){
 							console.error(error);
 						});
-					}).catch(function(error){
-						console.error(error);
 					});
-				}).catch(function(error){
-					console.error(error);
-				});
+				} else {
+					swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+				}
+			}).catch(function(error){
+				console.error(error);
 			});
 		} else {
-			swal("Oops...", "Looks like another user is currently reviewing this report!", "error");
+			swal("Oops...", "You must be an admin to do that!", "error");
 		}
 	}).catch(function(error){
 		console.error(error);
@@ -1364,6 +1526,27 @@ resyncDataButton.addEventListener('click', function(){
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 	});
 });
+eventProgress.addEventListener('mdl-componentupgraded', function() {
+  this.MaterialProgress.setProgress(0);
+});
+database.ref('filteredIndices').on('value', function(snapshot){
+	var filteredLength = Object.keys(snapshot.val()).length;
+	database.ref('adminReviewedIndices').on('value', function(snapshot){
+		var approvedLength = Object.keys(snapshot.val()).length;
+		var totalLength = filteredLength + approvedLength;
+		if (totalLength >= 3602) {
+			eventProgress.MaterialProgress.setProgress(100);
+			weDidIt();
+		} else {
+			eventProgress.MaterialProgress.setProgress(Math.round((totalLength / 3602) * 100));
+		}
+	}).catch(function(error){
+		console.error(error);
+	});
+}).catch(function(error){
+	console.error(error);
+});
+
 /*/
 /* Page Hooks
 /*/

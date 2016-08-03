@@ -22,6 +22,9 @@
     <script src="js/vendor/local-storage-polyfill.js"></script>
   </head>
   <body>
+    <div id="confetti-wrapper" class="hidden">
+      <canvas id="world"></canvas>
+    </div>
     <div id="landing" class="mdl-grid">
       <div class="mdl-cell--middle landing-wrapper">
         <div class="landing-card-wide mdl-card mdl-shadow--2dp">
@@ -43,6 +46,11 @@
       <header class="necir-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">Bay State Ballot Question Hackathon</span>
+          <span id="user-counter">0 Reports Categorized</span>
+          <label for="checkbox-2">
+            <div id="event-progress" class="mdl-progress mdl-js-progress"></div>
+            <span>Event Progress</span>
+          </label>
           <div class="mdl-layout-spacer"></div>
           <div id="results-length-wrapper" class="hidden">
             Show... <button id="results-length-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
@@ -226,6 +234,15 @@
             </button>
           </div>
         </div>
+        <footer class="mdl-mini-footer">
+          <div class="mdl-mini-footer__left-section">
+            <div class="mdl-logo">Bay State Ballot Question Hackathon</div>
+            <ul class="mdl-mini-footer__link-list">
+              <li>A project of the <a href="http://eye.necir.org/" class="footer-link">New England Center for Investigative Reporting</a></li>
+              <li>Designed by <a href="https://rooday.com/" class="footer-link">Rudhra Raveendran</a></li>
+            </ul>
+          </div>
+        </footer>
       </main>
     </div>
 

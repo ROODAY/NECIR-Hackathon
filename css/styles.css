@@ -265,14 +265,14 @@ _:-ms-input-placeholder, :root .necir-graph {
 
 #full-report-dialog {
   width: 50% !important;
-  height: 75% !important;
+  max-height: 75% !important;
   overflow-y: scroll !important;
   top: 12.5% !important;
 }
 
 #table-full-report-dialog {
   width: 50% !important;
-  height: 75% !important;
+  max-height: 75% !important;
   overflow-y: scroll !important;
   top: 12.5% !important;
 }
@@ -391,4 +391,29 @@ p {
 
 .necir-drawer {
 	overflow-y: hidden;
+}
+
+.necir-tab {
+  min-height: 95vh;
+}
+
+.footer-link {
+  transition: color 0.5s ease;
+}
+
+.footer-link:hover {
+  color: white !important;
+}
+.mdl-layout-title, #user-counter {
+  margin-right: 10px;
+}
+#confetti-wrapper {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #111;
+  z-index: 99998;
+  position: fixed;
 }
