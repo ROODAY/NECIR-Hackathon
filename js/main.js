@@ -516,7 +516,6 @@ function necirLogin() {
 					}
 					window.localStorage.setItem("user", JSON.stringify(user));
 					window.localStorage.setItem("userData", JSON.stringify(userData));
-					console.log(user);
 					removeClass(currentReportLoader, 'hidden');
 					getNextReport(0);
 					var snackbarData = {
@@ -1583,6 +1582,7 @@ database.ref('filteredIndices').on('value', function(snapshot){
 		var filteredLength = Object.keys(snapshot.val()).length;
 		database.ref('adminReviewedIndices').on('value', function(snapshot){
 			if (isReal(snapshot.val())) {
+				console.log('updating bar')
 				var approvedLength = Object.keys(snapshot.val()).length;
 				var totalLength = filteredLength + approvedLength;
 				if (totalLength >= 3602) {
@@ -1594,6 +1594,10 @@ database.ref('filteredIndices').on('value', function(snapshot){
 			}
 		});
 	}
+});
+database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
+	console.log('report categorized');
+	userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
 });
 
 /*/
@@ -1786,9 +1790,9 @@ window.onload = function() {
 			} else {
 				profilePicture.src = 'images/user.jpg'
 			}
-			database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
-				userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
-			});
+			if (isReal(userData.reportsCategorized)) {
+				userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+			}
 		}
 	}).catch(function(error){
 		console.error(error);
