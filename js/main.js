@@ -304,16 +304,13 @@ function necirLogin() {
 									console.error(error);
 								});
 								window.localStorage.setItem("user", JSON.stringify(user));
-								if (!user.emailVerified) {
-									user.sendEmailVerification();
-									landing.style.margin = "-100vh";
-									setTimeout(function(){
-										addClass(landing, 'hidden');
-									}, 500);
-									swal("Success!", "You've registered! Check your email to verify your account!", "success");
-									necirLoginDialog.querySelector('#login-email').value ='';
-									necirLoginDialog.querySelector('#login-password').value ='';
-								}
+								landing.style.margin = "-100vh";
+								setTimeout(function(){
+									addClass(landing, 'hidden');
+								}, 500);
+								swal("Success!", "You've registered!", "success");
+								necirLoginDialog.querySelector('#login-email').value ='';
+								necirLoginDialog.querySelector('#login-password').value ='';
 							}).catch(function(error) {
 								if (error) {
 									console.error(error);
