@@ -216,121 +216,133 @@ function resyncAllData() {
 }
 function weDidIt() {
 	if (!confettiHappened) {
-		confettiHappened = true;
+		confettiHappened = false;
 		window.localStorage.setItem("confettiHappened", confettiHappened);
 		removeClass(document.querySelector('#confetti-wrapper'), 'hidden');
-		swal("We Did It!", "All reports have been categorized!", "success");
-		var COLORS, Confetti, NUM_CONFETTI, PI_2, canvas, confetti, context, drawCircle, i, range, resizeWindow, xpos;
+		database.ref('users').once('value').then(function(snapshot){
+			var allusers = snapshot.val();
+			var topusers = [];
+			for (var i = 0; i < Object.keys(allusers).length; i++) {
+				topusers.push(allusers[Object.keys(allusers)[i]]);
+			}
+			topusers.sort(function(a, b) {
+			    return b.reportsCategorized - a.reportsCategorized;
+			});
+			swal("We Did It!", "All reports have been categorized! " + topusers[0].username + " categorized the most, at " + topusers[0].reportsCategorized + " reports!", "success");
+			var COLORS, Confetti, NUM_CONFETTI, PI_2, canvas, confetti, context, drawCircle, i, range, resizeWindow, xpos;
 
-		NUM_CONFETTI = 350;
+			NUM_CONFETTI = 350;
 
-		COLORS = [[85, 71, 106], [174, 61, 99], [219, 56, 83], [244, 92, 68], [248, 182, 70]];
+			COLORS = [[85, 71, 106], [174, 61, 99], [219, 56, 83], [244, 92, 68], [248, 182, 70]];
 
-		PI_2 = 2 * Math.PI;
+			PI_2 = 2 * Math.PI;
 
-		canvas = document.getElementById("world");
+			canvas = document.getElementById("world");
 
-		context = canvas.getContext("2d");
+			context = canvas.getContext("2d");
 
-		window.w = 0;
+			window.w = 0;
 
-		window.h = 0;
+			window.h = 0;
 
-		resizeWindow = function() {
-		window.w = canvas.width = window.innerWidth;
-		return window.h = canvas.height = window.innerHeight;
-		};
-		resizeWindow();
+			resizeWindow = function() {
+			window.w = canvas.width = window.innerWidth;
+			return window.h = canvas.height = window.innerHeight;
+			};
+			resizeWindow();
 
-		window.addEventListener('resize', resizeWindow, false);
+			window.addEventListener('resize', resizeWindow, false);
 
-		range = function(a, b) {
-		return (b - a) * Math.random() + a;
-		};
+			range = function(a, b) {
+			return (b - a) * Math.random() + a;
+			};
 
-		drawCircle = function(x, y, r, style) {
-		context.beginPath();
-		context.arc(x, y, r, 0, PI_2, false);
-		context.fillStyle = style;
-		return context.fill();
-		};
+			drawCircle = function(x, y, r, style) {
+			context.beginPath();
+			context.arc(x, y, r, 0, PI_2, false);
+			context.fillStyle = style;
+			return context.fill();
+			};
 
-		xpos = 0.5;
+			xpos = 0.5;
 
-		document.onmousemove = function(e) {
-		return xpos = e.pageX / w;
-		};
+			document.onmousemove = function(e) {
+			return xpos = e.pageX / w;
+			};
 
-		window.requestAnimationFrame = (function() {
-		return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
-		  return window.setTimeout(callback, 1000 / 60);
-		};
-		})();
+			window.requestAnimationFrame = (function() {
+			return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
+			  return window.setTimeout(callback, 1000 / 60);
+			};
+			})();
 
-		Confetti = (function() {
-		function Confetti() {
-		  this.style = COLORS[~~range(0, 5)];
-		  this.rgb = "rgba(" + this.style[0] + "," + this.style[1] + "," + this.style[2];
-		  this.r = ~~range(2, 6);
-		  this.r2 = 2 * this.r;
-		  this.replace();
-		}
+			Confetti = (function() {
+			function Confetti() {
+			  this.style = COLORS[~~range(0, 5)];
+			  this.rgb = "rgba(" + this.style[0] + "," + this.style[1] + "," + this.style[2];
+			  this.r = ~~range(2, 6);
+			  this.r2 = 2 * this.r;
+			  this.replace();
+			}
 
-		Confetti.prototype.replace = function() {
-		  this.opacity = 0;
-		  this.dop = 0.03 * range(1, 4);
-		  this.x = range(-this.r2, w - this.r2);
-		  this.y = range(-20, h - this.r2);
-		  this.xmax = w - this.r;
-		  this.ymax = h - this.r;
-		  this.vx = range(0, 2) + 8 * xpos - 5;
-		  return this.vy = 0.7 * this.r + range(-1, 1);
-		};
+			Confetti.prototype.replace = function() {
+			  this.opacity = 0;
+			  this.dop = 0.03 * range(1, 4);
+			  this.x = range(-this.r2, w - this.r2);
+			  this.y = range(-20, h - this.r2);
+			  this.xmax = w - this.r;
+			  this.ymax = h - this.r;
+			  this.vx = range(0, 2) + 8 * xpos - 5;
+			  return this.vy = 0.7 * this.r + range(-1, 1);
+			};
 
-		Confetti.prototype.draw = function() {
-		  var ref;
-		  this.x += this.vx;
-		  this.y += this.vy;
-		  this.opacity += this.dop;
-		  if (this.opacity > 1) {
-		    this.opacity = 1;
-		    this.dop *= -1;
-		  }
-		  if (this.opacity < 0 || this.y > this.ymax) {
-		    this.replace();
-		  }
-		  if (!((0 < (ref = this.x) && ref < this.xmax))) {
-		    this.x = (this.x + this.xmax) % this.xmax;
-		  }
-		  return drawCircle(~~this.x, ~~this.y, this.r, this.rgb + "," + this.opacity + ")");
-		};
+			Confetti.prototype.draw = function() {
+			  var ref;
+			  this.x += this.vx;
+			  this.y += this.vy;
+			  this.opacity += this.dop;
+			  if (this.opacity > 1) {
+			    this.opacity = 1;
+			    this.dop *= -1;
+			  }
+			  if (this.opacity < 0 || this.y > this.ymax) {
+			    this.replace();
+			  }
+			  if (!((0 < (ref = this.x) && ref < this.xmax))) {
+			    this.x = (this.x + this.xmax) % this.xmax;
+			  }
+			  return drawCircle(~~this.x, ~~this.y, this.r, this.rgb + "," + this.opacity + ")");
+			};
 
-		return Confetti;
+			return Confetti;
 
-		})();
+			})();
 
-		confetti = (function() {
-		var j, ref, results;
-		results = [];
-		for (i = j = 1, ref = NUM_CONFETTI; 1 <= ref ? j <= ref : j >= ref; i = 1 <= ref ? ++j : --j) {
-		  results.push(new Confetti);
-		}
-		return results;
-		})();
+			confetti = (function() {
+			var j, ref, results;
+			results = [];
+			for (i = j = 1, ref = NUM_CONFETTI; 1 <= ref ? j <= ref : j >= ref; i = 1 <= ref ? ++j : --j) {
+			  results.push(new Confetti);
+			}
+			return results;
+			})();
 
-		window.step = function() {
-		var c, j, len, results;
-		requestAnimationFrame(step);
-		context.clearRect(0, 0, w, h);
-		results = [];
-		for (j = 0, len = confetti.length; j < len; j++) {
-		  c = confetti[j];
-		  results.push(c.draw());
-		}
-		return results;
-		};
+			window.step = function() {
+			var c, j, len, results;
+			requestAnimationFrame(step);
+			context.clearRect(0, 0, w, h);
+			results = [];
+			for (j = 0, len = confetti.length; j < len; j++) {
+			  c = confetti[j];
+			  results.push(c.draw());
+			}
+			return results;
+			};
 
-		step();
+			step();
+		}).catch(function(error){
+			console.error(error);
+		});
 	}
 }
 
@@ -504,6 +516,7 @@ function necirLogin() {
 					}
 					window.localStorage.setItem("user", JSON.stringify(user));
 					window.localStorage.setItem("userData", JSON.stringify(userData));
+					console.log(user);
 					removeClass(currentReportLoader, 'hidden');
 					getNextReport(0);
 					var snackbarData = {
@@ -679,7 +692,9 @@ function fillReportData() {
 	var radio2 = categorizationOptions.querySelectorAll('input[name="locationOptions"]');
 	for (var i = 0; i < radio1.length; i++) {
 		radio1[i].parentNode.MaterialRadio.uncheck();
-		radio2[i].parentNode.MaterialRadio.uncheck();
+		if (i < 3) {
+			radio2[i].parentNode.MaterialRadio.uncheck();
+		}
 	}
 	categorizationOptions.querySelector("#switch-notable").checked = false;
 	removeClass(categorizationOptions.querySelector("#switch-notable").parentNode, 'is-checked');
@@ -723,7 +738,6 @@ function saveCategorizations() {
 									delete unfilteredIndices[currentReportID];
 									window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 									userData.reportsCategorized += 1;
-									userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
 									database.ref('users/' + userData.username + '/reportsCategorized').set(userData.reportsCategorized, function(err){
 										if (err) {
 											console.error(err);
@@ -860,7 +874,9 @@ function addViewReportsListeners() {
 				var radio2 = tableFullReportDialog.querySelectorAll('input[name="tableLocationOptions"]');
 				for (var i = 0; i < radio1.length; i++) {
 					radio1[i].parentNode.MaterialRadio.uncheck();
-					radio2[i].parentNode.MaterialRadio.uncheck();
+					if (i < 3) {
+						radio2[i].parentNode.MaterialRadio.uncheck();
+					}
 				}
 				tableFullReportDialog.querySelector("#table-switch-notable").checked = false;
 				removeClass(tableFullReportDialog.querySelector("#table-switch-notable").parentNode, 'is-checked');
@@ -952,7 +968,6 @@ function saveTableCategorizations() {
 											addClass(viewReportsTableBody, 'hidden');
 											removeClass(viewReportsLoader, 'hidden');
 											userData.reportsCategorized += 1;
-											userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
 											database.ref('users/' + userData.username + '/reportsCategorized').set(userData.reportsCategorized, function(err){
 												if (err) {
 													console.error(err);
@@ -1149,23 +1164,35 @@ function resetReport() {
 									}
 									database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 										var report = snapshot.val();
-										report.Individual_Or_Organization = '';
-										report.Location                   = '';
-										report.Notable_Contributor        = '';
-										report.Categorized_By             = '';
-										report.Approved_By                = '';
-										addClass(viewReportsTableBody, 'hidden');
-										removeClass(viewReportsLoader, 'hidden');
-										addClass(approveReportsTableBody, 'hidden');
-										removeClass(approveReportsLoader, 'hidden');
-										database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
-											if (err) {
-												console.error(err);
-											} else {
-												swal("Success!", "Report has successfully been reset!", "success");
-												resyncAllData();
-											}
-										});
+										database.ref('users/' + report.Categorized_By + '/reportsCategorized').once('value').then(function(snapshot){
+											var num = snapshot.val();
+											num -= 1;
+											database.ref('users/' + report.Categorized_By + '/reportsCategorized').set(num, function(err){
+												if (err) {
+													console.error(err);
+												} else {
+													report.Individual_Or_Organization = '';
+													report.Location                   = '';
+													report.Notable_Contributor        = '';
+													report.Categorized_By             = '';
+													report.Approved_By                = '';
+													addClass(viewReportsTableBody, 'hidden');
+													removeClass(viewReportsLoader, 'hidden');
+													addClass(approveReportsTableBody, 'hidden');
+													removeClass(approveReportsLoader, 'hidden');
+													database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
+														if (err) {
+															console.error(err);
+														} else {
+															swal("Success!", "Report has successfully been reset!", "success");
+															resyncAllData();
+														}
+													});
+												}
+											});
+										}).catch(function(error){
+											console.error(error);
+										});	
 									}).catch(function(error){
 										console.log(error);
 									});
@@ -1526,6 +1553,9 @@ resetPasswordDialog.querySelector('#reset-password-button').addEventListener('cl
 		removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
 	}
 });
+resetPasswordDialog.querySelector('#close').addEventListener('click', function(){
+	resetPasswordDialog.close();
+});
 resyncDataButton.addEventListener('click', function(){
 	settingsDialog.close();
 	swal({
@@ -1756,9 +1786,9 @@ window.onload = function() {
 			} else {
 				profilePicture.src = 'images/user.jpg'
 			}
-			if (isReal(userData.reportsCategorized)) {
-				userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
-			}
+			database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
+				userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
+			});
 		}
 	}).catch(function(error){
 		console.error(error);
