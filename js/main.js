@@ -436,6 +436,14 @@ function necirLogin() {
 										window.localStorage.setItem("user", JSON.stringify(user));
 										window.localStorage.setItem("userData", JSON.stringify(newUserData));
 										userData = newUserData;
+										database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
+											console.log('report categorized');
+											if (snapshot.val() === 1) {
+												userCounter.innerHTML = '1 Report Categorized';
+											} else {
+												userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
+											}
+										});
 										resyncAllData();
 										landing.style.margin = "-100vh";
 										setTimeout(function(){
@@ -512,8 +520,21 @@ function necirLogin() {
 						profilePicture.src = 'images/user.jpg'
 					}
 					if (isReal(userData.reportsCategorized)) {
-						userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+						if (userData.reportsCategorized === 1) {
+							userCounter.innerHTML = '1 Report Categorized';
+						} else {
+							userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+						}
+						
 					}
+					database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
+						console.log('report categorized');
+						if (snapshot.val() === 1) {
+							userCounter.innerHTML = '1 Report Categorized';
+						} else {
+							userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
+						}
+					});
 					window.localStorage.setItem("user", JSON.stringify(user));
 					window.localStorage.setItem("userData", JSON.stringify(userData));
 					removeClass(currentReportLoader, 'hidden');
@@ -1797,7 +1818,11 @@ window.onload = function() {
 				profilePicture.src = 'images/user.jpg'
 			}
 			if (isReal(userData.reportsCategorized)) {
-				userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+				if (userData.reportsCategorized === 1) {
+					userCounter.innerHTML = '1 Report Categorized';
+				} else {
+					userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+				}
 			}
 		}
 	}).catch(function(error){
@@ -1805,7 +1830,11 @@ window.onload = function() {
 	});
 	database.ref('users/' + userData.username + '/reportsCategorized').on('value', function(snapshot){
 		console.log('report categorized');
-		userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
+		if (snapshot.val() === 1) {
+			userCounter.innerHTML = '1 Report Categorized';
+		} else {
+			userCounter.innerHTML = snapshot.val() + ' Reports Categorized';
+		}
 	});
 }
 

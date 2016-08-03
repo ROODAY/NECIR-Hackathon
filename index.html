@@ -133,10 +133,10 @@
           </div>
           <div id="tab-2" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
             <div id="current-report" class="hidden">
-              <h1>Report Summary</h1> <div id="current-report-loader" class="mdl-spinner mdl-js-spinner is-active"></div>
+              <h5><i>Report Summary</i></h5> <div id="current-report-loader" class="mdl-spinner mdl-js-spinner is-active"></div>
               <div id="span-wrapper">
-                <h2><span id="span-questionyear"></span> | <span id="span-question"></span></h2>
-                <h3>Recipient: <span id="span-recipient"></span></h3>
+                <h3><span id="span-questionyear"></span> | <span id="span-question"></span></h3>
+                <h4>Recipient: <span id="span-recipient"></span></h4>
                 <strong>Contributor:</strong> <span id="span-contributor"></span> <br>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
                 <strong>Amount:</strong> <span id="span-amount"></span> <br>
@@ -150,38 +150,50 @@
               <div id="categorization-options">
                 <h4>Categories: </h4>
                 <div id="organization-options">
-                  Contributor Type:
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-individual">
-                    <input type="radio" id="option-individual" class="mdl-radio__button" name="organizationOptions" value="individual" checked>
-                    <span class="mdl-radio__label">Individual</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-organization">
-                    <input type="radio" id="option-organization" class="mdl-radio__button" name="organizationOptions" value="organization">
-                    <span class="mdl-radio__label">Organization</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-corporation">
-                    <input type="radio" id="option-corporation" class="mdl-radio__button" name="organizationOptions" value="corporation">
-                    <span class="mdl-radio__label">Corporation</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unknown-o">
-                    <input type="radio" id="option-unknown-o" class="mdl-radio__button" name="organizationOptions" value="unknown">
-                    <span class="mdl-radio__label">Unknown</span>
-                  </label>
+                  <div class="mdl-grid">
+                    <div class="mdl-cell mdl-cell--2-col">
+                      Contributor Type:
+                    </div>
+                    <div class="mdl-cell mdl-cell--2-col">
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-individual">
+                        <input type="radio" id="option-individual" class="mdl-radio__button" name="organizationOptions" value="individual" checked>
+                        <span class="mdl-radio__label">Individual</span>
+                      </label><br>
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-organization">
+                        <input type="radio" id="option-organization" class="mdl-radio__button" name="organizationOptions" value="organization">
+                        <span class="mdl-radio__label">Organization</span>
+                      </label><br>
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-corporation">
+                        <input type="radio" id="option-corporation" class="mdl-radio__button" name="organizationOptions" value="corporation">
+                        <span class="mdl-radio__label">Corporation</span>
+                      </label><br>
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unknown-o">
+                        <input type="radio" id="option-unknown-o" class="mdl-radio__button" name="organizationOptions" value="unknown">
+                        <span class="mdl-radio__label">Unknown</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <div id="location-options">
-                  Contributor Location:
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-in">
-                    <input type="radio" id="option-in" class="mdl-radio__button" name="locationOptions" value="in-state" checked>
-                    <span class="mdl-radio__label">In State</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-out">
-                    <input type="radio" id="option-out" class="mdl-radio__button" name="locationOptions" value="out-of-state">
-                    <span class="mdl-radio__label">Out of State</span>
-                  </label>
-                  <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unknown-l">
-                    <input type="radio" id="option-unknown-l" class="mdl-radio__button" name="locationOptions" value="unknown">
-                    <span class="mdl-radio__label">Unknown</span>
-                  </label>
+                  <div class="mdl-grid">
+                    <div class="mdl-cell mdl-cell--2-col">
+                      Contributor Location:
+                    </div>
+                    <div class="mdl-cell mdl-cell--2-col">
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-in">
+                        <input type="radio" id="option-in" class="mdl-radio__button" name="locationOptions" value="in-state" checked>
+                        <span class="mdl-radio__label">In State</span>
+                      </label><br>
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-out">
+                        <input type="radio" id="option-out" class="mdl-radio__button" name="locationOptions" value="out-of-state">
+                        <span class="mdl-radio__label">Out of State</span>
+                      </label><br>
+                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unknown-l">
+                        <input type="radio" id="option-unknown-l" class="mdl-radio__button" name="locationOptions" value="unknown">
+                        <span class="mdl-radio__label">Unknown</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <div id="contributor-options">
                   <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-notable">
@@ -277,15 +289,15 @@
     </dialog>
 
     <dialog id="table-full-report-dialog" data-reportid="" class="mdl-dialog">
-      <h4 class="mdl-dialog__title">Report Data</h4>
+      <h5 class="mdl-dialog__title"><i>Report Data</i></h5>
       <div class="mdl-dialog__content">
         <div id="table-raw-data-wrapper" class="hidden">
           <pre id="table-raw-data" class="lang-js"></pre>
         </div>
         <div id="table-span-wrapper">
           <div id="table-user-spans">
-            <h2><span id="table-span-questionyear"></span> | <span id="table-span-question"></span></h2>
-            <h3>Recipient: <span id="table-span-recipient"></span></h3>
+            <h3><span id="table-span-questionyear"></span> | <span id="table-span-question"></span></h3>
+            <h4>Recipient: <span id="table-span-recipient"></span></h4>
             <strong>Contributor:</strong> <span id="table-span-contributor"></span> <br>
             <strong>City, State:</strong> <span id="table-span-citystate"></span> <br>
             <strong>Amount:</strong> <span id="table-span-amount"></span> <br>
