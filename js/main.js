@@ -80,11 +80,13 @@ var viewReportsPreviousButton        = document.querySelector("#view-reports-pre
 var viewReportsTableBody             = document.querySelector('#view-reports-table > tbody');
 
 var spanQuestion = document.querySelector('#span-question');
+var spanQuestionyear = document.querySelector('#span-questionyear');
 var spanRecipient = document.querySelector('#span-recipient');
 var spanContributor = document.querySelector('#span-contributor');
 var spanCitystate = document.querySelector('#span-citystate');
 var spanAmount = document.querySelector('#span-amount');
 var spanDate = document.querySelector('#span-date');
+
 var eventProgress = document.querySelector('#event-progress');
 var userCounter = document.querySelector('#user-counter');
 
@@ -399,6 +401,9 @@ function necirLogin() {
 										} else {
 											profilePicture.src = 'images/user.jpg'
 										}
+										if (isReal(newUserData.reportsCategorized)) {
+											userCounter.innerHTML = newUserData.reportsCategorized;
+										}
 										addClass(navNecirLogin, 'hidden');
 										removeClass(settingsButton, 'hidden');
 										removeClass(navLogout, 'hidden');
@@ -493,6 +498,9 @@ function necirLogin() {
 						profilePicture.src = userData.photoURL;
 					} else {
 						profilePicture.src = 'images/user.jpg'
+					}
+					if (isReal(userData.reportsCategorized)) {
+						userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
 					}
 					window.localStorage.setItem("user", JSON.stringify(user));
 					window.localStorage.setItem("userData", JSON.stringify(userData));
@@ -651,6 +659,7 @@ function getNextReport(startIndex) {
 
 function fillReportData() {
 	spanQuestion.innerHTML = currentReport.Question;
+	spanQuestionyear.innerHTML = currentReport.question_year;
 	spanRecipient.innerHTML = currentReport.Recipient;
 	spanContributor.innerHTML = currentReport.Contributor;
 	spanCitystate.innerHTML = currentReport.City + ', ' + currentReport.State;
@@ -686,7 +695,6 @@ function saveCategorizations() {
 				swal({
 					title: "Are you sure?", 
 					text: "Continuing will save the current categorization and move on to the next report.", 
-					type: "warning", 
 					showCancelButton: true, 
 					confirmButtonColor: "#DD6B55", 
 					confirmButtonText: "Yes, continue!", 
@@ -842,6 +850,7 @@ function addViewReportsListeners() {
 				tableCategoriesLocation.innerHTML = report.Location;
 				tableCategoriesNotable.innerHTML = report.Notable_Contributor;
 				tableFullReportDialog.querySelector("#table-span-question").innerHTML = report.Question;
+				tableFullReportDialog.querySelector("#table-span-questionyear").innerHTML = report.question_year;
 				tableFullReportDialog.querySelector("#table-span-recipient").innerHTML = report.Recipient;
 				tableFullReportDialog.querySelector("#table-span-contributor").innerHTML = report.Contributor;
 				tableFullReportDialog.querySelector("#table-span-citystate").innerHTML = report.City + ', ' + report.State;
@@ -859,8 +868,16 @@ function addViewReportsListeners() {
 				database.ref('admins/' + user.uid).once('value').then(function(snapshot){
 					if (snapshot.val() != null) {
 						tableFullReportDialog.querySelector("#table-span-reportid").innerHTML = report.Report_ID;
+						tableFullReportDialog.querySelector("#table-span-admin-question").innerHTML = report.Question;
+						tableFullReportDialog.querySelector("#table-span-admin-recipient").innerHTML = report.Recipient;
+						tableFullReportDialog.querySelector("#table-span-admin-contributor").innerHTML = report.Contributor;
+						tableFullReportDialog.querySelector("#table-span-admin-citystate").innerHTML = report.City + ', ' + report.State;
+						tableFullReportDialog.querySelector("#table-span-admin-amount").innerHTML = report.Amount;
+						tableFullReportDialog.querySelector("#table-span-admin-date").innerHTML = report.Date;
 						removeClass(tableFullReportDialog.querySelector("#table-admin-reportid"), 'hidden');
 						removeClass(tableFullReportDialog.querySelector("#table-raw-data-wrapper"), 'hidden');
+						removeClass(tableFullReportDialog.querySelector("#table-admin-spans"), 'hidden');
+						addClass(tableFullReportDialog.querySelector("#table-user-spans"), 'hidden');
 						if (isReal(report.Categorized_By)) {
 							tableFullReportDialog.querySelector("#table-span-categorizedby").innerHTML = report.Categorized_By;
 							removeClass(tableFullReportDialog.querySelector("#table-admin-categorizedby"), 'hidden');
@@ -879,6 +896,8 @@ function addViewReportsListeners() {
 						tableFullReportDialog.querySelector("#table-span-reportid").innerHTML = '';
 						addClass(tableFullReportDialog.querySelector("#table-admin-reportid"), 'hidden');
 						addClass(tableFullReportDialog.querySelector("#table-raw-data-wrapper"), 'hidden');
+						addClass(tableFullReportDialog.querySelector("#table-admin-spans"), 'hidden');
+						removeClass(tableFullReportDialog.querySelector("#table-user-spans"), 'hidden');
 					}
 					tableFullReportDialog.showModal();
 					tableFullReportDialog.scrollTop = 0;
@@ -904,7 +923,6 @@ function saveTableCategorizations() {
 						swal({
 							title: "Are you sure?", 
 							text: "Continuing will save the current categorization and mark it as filtered.", 
-							type: "warning", 
 							showCancelButton: true, 
 							confirmButtonColor: "#DD6B55", 
 							confirmButtonText: "Yes, continue!", 
@@ -1554,6 +1572,9 @@ database.ref('filteredIndices').on('value', function(snapshot){
 
 window.onload = function() {
 	hljs.initHighlightingOnLoad();
+	/*if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+	  addClass(document.querySelector('#event-progress-wrapper'), 'hidden');
+	}*/
 	for (var i = 0; i < navLinks.length; i++) {
 		navLinks[i].addEventListener('click', function(){
 			for (var i = 0; i < tabs.length; i++) {
@@ -1698,17 +1719,7 @@ window.onload = function() {
 			console.log(error);
 		});
 	}
-	if (user != null && userData != null) {
-		if (isReal(userData.username)) {
-			userNameSpan.innerHTML = userData.username;
-		} else if (isReal(user.email)) {
-			userNameSpan.innerHTML = user.email;
-		}
-		if (isReal(userData.photoURL)) {
-			profilePicture.src = userData.photoURL;
-		} else {
-			profilePicture.src = 'images/user.jpg'
-		}
+	if (user != null) {
 		addClass(navNecirLogin, 'hidden');
 		removeClass(navLogout, 'hidden');
 		removeClass(settingsButton, 'hidden');
@@ -1732,6 +1743,26 @@ window.onload = function() {
 		}, 500);
 		firebase.auth().currentUser = user;
 	}
+	database.ref('users/' + userData.username).once('value').then(function(snapshot){
+		if (snapshot != null) {
+			userData = snapshot.val();
+				if (isReal(userData.username)) {
+				userNameSpan.innerHTML = userData.username;
+			} else if (isReal(user.email)) {
+				userNameSpan.innerHTML = user.email;
+			}
+			if (isReal(userData.photoURL)) {
+				profilePicture.src = userData.photoURL;
+			} else {
+				profilePicture.src = 'images/user.jpg'
+			}
+			if (isReal(userData.reportsCategorized)) {
+				userCounter.innerHTML = userData.reportsCategorized + ' Reports Categorized';
+			}
+		}
+	}).catch(function(error){
+		console.error(error);
+	});
 }
 
 window.onbeforeunload = function confirmExit() {

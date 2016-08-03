@@ -10,7 +10,7 @@
     <link rel="shortcut icon" href="images/favicon.png">
 
     <link rel="stylesheet" href="css/vendor/normalize.css">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,700italic,400italic'>
     <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="//code.getmdl.io/1.1.3/material.cyan-light_blue.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/default.min.css">
@@ -45,32 +45,41 @@
     <div class="necir-layout mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header class="necir-header mdl-layout__header mdl-color--grey-100 mdl-color-text--grey-600">
         <div class="mdl-layout__header-row">
-          <span class="mdl-layout-title">Bay State Ballot Question Hackathon</span>
-          <span id="user-counter">0 Reports Categorized</span>
-          <label for="checkbox-2">
-            <div id="event-progress" class="mdl-progress mdl-js-progress"></div>
-            <span>Event Progress</span>
-          </label>
-          <div class="mdl-layout-spacer"></div>
-          <div id="results-length-wrapper" class="hidden">
-            Show... <button id="results-length-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
-              <i class="material-icons" role="presentation">arrow_drop_down</i>
-              <span class="visuallyhidden">Show</span>
-            </button>
-            <ul id="results-length-list" class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="results-length-button">
-              <li id="show-10-reports" class="mdl-menu__item">10 Reports</li>
-              <li id="show-25-reports" class="mdl-menu__item">25 Reports</li>
-              <li id="show-50-reports" class="mdl-menu__item">50 Reports</li>
-            </ul>
+          <div id="header-grid" class="mdl-grid">
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet text-left">
+              <span class="mdl-layout-title">Bay State Ballot Question Hackathon</span>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--hide-tablet text-center">
+              <span id="user-counter">0 Reports Categorized</span>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--hide-tablet text-center">
+              <label id="event-progress-wrapper" for="event-progress">
+                <div id="event-progress" class="mdl-progress mdl-js-progress"></div>
+                <span>Event Progress</span>
+              </label>
+            </div>
+            <div class="mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet text-right">
+              <div id="results-length-wrapper" class="hidden">
+                Show... <button id="results-length-button" class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                  <i class="material-icons" role="presentation">arrow_drop_down</i>
+                  <span class="visuallyhidden">Show</span>
+                </button>
+                <ul id="results-length-list" class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="results-length-button">
+                  <li id="show-10-reports" class="mdl-menu__item">10 Reports</li>
+                  <li id="show-25-reports" class="mdl-menu__item">25 Reports</li>
+                  <li id="show-50-reports" class="mdl-menu__item">50 Reports</li>
+                </ul>
+              </div>
+              <button id="reports-filter" class="mdl-button mdl-js-button mdl-button--icon hidden">
+                <i class="material-icons">more_vert</i>
+              </button>
+              <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="reports-filter">
+                <li id="show-unfiltered-reports" class="mdl-menu__item">Unreviewed Reports</li>
+                <li id="show-filtered-reports" class="mdl-menu__item">Reviewed Reports</li>
+                <li id="show-approved-reports" class="mdl-menu__item">Admin Approved Reports</li>
+              </ul>
+            </div>
           </div>
-          <button id="reports-filter" class="mdl-button mdl-js-button mdl-button--icon hidden">
-            <i class="material-icons">more_vert</i>
-          </button>
-          <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="reports-filter">
-            <li id="show-unfiltered-reports" class="mdl-menu__item">Unreviewed Reports</li>
-            <li id="show-filtered-reports" class="mdl-menu__item">Reviewed Reports</li>
-            <li id="show-approved-reports" class="mdl-menu__item">Admin Approved Reports</li>
-          </ul>
         </div>
       </header>
       <div class="necir-drawer mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50">
@@ -124,10 +133,10 @@
           </div>
           <div id="tab-2" class="necir-tab mld-cell mdl-cell mdl-cell--1-offset mdl-cell--10-col hidden">
             <div id="current-report" class="hidden">
-              <h3>Report Summary</h1> <div id="current-report-loader" class="mdl-spinner mdl-js-spinner is-active"></div>
+              <h1>Report Summary</h1> <div id="current-report-loader" class="mdl-spinner mdl-js-spinner is-active"></div>
               <div id="span-wrapper">
-                <strong>Question:</strong> <span id="span-question"></span> <br>
-                <strong>Recipient:</strong> <span id="span-recipient"></span> <br>
+                <h2><span id="span-questionyear"></span> | <span id="span-question"></span></h2>
+                <h3>Recipient: <span id="span-recipient"></span></h3>
                 <strong>Contributor:</strong> <span id="span-contributor"></span> <br>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
                 <strong>Amount:</strong> <span id="span-amount"></span> <br>
@@ -270,15 +279,26 @@
           <pre id="table-raw-data" class="lang-js"></pre>
         </div>
         <div id="table-span-wrapper">
-          <strong>Question:</strong> <span id="table-span-question"></span> <br>
-          <strong>Recipient:</strong> <span id="table-span-recipient"></span> <br>
-          <strong>Contributor:</strong> <span id="table-span-contributor"></span> <br>
-          <strong>City, State:</strong> <span id="table-span-citystate"></span> <br>
-          <strong>Amount:</strong> <span id="table-span-amount"></span> <br>
-          <strong>Date:</strong> <span id="table-span-date"></span> <br>
-          <span id="table-admin-reportid" class="hidden"><strong>Report ID:</strong> <span id="table-span-reportid"></span></span> <br>
-          <span id="table-admin-categorizedby" class="hidden"><strong>Categorized By:</strong> <span id="table-span-categorizedby"></span></span> <br>
-          <span id="table-admin-approvedby" class="hidden"><strong>Approved By:</strong> <span id="table-span-approvedby"></span></span> <br>
+          <div id="table-user-spans">
+            <h2><span id="table-span-questionyear"></span> | <span id="table-span-question"></span></h2>
+            <h3>Recipient: <span id="table-span-recipient"></span></h3>
+            <strong>Contributor:</strong> <span id="table-span-contributor"></span> <br>
+            <strong>City, State:</strong> <span id="table-span-citystate"></span> <br>
+            <strong>Amount:</strong> <span id="table-span-amount"></span> <br>
+            <strong>Date:</strong> <span id="table-span-date"></span> <br>
+          </div>
+
+          <div id="table-admin-spans" class="hidden">
+            <strong>Question:</strong> <span id="table-span-admin-question"></span> <br>
+            <strong>Recipient:</strong> <span id="table-span-admin-recipient"></span> <br>
+            <strong>Contributor:</strong> <span id="table-span-admin-contributor"></span> <br>
+            <strong>City, State:</strong> <span id="table-span-admin-citystate"></span> <br>
+            <strong>Amount:</strong> <span id="table-span-admin-amount"></span> <br>
+            <strong>Date:</strong> <span id="table-span-admin-date"></span> <br>
+            <span id="table-admin-reportid" class="hidden"><strong>Report ID:</strong> <span id="table-span-reportid"></span></span> <br>
+            <span id="table-admin-categorizedby" class="hidden"><strong>Categorized By:</strong> <span id="table-span-categorizedby"></span></span> <br>
+            <span id="table-admin-approvedby" class="hidden"><strong>Approved By:</strong> <span id="table-span-approvedby"></span></span> <br>
+          </div>
         </div>
         <div id="table-categorization-options">
           <h4>Categories: </h4>
