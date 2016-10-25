@@ -697,11 +697,11 @@ function fillReportData() {
 		console.error(error);
 	});
 	var radio1 = categorizationOptions.querySelectorAll('input[name="organizationOptions"]');
-	var radio2 = categorizationOptions.querySelectorAll('input[name="locationOptions"]');
+	//var radio2 = categorizationOptions.querySelectorAll('input[name="locationOptions"]');
 	for (var i = 0; i < radio1.length; i++) {
 		radio1[i].parentNode.MaterialRadio.uncheck();
 		if (i < 3) {
-			radio2[i].parentNode.MaterialRadio.uncheck();
+			//radio2[i].parentNode.MaterialRadio.uncheck();
 		}
 	}
 	categorizationOptions.querySelector("#switch-notable").checked = false;
@@ -712,7 +712,7 @@ function fillReportData() {
 }
 
 function saveCategorizations() {
-	if (categorizationOptions.querySelector('input[name="organizationOptions"]:checked') != null && categorizationOptions.querySelector('input[name="locationOptions"]:checked') != null) {
+	if (categorizationOptions.querySelector('input[name="organizationOptions"]:checked') != null /*&& categorizationOptions.querySelector('input[name="locationOptions"]:checked') != null*/) {
 		database.ref('unfilteredIndices/' + currentReportID).once('value').then(function(snapshot){
 			if (snapshot.val() != null) {
 				swal({
@@ -724,7 +724,7 @@ function saveCategorizations() {
 					closeOnConfirm: true
 				}, function() {
 					currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
-					currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
+					//currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
 					currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
 					currentReport.Categorized_By             = userData.username;
 					database.ref('reports/' + currentReportID).set(currentReport, function(err){
@@ -877,11 +877,11 @@ function addViewReportsListeners() {
 				tableFullReportDialog.querySelector("#table-span-amount").innerHTML = report.Amount;
 				tableFullReportDialog.querySelector("#table-span-date").innerHTML = report.Date;
 				var radio1 = tableFullReportDialog.querySelectorAll('input[name="tableOrganizationOptions"]');
-				var radio2 = tableFullReportDialog.querySelectorAll('input[name="tableLocationOptions"]');
+				//var radio2 = tableFullReportDialog.querySelectorAll('input[name="tableLocationOptions"]');
 				for (var i = 0; i < radio1.length; i++) {
 					radio1[i].parentNode.MaterialRadio.uncheck();
 					if (i < 3) {
-						radio2[i].parentNode.MaterialRadio.uncheck();
+						//radio2[i].parentNode.MaterialRadio.uncheck();
 					}
 				}
 				tableFullReportDialog.querySelector("#table-switch-notable").checked = false;
@@ -936,7 +936,7 @@ function addViewReportsListeners() {
 }
 
 function saveTableCategorizations() {
-	if (tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked') != null && tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked') != null) {
+	if (tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked') != null /*&& tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked') != null*/) {
 		database.ref('unfilteredIndices/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 			if (snapshot.val() != null) {
 				tableFullReportDialog.querySelector('.error-message').innerHTML = '';
@@ -955,7 +955,7 @@ function saveTableCategorizations() {
 							database.ref('reports/' + tableFullReportDialog.dataset.reportid).once('value').then(function(snapshot){
 								var report = snapshot.val();
 								report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
-								report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
+								//report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
 								report.Notable_Contributor        = tableFullReportDialog.querySelector("#table-switch-notable").checked;
 								report.Categorized_By             = userData.username;
 								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){

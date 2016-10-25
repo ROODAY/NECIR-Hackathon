@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/default.min.css">
     <link rel="stylesheet" href="css/vendor/dialog-polyfill.css">
     <link rel="stylesheet" href="css/vendor/sweetalert.css">
-    <link rel="stylesheet" href="css/production.css">
+    <link rel="stylesheet" href="css/styles.css">
 
     <script src="js/vendor/dialog-polyfill.js"></script>
     <script src="js/vendor/local-storage-polyfill.js"></script>
@@ -140,6 +140,7 @@
                 <h3><!--span id="span-questionyear"></span> | --><span id="span-question"></span></h3>
                 <h4>Recipient: <span id="span-recipient"></span></h4>
                 <strong>Contributor:</strong> <span id="span-contributor"></span> <br>
+                <strong id="is-employer">Employer</strong>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
                 <strong>Amount:</strong> $<span id="span-amount"></span> <br>
                 <strong>Date:</strong> <span id="span-date"></span> <br>
@@ -158,25 +159,57 @@
                     </div>
                     <div class="mdl-cell mdl-cell--2-col">
                       <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-individual">
-                        <input type="radio" id="option-individual" class="mdl-radio__button" name="organizationOptions" value="individual" checked>
+                        <input type="radio" id="option-individual" class="mdl-radio__button" name="organizationOptions" value="individual" checked onclick="if(this.checked){ document.getElementById('organization-deep-options').style.display = 'none';}">
                         <span class="mdl-radio__label">Individual</span>
                       </label><br>
                       <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-organization">
-                        <input type="radio" id="option-organization" class="mdl-radio__button" name="organizationOptions" value="committee">
-                        <span class="mdl-radio__label">Committee</span>
-                      </label><br>
+                        <input type="radio" id="option-organization" class="mdl-radio__button" name="organizationOptions" value="organization" onclick="if(this.checked){ document.getElementById('organization-deep-options').style.display = 'block';}">
+                        <span class="mdl-radio__label">Organization</span>
+                      </label><br>          
                       <!--label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-corporation">
                         <input type="radio" id="option-corporation" class="mdl-radio__button" name="organizationOptions" value="corporation">
                         <span class="mdl-radio__label">Corporation</span>
                       </label><br-->
                       <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unknown-o">
-                        <input type="radio" id="option-unknown-o" class="mdl-radio__button" name="organizationOptions" value="other">
-                        <span class="mdl-radio__label">Other</span>
+                        <input type="radio" id="option-unknown-o" class="mdl-radio__button" name="organizationOptions" value="unknown" onclick="if(this.checked){ document.getElementById('organization-deep-options').style.display = 'none';}">
+                        <span class="mdl-radio__label">Unknown</span>
                       </label>
+                    </div>
+                    <div class="mdl-cell mdl-cell--4-col">
+                      <div id="organization-deep-options">
+                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-nonprofit">
+                          <input type="checkbox" id="organization-deep-option-nonprofit" class="mdl-checkbox__input" value="non-profit" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <span class="mdl-checkbox__label">Non-Profit</span>
+                        </label><br>
+                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-candidatecampaign">
+                          <input type="checkbox" id="organization-deep-option-candidatecampaign" class="mdl-checkbox__input" value="candidate campagin" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <span class="mdl-checkbox__label">Candidate Campaign</span>
+                        </label><br>
+                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-issuepac">
+                          <input type="checkbox" id="organization-deep-option-issuepac" class="mdl-checkbox__input" value="issue pac" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <span class="mdl-checkbox__label">Issue PAC</span>
+                        </label><br>
+                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-utpgroup">
+                          <input type="checkbox" id="organization-deep-option-utpgroup" class="mdl-checkbox__input" value="union, trade, or professional group" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <span class="mdl-checkbox__label">Union, Trade, or Professional Group</span>
+                        </label><br>
+                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-business">
+                          <input type="checkbox" id="organization-deep-option-business" class="mdl-checkbox__input" value="business" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <span class="mdl-checkbox__label">Business</span>
+                        </label><br>
+                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-other">
+                          <input type="checkbox" id="organization-deep-option-other" class="mdl-checkbox__input" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'block';}">
+                          <span class="mdl-checkbox__label">Other</span>
+                        </label>
+                        <div id="organization-deep-option-other-text-wrapper" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                          <input class="mdl-textfield__input" type="text" id="organization-deep-option-other-text">
+                          <label class="mdl-textfield__label" for="organization-deep-option-other-text">Enter category...</label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div id="location-options">
+                <!--div id="location-options">
                   <div class="mdl-grid">
                     <div class="mdl-cell mdl-cell--2-col">
                       Contributor Location:
@@ -196,7 +229,7 @@
                       </label>
                     </div>
                   </div>
-                </div>
+                </div-->
                 <div id="contributor-options">
                   <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-notable">
                     <input type="checkbox" id="switch-notable" class="mdl-switch__input">
@@ -339,7 +372,7 @@
               <span class="mdl-radio__label">Other</span>
             </label>
           </div>
-          <div id="table-location-options">
+          <!--div id="table-location-options">
             Contributor Location:
             <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-in">
               <input type="radio" id="table-option-in" class="mdl-radio__button" name="tableLocationOptions" value="in-state" checked>
@@ -353,7 +386,7 @@
               <input type="radio" id="table-option-unknown-l" class="mdl-radio__button" name="tableLocationOptions" value="unknown">
               <span class="mdl-radio__label">Unknown</span>
             </label>
-          </div>
+          </div-->
           <div id="table-contributor-options">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="table-switch-notable">
               <input type="checkbox" id="table-switch-notable" class="mdl-switch__input">
@@ -446,6 +479,6 @@
     <script src="//code.getmdl.io/1.1.3/material.min.js"></script>
     <script src="//www.gstatic.com/firebasejs/3.2.0/firebase.js"></script>
     <script src="js/vendor/sweetalert.min.js"></script>
-    <script src="js/production.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>

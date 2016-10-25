@@ -449,3 +449,6 @@ p {
 #results-length-wrapper {
   display: inline-block;
 }
+#organization-deep-options, #organization-deep-option-other-text-wrapper, #is-employer {
+  display: none;
+}
