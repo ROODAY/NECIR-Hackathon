@@ -139,8 +139,7 @@
               <div id="span-wrapper">
                 <h3><!--span id="span-questionyear"></span> | --><span id="span-question"></span></h3>
                 <h4>Recipient: <span id="span-recipient"></span></h4>
-                <strong>Contributor:</strong> <span id="span-contributor"></span> <br>
-                <strong id="is-employer">Employer</strong>
+                <strong>Contributor:</strong> <span id="span-contributor"></span> <span id="is-employer">(<strong>Employer</strong>)</span> <br>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
                 <strong>Amount:</strong> $<span id="span-amount"></span> <br>
                 <strong>Date:</strong> <span id="span-date"></span> <br>
@@ -178,27 +177,27 @@
                     <div class="mdl-cell mdl-cell--4-col">
                       <div id="organization-deep-options">
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-nonprofit">
-                          <input type="checkbox" id="organization-deep-option-nonprofit" class="mdl-checkbox__input" value="non-profit" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <input type="checkbox" id="organization-deep-option-nonprofit" class="mdl-checkbox__input" value="non-profit">
                           <span class="mdl-checkbox__label">Non-Profit</span>
                         </label><br>
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-candidatecampaign">
-                          <input type="checkbox" id="organization-deep-option-candidatecampaign" class="mdl-checkbox__input" value="candidate campagin" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <input type="checkbox" id="organization-deep-option-candidatecampaign" class="mdl-checkbox__input" value="candidate campagin">
                           <span class="mdl-checkbox__label">Candidate Campaign</span>
                         </label><br>
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-issuepac">
-                          <input type="checkbox" id="organization-deep-option-issuepac" class="mdl-checkbox__input" value="issue pac" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <input type="checkbox" id="organization-deep-option-issuepac" class="mdl-checkbox__input" value="issue pac">
                           <span class="mdl-checkbox__label">Issue PAC</span>
                         </label><br>
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-utpgroup">
-                          <input type="checkbox" id="organization-deep-option-utpgroup" class="mdl-checkbox__input" value="union, trade, or professional group" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <input type="checkbox" id="organization-deep-option-utpgroup" class="mdl-checkbox__input" value="union, trade, or professional group">
                           <span class="mdl-checkbox__label">Union, Trade, or Professional Group</span>
                         </label><br>
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-business">
-                          <input type="checkbox" id="organization-deep-option-business" class="mdl-checkbox__input" value="business" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <input type="checkbox" id="organization-deep-option-business" class="mdl-checkbox__input" value="business">
                           <span class="mdl-checkbox__label">Business</span>
                         </label><br>
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-other">
-                          <input type="checkbox" id="organization-deep-option-other" class="mdl-checkbox__input" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'block';}">
+                          <input type="checkbox" id="organization-deep-option-other" class="mdl-checkbox__input" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'block';} else {document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
                           <span class="mdl-checkbox__label">Other</span>
                         </label>
                         <div id="organization-deep-option-other-text-wrapper" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">

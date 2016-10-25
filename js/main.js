@@ -88,6 +88,8 @@ var viewReportsTableBody             = document.querySelector('#view-reports-tab
 var navLinks                         = document.querySelectorAll('.tab-link');
 var tabs                             = document.querySelectorAll('.necir-tab');
 
+var isEmployer = document.querySelector('#is-employer');
+
 /*/
 /* Helper Functions
 /*/
@@ -685,6 +687,11 @@ function fillReportData() {
 	spanContributor.innerHTML = currentReport.Contributor;
 	spanCitystate.innerHTML = currentReport.City + ', ' + currentReport.State;
 	spanAmount.innerHTML = currentReport.Amount;
+	if (currentReport.Amount >= 5000) {
+		isEmployer.style.display = "inline-block";
+	} else {
+		isEmployer.style.display = "none";
+	}
 	spanDate.innerHTML = currentReport.Date;
 	preElement.innerHTML = JSON.stringify(currentReport, null, 4);
 	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
