@@ -139,7 +139,8 @@
               <div id="span-wrapper">
                 <h3><!--span id="span-questionyear"></span> | --><span id="span-question"></span></h3>
                 <h4>Recipient: <span id="span-recipient"></span></h4>
-                <strong>Contributor:</strong> <span id="span-contributor"></span> <span id="is-employer">(<strong>Employer</strong>)</span> <br>
+                <strong>Contributor:</strong> <span id="span-contributor"></span><br>
+                <span id="employer-wrapper"><strong>Employer: </strong> <span id="span-employer"></span></span><br>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
                 <strong>Amount:</strong> $<span id="span-amount"></span> <br>
                 <strong>Date:</strong> <span id="span-date"></span> <br>
@@ -197,7 +198,7 @@
                           <span class="mdl-checkbox__label">Business</span>
                         </label><br>
                         <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="organization-deep-option-other">
-                          <input type="checkbox" id="organization-deep-option-other" name="organizationDeepOptions" class="mdl-checkbox__input" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'block';} else {document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}">
+                          <input type="checkbox" id="organization-deep-option-other" name="organizationDeepOptions" class="mdl-checkbox__input" onclick="if(this.checked){ document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'block';} else {document.getElementById('organization-deep-option-other-text-wrapper').style.display = 'none';}" value="other">
                           <span class="mdl-checkbox__label">Other</span>
                         </label>
                         <div id="organization-deep-option-other-text-wrapper" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">

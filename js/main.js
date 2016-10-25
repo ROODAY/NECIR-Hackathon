@@ -88,7 +88,8 @@ var viewReportsTableBody             = document.querySelector('#view-reports-tab
 var navLinks                         = document.querySelectorAll('.tab-link');
 var tabs                             = document.querySelectorAll('.necir-tab');
 
-var isEmployer = document.querySelector('#is-employer');
+var employerWrapper = document.querySelector('#employer-wrapper');
+var spanEmployer = document.querySelector('#span-employer');
 var organizationDeepOptions = document.querySelector('#organization-deep-options');
 
 /*/
@@ -688,10 +689,12 @@ function fillReportData() {
 	spanContributor.innerHTML = currentReport.Contributor;
 	spanCitystate.innerHTML = currentReport.City + ', ' + currentReport.State;
 	spanAmount.innerHTML = currentReport.Amount;
-	if (currentReport.Amount >= 5000) {
-		isEmployer.style.display = "inline-block";
+	if (isReal(currentReport.Employer)) {
+		employerWrapper.style.display = "inline-block";
+		spanEmployer.innerHTML = currentReport.Employer;
 	} else {
-		isEmployer.style.display = "none";
+		spanEmployer.innerHTML = '';
+		employerWrapper.style.display = "none";
 	}
 	spanDate.innerHTML = currentReport.Date;
 	preElement.innerHTML = JSON.stringify(currentReport, null, 4);
@@ -717,6 +720,9 @@ function fillReportData() {
 	for (var i = 0; i < orgDeepOptions.length; i++) {
 		orgDeepOptions[i].parentNode.MaterialCheckbox.uncheck();
 	}
+	removeClass(organizationDeepOptions.querySelector('#organization-deep-option-other-text').parentNode, 'is-dirty');
+	organizationDeepOptions.querySelector('#organization-deep-option-other-text-wrapper').style.display = "none";
+	organizationDeepOptions.querySelector('#organization-deep-option-other-text').value = '';
 	categorizationOptions.querySelector("#switch-notable").checked = false;
 	removeClass(categorizationOptions.querySelector("#switch-notable").parentNode, 'is-checked');
 	removeClass(currentReportDiv, "hidden");
@@ -741,7 +747,11 @@ function saveCategorizations() {
 						var deepOptions = organizationDeepOptions.querySelectorAll('input[name="organizationDeepOptions"]:checked');
 						currentReport.Organization_Class = "";
 						for (var i = 0; i < deepOptions.length; i++) {
-							currentReport.Organization_Class += deepOptions[i].value + ", ";
+							if (deepOptions[i].value === "other") {
+								currentReport.Organization_Class += organizationDeepOptions.querySelector('#organization-deep-option-other-text').value + ", ";
+							} else {
+								currentReport.Organization_Class += deepOptions[i].value + ", ";
+							}
 						}
 					}
 					//currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
