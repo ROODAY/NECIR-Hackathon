@@ -1005,6 +1005,18 @@ function saveTableCategorizations() {
 								var report = snapshot.val();
 								report.Individual_Or_Organization = tableFullReportDialog.querySelector('input[name="tableOrganizationOptions"]:checked').value;
 								//report.Location                   = tableFullReportDialog.querySelector('input[name="tableLocationOptions"]:checked').value;
+								if (report.Individual_Or_Organization === 'organization') {
+									var deepOptions = tableOrganizationDeepOptions.querySelectorAll('input[name="table-organizationDeepOptions"]:checked');
+									report.Organization_Class = "";
+									for (var i = 0; i < deepOptions.length; i++) {
+										if (deepOptions[i].value === "other") {
+											report.Organization_Class += tableOrganizationDeepOptions.querySelector('#table-organization-deep-option-other-text').value + ", ";
+										} else {
+											report.Organization_Class += deepOptions[i].value + ", ";
+										}
+									}
+								}
+								report.Findings = tableFullReportDialog.querySelector('#table-findings-input').value;
 								report.Notable_Contributor        = tableFullReportDialog.querySelector("#table-switch-notable").checked;
 								report.Categorized_By             = userData.username;
 								database.ref('reports/' + tableFullReportDialog.dataset.reportid).set(report, function(err){
