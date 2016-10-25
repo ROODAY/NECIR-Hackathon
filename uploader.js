@@ -8,12 +8,12 @@ var db = firebase.database();
 var ref = db.ref("/unfilteredIndices");
 var fs = require('fs');
 var Converter = require("csvtojson").Converter;
-var header = "Report_ID,Date,Contributor,Address,City,State,Zip,Occupation,Employer,Amount,Recipient,Question,Position,question_year,Categorized_By,Approved_By"
+var header = "Report_ID,Date,Contributor,Address,City,State,Zip,Occupation,Employer,Amount,Recipient,Question,Position,Contributor_Type,First_Name,Last_Name,Line_Sequence,Occ_Emp_Updated,Principal_Officer,ID,Tender,index,ocpf_id,org_name,org_name_clean"
 var queue = [];
 var count = 0;
 var upload_lock = false;
 var lineReader = require('readline').createInterface({
-  input: fs.createReadStream('data.csv')
+  input: fs.createReadStream('new_data.csv')
 });
 
 lineReader.on('line', function (line) {
@@ -33,14 +33,14 @@ lineReader.on('line', function (line) {
 	  		}
 			});
 		} else {
-			result[0].Location = "";
+			/*result[0].Location = "";
 			result[0].Individual_Or_Organization = "";
 			result[0].Notable_Contributor = "";
 			result[0].Categorized_By = "";
-			result[0].Approved_By = "";
+			result[0].Approved_By = "";*/
 			var reportRef = ref.child(result[0].Report_ID);
 			count += 1;
-			reportRef.set(result[0]);
+			reportRef.set(result[0].Report_ID);
 			console.log("Sent Object #" + count);
 	  }
 	});

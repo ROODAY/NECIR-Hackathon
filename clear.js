@@ -4,7 +4,7 @@ firebase.initializeApp({
   databaseURL: "https://necir-hackathon.firebaseio.com"
 });
 var db = firebase.database();
-var ref = db.ref("/");
+var ref = db.ref("/adminReviewedIndices");
 ref.set(null, function(err){
 	if (err) {
 		console.error(err);
