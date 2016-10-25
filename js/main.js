@@ -89,6 +89,7 @@ var navLinks                         = document.querySelectorAll('.tab-link');
 var tabs                             = document.querySelectorAll('.necir-tab');
 
 var isEmployer = document.querySelector('#is-employer');
+var organizationDeepOptions = document.querySelector('#organization-deep-options');
 
 /*/
 /* Helper Functions
@@ -711,6 +712,11 @@ function fillReportData() {
 			//radio2[i].parentNode.MaterialRadio.uncheck();
 		}
 	}
+	organizationDeepOptions.style.display = "none";
+	var orgDeepOptions = categorizationOptions.querySelectorAll('input[name="organizationDeepOptions"]');
+	for (var i = 0; i < orgDeepOptions.length; i++) {
+		orgDeepOptions[i].parentNode.MaterialCheckbox.uncheck();
+	}
 	categorizationOptions.querySelector("#switch-notable").checked = false;
 	removeClass(categorizationOptions.querySelector("#switch-notable").parentNode, 'is-checked');
 	removeClass(currentReportDiv, "hidden");
@@ -731,6 +737,13 @@ function saveCategorizations() {
 					closeOnConfirm: true
 				}, function() {
 					currentReport.Individual_Or_Organization = categorizationOptions.querySelector('input[name="organizationOptions"]:checked').value;
+					if (currentReport.Individual_Or_Organization === 'organization') {
+						var deepOptions = organizationDeepOptions.querySelectorAll('input[name="organizationDeepOptions"]:checked');
+						currentReport.Organization_Class = "";
+						for (var i = 0; i < deepOptions.length; i++) {
+							currentReport.Organization_Class += deepOptions[i].value + ", ";
+						}
+					}
 					//currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
 					currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
 					currentReport.Categorized_By             = userData.username;
