@@ -90,7 +90,10 @@ var tabs                             = document.querySelectorAll('.necir-tab');
 
 var employerWrapper = document.querySelector('#employer-wrapper');
 var spanEmployer = document.querySelector('#span-employer');
+var tableEmployerWrapper = document.querySelector('#table-employer-wrapper');
+var tableSpanEmployer = document.querySelector('#table-span-employer');
 var organizationDeepOptions = document.querySelector('#organization-deep-options');
+var tableOrganizationDeepOptions = document.querySelector('#table-organization-deep-options');
 
 /*/
 /* Helper Functions
@@ -720,6 +723,8 @@ function fillReportData() {
 	for (var i = 0; i < orgDeepOptions.length; i++) {
 		orgDeepOptions[i].parentNode.MaterialCheckbox.uncheck();
 	}
+	categorizationOptions.querySelector('#findings-input').value = '';
+	removeClass(categorizationOptions.querySelector('#findings-input').parentNode, 'is-dirty');
 	removeClass(organizationDeepOptions.querySelector('#organization-deep-option-other-text').parentNode, 'is-dirty');
 	organizationDeepOptions.querySelector('#organization-deep-option-other-text-wrapper').style.display = "none";
 	organizationDeepOptions.querySelector('#organization-deep-option-other-text').value = '';
@@ -757,6 +762,7 @@ function saveCategorizations() {
 					//currentReport.Location                   = categorizationOptions.querySelector('input[name="locationOptions"]:checked').value;
 					currentReport.Notable_Contributor        = categorizationOptions.querySelector("#switch-notable").checked;
 					currentReport.Categorized_By             = userData.username;
+					currentReport.Findings = categorizationOptions.querySelector('#findings-input').value;
 					database.ref('reports/' + currentReportID).set(currentReport, function(err){
 						if (err) {
 							console.error(err);
@@ -902,19 +908,32 @@ function addViewReportsListeners() {
 				tableFullReportDialog.querySelector("#table-span-question").innerHTML = report.Question;
 				tableFullReportDialog.querySelector("#table-span-questionyear").innerHTML = report.question_year;
 				tableFullReportDialog.querySelector("#table-span-recipient").innerHTML = report.Recipient;
+				if (isReal(report.Employer)) {
+					tableFullReportDialog.querySelector('#table-employer-wrapper').style.display = "inline-block";
+					tableFullReportDialog.querySelector('#table-span-employer').innerHTML = report.Employer;
+				} else {
+					tableFullReportDialog.querySelector('#table-employer-wrapper').style.display = "none";
+					tableFullReportDialog.querySelector('#table-span-employer').innerHTML = '';
+				}
 				tableFullReportDialog.querySelector("#table-span-contributor").innerHTML = report.Contributor;
 				tableFullReportDialog.querySelector("#table-span-citystate").innerHTML = report.City + ', ' + report.State;
 				tableFullReportDialog.querySelector("#table-span-amount").innerHTML = report.Amount;
 				tableFullReportDialog.querySelector("#table-span-date").innerHTML = report.Date;
 				var radio1 = tableFullReportDialog.querySelectorAll('input[name="tableOrganizationOptions"]');
-				//var radio2 = tableFullReportDialog.querySelectorAll('input[name="tableLocationOptions"]');
 				for (var i = 0; i < radio1.length; i++) {
 					radio1[i].parentNode.MaterialRadio.uncheck();
-					if (i < 3) {
-						//radio2[i].parentNode.MaterialRadio.uncheck();
-					}
 				}
 				tableFullReportDialog.querySelector("#table-switch-notable").checked = false;
+				tableOrganizationDeepOptions.style.display = "none";
+				var orgDeepOptions = tableFullReportDialog.querySelectorAll('input[name="table-organizationDeepOptions"]');
+				for (var i = 0; i < orgDeepOptions.length; i++) {
+					orgDeepOptions[i].parentNode.MaterialCheckbox.uncheck();
+				}
+				tableFullReportDialog.querySelector('#table-findings-input').value = '';
+				removeClass(tableFullReportDialog.querySelector('#table-findings-input').parentNode, 'is-dirty');
+				removeClass(tableFullReportDialog.querySelector('#table-organization-deep-option-other-text').parentNode, 'is-dirty');
+				tableFullReportDialog.querySelector('#table-organization-deep-option-other-text-wrapper').style.display = "none";
+				tableFullReportDialog.querySelector('#table-organization-deep-option-other-text').value = '';
 				removeClass(tableFullReportDialog.querySelector("#table-switch-notable").parentNode, 'is-checked');
 				hljs.highlightBlock(tablePreElement);
 				database.ref('admins/' + user.uid).once('value').then(function(snapshot){

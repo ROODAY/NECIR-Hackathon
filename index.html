@@ -140,7 +140,7 @@
                 <h3><!--span id="span-questionyear"></span> | --><span id="span-question"></span></h3>
                 <h4>Recipient: <span id="span-recipient"></span></h4>
                 <strong>Contributor:</strong> <span id="span-contributor"></span><br>
-                <span id="employer-wrapper"><strong>Employer: </strong> <span id="span-employer"></span></span><br>
+                <span id="employer-wrapper"><strong>Employer: </strong> <span id="span-employer"></span><br></span>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
                 <strong>Amount:</strong> $<span id="span-amount"></span> <br>
                 <strong>Date:</strong> <span id="span-date"></span> <br>
@@ -236,8 +236,13 @@
                     <span class="mdl-switch__label">Notable Contributor</span>
                   </label>
                 </div>
+                <div>
+                  <div class="mdl-textfield mdl-js-textfield">
+                    <textarea class="mdl-textfield__input" type="text" rows= "3" id="findings-input" ></textarea>
+                    <label class="mdl-textfield__label" for="findings-input">Findings</label>
+                  </div>
+                </div>
               </div>
-
               <button id="save-categorization" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
                 Save Categorization
               </button>
@@ -342,6 +347,7 @@
           <div id="table-admin-spans" class="hidden">
             <strong>Question:</strong> <span id="table-span-admin-question"></span> <br>
             <strong>Recipient:</strong> <span id="table-span-admin-recipient"></span> <br>
+            <span id="table-employer-wrapper"><strong>Employer: </strong> <span id="table-span-employer"></span><br></span>
             <strong>Contributor:</strong> <span id="table-span-admin-contributor"></span> <br>
             <strong>City, State:</strong> <span id="table-span-admin-citystate"></span> <br>
             <strong>Amount:</strong> <span id="table-span-admin-amount"></span> <br>
@@ -356,20 +362,20 @@
           <div id="table-organization-options">
             Contributor Type:
             <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-individual">
-              <input type="radio" id="table-option-individual" class="mdl-radio__button" name="tableOrganizationOptions" value="individual" checked>
+              <input type="radio" id="table-option-individual" class="mdl-radio__button" name="tableOrganizationOptions" value="individual" checked onclick="if(this.checked){ document.getElementById('table-organization-deep-options').style.display = 'none';}">
               <span class="mdl-radio__label">Individual</span>
             </label>
             <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-organization">
-              <input type="radio" id="table-option-organization" class="mdl-radio__button" name="tableOrganizationOptions" value="committee">
-              <span class="mdl-radio__label">Committee</span>
+              <input type="radio" id="table-option-organization" class="mdl-radio__button" name="tableOrganizationOptions" value="organization" onclick="if(this.checked){ document.getElementById('table-organization-deep-options').style.display = 'block';}">
+              <span class="mdl-radio__label">Organization</span>
             </label>
             <!--label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-corporation">
               <input type="radio" id="table-option-corporation" class="mdl-radio__button" name="tableOrganizationOptions" value="corporation">
               <span class="mdl-radio__label">Corporation</span>
             </label-->
             <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="table-option-unknown-o">
-              <input type="radio" id="table-option-unknown-o" class="mdl-radio__button" name="tableOrganizationOptions" value="other">
-              <span class="mdl-radio__label">Other</span>
+              <input type="radio" id="table-option-unknown-o" class="mdl-radio__button" name="tableOrganizationOptions" value="unknown" onclick="if(this.checked){ document.getElementById('table-organization-deep-options').style.display = 'none';}">
+              <span class="mdl-radio__label">Unknown</span>
             </label>
           </div>
           <!--div id="table-location-options">
@@ -387,11 +393,47 @@
               <span class="mdl-radio__label">Unknown</span>
             </label>
           </div-->
+          <div id="table-organization-deep-options">
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="table-organization-deep-option-nonprofit">
+              <input type="checkbox" id="table-organization-deep-option-nonprofit" name="table-organizationDeepOptions" class="mdl-checkbox__input" value="non-profit">
+              <span class="mdl-checkbox__label">Non-Profit</span>
+            </label><br>
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="table-organization-deep-option-candidatecampaign">
+              <input type="checkbox" id="table-organization-deep-option-candidatecampaign" name="table-organizationDeepOptions" class="mdl-checkbox__input" value="candidate campaign">
+              <span class="mdl-checkbox__label">Candidate Campaign</span>
+            </label><br>
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="table-organization-deep-option-issuepac">
+              <input type="checkbox" id="table-organization-deep-option-issuepac" name="table-organizationDeepOptions" class="mdl-checkbox__input" value="issue pac">
+              <span class="mdl-checkbox__label">Issue PAC</span>
+            </label><br>
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="table-organization-deep-option-utpgroup">
+              <input type="checkbox" id="table-organization-deep-option-utpgroup" name="table-organizationDeepOptions" class="mdl-checkbox__input" value="union/trade/professional group">
+              <span class="mdl-checkbox__label">Union, Trade, or Professional Group</span>
+            </label><br>
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="table-organization-deep-option-business">
+              <input type="checkbox" id="table-organization-deep-option-business" name="table-organizationDeepOptions" class="mdl-checkbox__input" value="business">
+              <span class="mdl-checkbox__label">Business</span>
+            </label><br>
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="table-organization-deep-option-other">
+              <input type="checkbox" id="table-organization-deep-option-other" name="table-organizationDeepOptions" class="mdl-checkbox__input" onclick="if(this.checked){ document.getElementById('table-organization-deep-option-other-text-wrapper').style.display = 'block';} else {document.getElementById('table-organization-deep-option-other-text-wrapper').style.display = 'none';}" value="other">
+              <span class="mdl-checkbox__label">Other</span>
+            </label>
+            <div id="table-organization-deep-option-other-text-wrapper" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="table-organization-deep-option-other-text">
+              <label class="mdl-textfield__label" for="table-organization-deep-option-other-text">Enter category...</label>
+            </div>
+          </div>
           <div id="table-contributor-options">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="table-switch-notable">
               <input type="checkbox" id="table-switch-notable" class="mdl-switch__input">
               <span class="mdl-switch__label">Notable Contributor</span>
             </label>
+          </div>
+          <div>
+            <div class="mdl-textfield mdl-js-textfield">
+              <textarea class="mdl-textfield__input" type="text" rows= "3" id="table-findings-input" ></textarea>
+              <label class="mdl-textfield__label" for="table-findings-input">Findings</label>
+            </div>
           </div>
           <span class="error-message hidden"></span>
         </div>
