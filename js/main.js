@@ -9,22 +9,20 @@ firebase.initializeApp({
 	storageBucket: ''
 });
 
-var currentReport, currentReportID;
+var currentReport, currentReportID, newUserEmail;
 var database = firebase.database();
 
 var firstResultIndex = 0;
 var resultSection = null;
 var resultsLength = 9;
 var resultSectionNum = 1;
+var totalReportsNumber = 100;
 
-var adminReviewedIndices  = JSON.parse(window.localStorage.getItem('adminReviewedIndices'));
-var filteredIndices       = JSON.parse(window.localStorage.getItem('filteredIndices'));
-var unfilteredIndices     = JSON.parse(window.localStorage.getItem('unfilteredIndices'));
 var user                  = JSON.parse(window.localStorage.getItem('user'));
-var userData                  = JSON.parse(window.localStorage.getItem('userData'));
-var currentTab                  = window.localStorage.getItem('currentTab');
+var userData              = JSON.parse(window.localStorage.getItem('userData'));
+var confettiHappened      = window.localStorage.getItem('confettiHappened');
+var currentTab            = window.localStorage.getItem('currentTab');
 var repeatUser            = window.localStorage.getItem('repeatUser');
-var confettiHappened            = window.localStorage.getItem('confettiHappened');
 
 var adminAuth                        = document.querySelector('#admin-auth');
 var approveReportsLoader             = document.querySelector('#approve-reports-loader');
@@ -36,6 +34,7 @@ var approveTableCategorizationButton = document.querySelector('#approve-table-ca
 var categorizationOptions            = document.querySelector('#categorization-options');
 var currentReportDiv                 = document.querySelector("#current-report");
 var currentReportLoader              = document.querySelector('#current-report-loader');
+var eventProgress                    = document.querySelector('#event-progress');
 var fullReportDialog                 = document.querySelector('#full-report-dialog');
 var getNextReportButton              = document.querySelector("#get-report");
 var landing                          = document.querySelector('#landing');
@@ -50,8 +49,8 @@ var refreshViewReportsButton         = document.querySelector("#refresh-view-rep
 var reportsFilter                    = document.querySelector('#reports-filter');
 var resetPasswordDialog              = document.querySelector('#reset-password-dialog');
 var resetReportButton                = document.querySelector('#reset-report');
-var resyncDataButton                 = document.querySelector('#resync-data-button');
 var resultsLengthWrapper             = document.querySelector('#results-length-wrapper')
+var resyncDataButton                 = document.querySelector('#resync-data-button');
 var saveCategorizationButton         = document.querySelector('#save-categorization');
 var saveTableCategorizationButton    = document.querySelector('#save-table-categorization');
 var settingsButton                   = document.querySelector('#settings-button');
@@ -64,6 +63,13 @@ var showFilteredReportsButton        = document.querySelector("#show-filtered-re
 var showFullReportButton             = document.querySelector("#show-full-report");
 var showUnfilteredReportsButton      = document.querySelector("#show-unfiltered-reports");
 var snackbarContainer                = document.querySelector('#necir-snackbar');
+var spanAmount                       = document.querySelector('#span-amount');
+var spanCitystate                    = document.querySelector('#span-citystate');
+var spanContributor                  = document.querySelector('#span-contributor');
+var spanDate                         = document.querySelector('#span-date');
+var spanQuestion                     = document.querySelector('#span-question');
+var spanQuestionyear                 = document.querySelector('#span-questionyear');
+var spanRecipient                    = document.querySelector('#span-recipient');
 var startButton                      = document.querySelector('#start-button');
 var tableCategories                  = document.querySelector('#table-categories');
 var tableCategoriesLocation          = document.querySelector('#table-categories-location');
@@ -72,26 +78,13 @@ var tableCategoriesType              = document.querySelector('#table-categories
 var tableCategorizationOptions       = document.querySelector('#table-categorization-options');
 var tableFullReportDialog            = document.querySelector('#table-full-report-dialog');
 var tablePreElement                  = document.querySelector('#table-raw-data');
+var userCounter                      = document.querySelector('#user-counter');
 var userNameSpan                     = document.querySelector('#user-name');
 var viewReportsHeader                = document.querySelector('#view-reports-header');
 var viewReportsLoader                = document.querySelector('#view-reports-loader');
 var viewReportsNextButton            = document.querySelector("#view-reports-next");
 var viewReportsPreviousButton        = document.querySelector("#view-reports-previous");
 var viewReportsTableBody             = document.querySelector('#view-reports-table > tbody');
-
-var spanQuestion = document.querySelector('#span-question');
-var spanQuestionyear = document.querySelector('#span-questionyear');
-var spanRecipient = document.querySelector('#span-recipient');
-var spanContributor = document.querySelector('#span-contributor');
-var spanCitystate = document.querySelector('#span-citystate');
-var spanAmount = document.querySelector('#span-amount');
-var spanDate = document.querySelector('#span-date');
-
-var eventProgress = document.querySelector('#event-progress');
-var userCounter = document.querySelector('#user-counter');
-
-var newUserEmail;
-
 var navLinks                         = document.querySelectorAll('.tab-link');
 var tabs                             = document.querySelectorAll('.necir-tab');
 
@@ -645,8 +638,9 @@ function authenticateAsAdmin() {
 /*/
 
 function getNextReport(startIndex) {
-	if (unfilteredIndices != null && unfilteredIndices != undefined) {
-		currentReportID = unfilteredIndices[Object.keys(unfilteredIndices)[startIndex]];
+	database.ref('unfilteredIndices').once('value').then(function(snapshot){
+		var data = snapshot.val();
+		currentReportID = data[Object.keys(data)[startIndex]];
 		database.ref('currentlyAccessedIndices/' + currentReportID).once('value').then(function(snapshot){
 			if (snapshot.val() === null) {
 				database.ref('unfilteredIndices/' + currentReportID).once('value').then(function(snapshot){
@@ -668,7 +662,6 @@ function getNextReport(startIndex) {
 							});
 						});
 					} else {
-						delete unfilteredIndices[currentReportID];
 						getNextReport(startIndex + 1);
 					}
 				}).catch(function(error){
@@ -680,15 +673,9 @@ function getNextReport(startIndex) {
 		}).catch(function(error){
 			console.error(error);
 		});
-	} else {
-		var snackbarData = {
-			message: 'Downloading Data...',
-			timeout: 2000
-		};
-		addClass(currentReportLoader, 'hidden');
-		resyncAllData();
-		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	}
+	}).catch(function(error){
+		console.error(error);
+	});
 }
 
 function fillReportData() {
@@ -756,8 +743,6 @@ function saveCategorizations() {
 									if (err) {
 										console.error(err);
 									}
-									delete unfilteredIndices[currentReportID];
-									window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 									userData.reportsCategorized += 1;
 									database.ref('users/' + userData.username + '/reportsCategorized').set(userData.reportsCategorized, function(err){
 										if (err) {
@@ -985,8 +970,6 @@ function saveTableCategorizations() {
 											if (err) {
 												console.error(err);
 											}
-											delete unfilteredIndices[tableFullReportDialog.dataset.reportid];
-											window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
 											viewReportsTableBody.innerHTML = "";
 											addClass(viewReportsTableBody, 'hidden');
 											removeClass(viewReportsLoader, 'hidden');
@@ -1249,385 +1232,6 @@ function resetReport() {
 }
 
 /*/
-/* Event Listeners
-/*/
-
-startButton.addEventListener('click', function(){
-	window.localStorage.setItem("repeatUser", true);
-	for (var i = 0; i < tabs.length; i++) {
-		addClass(tabs[i], "hidden");
-	}
-	removeClass(document.querySelector("#tab-2"), "hidden");
-});
-navNecirLogin.addEventListener('click', function(){
-	necirLoginDialog.showModal();
-});
-navLogout.addEventListener('click', firebaseLogout);
-adminAuth.addEventListener('click', authenticateAsAdmin);
-saveCategorizationButton.addEventListener('click', saveCategorizations);
-saveTableCategorizationButton.addEventListener('click', saveTableCategorizations);
-showFullReportButton.addEventListener('click', function() {
-	hljs.highlightBlock(preElement);
-	fullReportDialog.showModal();
-	fullReportDialog.scrollTop = 0;
-});
-fullReportDialog.querySelector('button').addEventListener('click', function() {
-	fullReportDialog.close();
-});
-tableFullReportDialog.querySelector('#close').addEventListener('click', function() {
-	tableFullReportDialog.close();
-});
-necirLoginDialog.querySelector('#close').addEventListener('click', function() {
-	necirLoginDialog.close();
-});
-necirLoginDialog.querySelector('#necir-login-button').addEventListener('click', necirLogin);
-getNextReportButton.addEventListener('click', function(){
-	removeClass(currentReportLoader, 'hidden');
-	getNextReport(0);
-	var snackbarData = {
-		message: 'Fetching report...',
-		timeout: 2000
-	};
-	snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-});
-necirLoginButton.addEventListener('click', function() {
-	necirLoginDialog.showModal();
-}, false);
-refreshViewReportsButton.addEventListener('click', function(){
-	viewReportsTableBody.innerHTML = "";
-	addClass(viewReportsTableBody, 'hidden');
-	removeClass(viewReportsLoader, 'hidden');
-	resyncAllData();
-});
-refreshApproveReportsButton.addEventListener('click', function(){
-	approveReportsTableBody.innerHTML = "";
-	addClass(approveReportsTableBody, 'hidden');
-	removeClass(approveReportsLoader, 'hidden');
-	resyncAllData();
-});
-viewReportsPreviousButton.addEventListener('click', function(){
-	if ((firstResultIndex - (resultsLength + 1)) >= 0) {
-		firstResultIndex -= (resultsLength + 1);
-		viewReportsTableBody.innerHTML = "";
-		addClass(viewReportsTableBody, 'hidden');
-		removeClass(viewReportsLoader, 'hidden');
-		fillViewReports(firstResultIndex);
-		if (viewReportsNextButton.disabled) {
-			viewReportsNextButton.disabled = false;
-		}
-	} else if (firstResultIndex > 0) {
-		viewReportsTableBody.innerHTML = "";
-		firstResultIndex = 0;
-		addClass(viewReportsTableBody, 'hidden');
-		removeClass(viewReportsLoader, 'hidden');
-		fillViewReports(firstResultIndex);
-		if (viewReportsNextButton.disabled) {
-			viewReportsNextButton.disabled = false;
-		}
-	} else {
-		viewReportsPreviousButton.disabled = true;
-	}
-});
-viewReportsNextButton.addEventListener('click', function(){
-	if ((firstResultIndex + resultsLength + 1) < Object.keys(resultSection).length) {
-		firstResultIndex += (resultsLength + 1);
-		viewReportsTableBody.innerHTML = "";
-		addClass(viewReportsTableBody, 'hidden');
-		removeClass(viewReportsLoader, 'hidden');
-		fillViewReports(firstResultIndex);
-		if (viewReportsPreviousButton.disabled) {
-			viewReportsPreviousButton.disabled = false;
-		}
-	} else {
-		viewReportsNextButton.disabled = true;
-	}
-});
-approveReportsPreviousButton.addEventListener('click', function(){
-	if ((firstResultIndex - (resultsLength + 1)) >= 0) {
-		firstResultIndex -= (resultsLength + 1);
-		approveReportsTableBody.innerHTML = "";
-		fillApproveReports(firstResultIndex);
-		addClass(approveReportsTableBody, 'hidden');
-		removeClass(approveReportsLoader, 'hidden');
-		if (approveReportsNextButton.disabled) {
-			approveReportsNextButton.disabled = false;
-		}
-	} else if (firstResultIndex > 0) {
-		approveReportsTableBody.innerHTML = "";
-		firstResultIndex = 0;
-		fillApproveReports(firstResultIndex);
-		addClass(approveReportsTableBody, 'hidden');
-		removeClass(approveReportsLoader, 'hidden');
-		if (approveReportsNextButton.disabled) {
-			approveReportsNextButton.disabled = false;
-		}
-	} else {
-		approveReportsPreviousButton.disabled = true;
-	}
-});
-approveReportsNextButton.addEventListener('click', function(){
-	if ((firstResultIndex + resultsLength + 1) < Object.keys(resultSection).length) {
-		firstResultIndex += (resultsLength + 1);
-		approveReportsTableBody.innerHTML = "";
-		fillApproveReports(firstResultIndex);
-		addClass(approveReportsTableBody, 'hidden');
-		removeClass(approveReportsLoader, 'hidden');
-		if (approveReportsPreviousButton.disabled) {
-			approveReportsPreviousButton.disabled = false;
-		}
-	} else {
-		approveReportsNextButton.disabled = true;
-	}
-});
-show10ReportsButton.addEventListener('click', function(){
-	resultsLength = 9;
-	viewReportsTableBody.innerHTML = "";
-	addClass(viewReportsTableBody, 'hidden');
-	removeClass(viewReportsLoader, 'hidden');
-	fillViewReports(firstResultIndex);
-	approveReportsTableBody.innerHTML = "";
-	fillApproveReports(firstResultIndex);
-	addClass(approveReportsTableBody, 'hidden');
-	removeClass(approveReportsLoader, 'hidden');
-});
-show25ReportsButton.addEventListener('click', function(){
-	resultsLength = 24;
-	viewReportsTableBody.innerHTML = "";
-	addClass(viewReportsTableBody, 'hidden');
-	removeClass(viewReportsLoader, 'hidden');
-	fillViewReports(firstResultIndex);
-	approveReportsTableBody.innerHTML = "";
-	fillApproveReports(firstResultIndex);
-	addClass(approveReportsTableBody, 'hidden');
-	removeClass(approveReportsLoader, 'hidden');
-});
-show50ReportsButton.addEventListener('click', function(){
-	resultsLength = 49;
-	viewReportsTableBody.innerHTML = "";
-	addClass(viewReportsTableBody, 'hidden');
-	removeClass(viewReportsLoader, 'hidden');
-	fillViewReports(firstResultIndex);
-	approveReportsTableBody.innerHTML = "";
-	fillApproveReports(firstResultIndex);
-	addClass(approveReportsTableBody, 'hidden');
-	removeClass(approveReportsLoader, 'hidden');
-});
-showUnfilteredReportsButton.addEventListener('click', function(){
-	database.ref('unfilteredIndices/').once('value').then(function(snapshot){
-		unfilteredIndices = snapshot.val();
-		resultSection = unfilteredIndices;
-		resultSectionNum = 1;
-		viewReportsTableBody.innerHTML = "";
-		firstResultIndex = 0;
-		addClass(viewReportsTableBody, 'hidden');
-		removeClass(viewReportsLoader, 'hidden');
-		fillViewReports(firstResultIndex);
-		if (viewReportsNextButton.disabled) {
-				viewReportsNextButton.disabled = false;
-			}
-			if (viewReportsPreviousButton.disabled) {
-				viewReportsPreviousButton.disabled = false;
-			}
-		viewReportsHeader.innerHTML = 'Unreviewed Reports';
-	}).catch(function(error){
-		console.log(error);
-	});
-});
-showFilteredReportsButton.addEventListener('click', function(){
-	database.ref('filteredIndices/').once('value').then(function(snapshot){
-		filteredIndices = snapshot.val();
-		window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
-		resultSection = filteredIndices;
-		resultSectionNum = 2;
-		viewReportsTableBody.innerHTML = "";
-		firstResultIndex = 0;
-		addClass(viewReportsTableBody, 'hidden');
-		removeClass(viewReportsLoader, 'hidden');
-		fillViewReports(firstResultIndex);
-		if (viewReportsNextButton.disabled) {
-			viewReportsNextButton.disabled = false;
-		}
-		if (viewReportsPreviousButton.disabled) {
-			viewReportsPreviousButton.disabled = false;
-		}
-		viewReportsHeader.innerHTML = 'Reviewed Reports';
-		var snackbarData = {
-			message: 'Filtered Report Indices Downloaded',
-			timeout: 2000
-		};
-		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	}).catch(function(error){
-		console.log(error);
-	});
-});
-showApprovedReportsButton.addEventListener('click', function(){
-	database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
-		adminReviewedIndices = snapshot.val();
-		window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
-		resultSection = adminReviewedIndices;
-		resultSectionNum = 3;
-		viewReportsTableBody.innerHTML = "";
-		firstResultIndex = 0;
-		addClass(viewReportsTableBody, 'hidden');
-		removeClass(viewReportsLoader, 'hidden');
-		fillViewReports(firstResultIndex);
-		if (viewReportsNextButton.disabled) {
-			viewReportsNextButton.disabled = false;
-		}
-		if (viewReportsPreviousButton.disabled) {
-			viewReportsPreviousButton.disabled = false;
-		}
-		viewReportsHeader.innerHTML = 'Approved Reports';
-		var snackbarData = {
-			message: 'Approved Report Indices Downloaded',
-			timeout: 2000
-		};
-		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	}).catch(function(error){
-		console.log(error);
-	});
-});
-approveTableCategorizationButton.addEventListener('click', function(){
-	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
-		if (snapshot.val() != null) {
-			approveReport();
-		} else {
-			tableFullReportDialog.close();
-			swal("Oops...", "You must be an admin to do that!", "error");
-		}
-	}).catch(function(error){
-		console.log(error);
-	});
-});
-resetReportButton.addEventListener('click', function(){
-	database.ref('admins/' + user.uid).once('value').then(function(snapshot){
-		if (snapshot.val() != null) {
-			tableFullReportDialog.close();
-			resetReport();
-		} else {
-			tableFullReportDialog.close();
-			swal("Oops...", "You must be an admin to do that!", "error");
-		}
-	}).catch(function(error){
-		console.log(error);
-	});
-});
-settingsButton.addEventListener('click', function(){
-	settingsDialog.querySelector('#settings-display-name').value = '';
-	settingsDialog.querySelector('#settings-photo-url').value = '';
-	removeClass(settingsDialog.querySelector('#settings-photo-url'), 'is-focused');
-	removeClass(settingsDialog.querySelector('#settings-display-name'), 'is-focused');
-	removeClass(settingsDialog.querySelector('#settings-photo-url'), 'is-dirty');
-	removeClass(settingsDialog.querySelector('#settings-display-name'), 'is-dirty');
-	if (isReal(userData.username)) {
-		settingsDialog.querySelector('#settings-display-name').value = userData.username;
-		addClass(settingsDialog.querySelector('#settings-display-name'), 'is-focused');
-		addClass(settingsDialog.querySelector('#settings-display-name'), 'is-dirty');
-	}
-	if (isReal(userData.photoURL)) {
-		settingsDialog.querySelector('#settings-photo-url').value = userData.photoURL;
-		addClass(settingsDialog.querySelector('#settings-photo-url'), 'is-focused');
-		addClass(settingsDialog.querySelector('#settings-photo-url'), 'is-dirty');
-	}
-	settingsDialog.showModal();
-});
-settingsDialog.querySelector('#close').addEventListener('click', function() {
-	settingsDialog.close();
-});
-settingsDialog.querySelector('#settings-update').addEventListener('click', function() {
-	user = firebase.auth().currentUser;
-	var name = settingsDialog.querySelector('#settings-display-name').value;
-	var pURL = settingsDialog.querySelector('#settings-photo-url').value;
-	database.ref('users/' + userData.username).set('null', function(err){
-		userData.username = name;
-		userData.photoURL = pURL;
-		database.ref('users/' + userData.username).set(userData, function(err){
-			settingsDialog.close();
-			firebase.auth().currentUser = user;
-			window.localStorage.setItem("user", JSON.stringify(user));
-			window.localStorage.setItem("userData", JSON.stringify(userData));
-			swal("Success!", "Preferences updated!", "success");
-			if (isReal(userData.username)) {
-				userNameSpan.innerHTML = userData.username;
-			} else if (isReal(user.email)) {
-				userNameSpan.innerHTML = user.email;
-			}
-			if (isReal(userData.photoURL)) {
-				profilePicture.src = userData.photoURL;
-			} else {
-				profilePicture.src = 'images/user.jpg'
-			}
-		});
-	});
-});
-necirLoginDialog.querySelector('#forgot-password').addEventListener('click', function(){
-	necirLoginDialog.close();
-	resetPasswordDialog.showModal();
-});
-resetPasswordDialog.querySelector('#reset-password-button').addEventListener('click', function(){
-	var email = resetPasswordDialog.querySelector('#reset-password-email').value;
-	if (isReal(email)){
-		resetPasswordDialog.querySelector('.error-message').value = ''
-		removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
-		var auth = firebase.auth();
-		auth.sendPasswordResetEmail(email).then(function() {
-			resetPasswordDialog.close();
-			swal("Success!", "A password reset has been sent to the email you provided!", "success");
-		}, function(error) {
-			resetPasswordDialog.querySelector('.error-message').innerHTML = error.message;
-			removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
-			console.error(error);
-		});
-	} else {
-		resetPasswordDialog.querySelector('.error-message').innerHTML = 'You must enter a valid email!'
-		removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
-	}
-});
-resetPasswordDialog.querySelector('#close').addEventListener('click', function(){
-	resetPasswordDialog.close();
-});
-resyncDataButton.addEventListener('click', function(){
-	settingsDialog.close();
-	swal({
-		title: "Are you sure?", 
-		text: "Resyncing data might take a bit, so be prepared to wait. (The webpage may also become unresponsive for a few seconds.)", 
-		type: "warning", 
-		showCancelButton: true, 
-		confirmButtonColor: "#DD6B55", 
-		confirmButtonText: "Resync Data", 
-		closeOnConfirm: true
-	}, function() {
-		resyncAllData();
-		var snackbarData = {
-			message: 'Beginning Resync...',
-			timeout: 2000
-		};
-		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	});
-});
-eventProgress.addEventListener('mdl-componentupgraded', function() {
-  this.MaterialProgress.setProgress(0);
-});
-database.ref('filteredIndices').on('value', function(snapshot){
-	if (isReal(snapshot.val())) {
-		var filteredLength = Object.keys(snapshot.val()).length;
-		database.ref('adminReviewedIndices').on('value', function(snapshot){
-			if (isReal(snapshot.val())) {
-				console.log('updating bar')
-				var approvedLength = Object.keys(snapshot.val()).length;
-				var totalLength = filteredLength + approvedLength;
-				if (totalLength >= 3602) {
-					eventProgress.MaterialProgress.setProgress(100);
-					weDidIt();
-				} else {
-					eventProgress.MaterialProgress.setProgress(Math.round((totalLength / 3602) * 100));
-				}
-			}
-		});
-	}
-});
-
-/*/
 /* Page Hooks
 /*/
 
@@ -1636,6 +1240,381 @@ window.onload = function() {
 	/*if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
 	  addClass(document.querySelector('#event-progress-wrapper'), 'hidden');
 	}*/
+
+	startButton.addEventListener('click', function(){
+		window.localStorage.setItem("repeatUser", true);
+		for (var i = 0; i < tabs.length; i++) {
+			addClass(tabs[i], "hidden");
+		}
+		removeClass(document.querySelector("#tab-2"), "hidden");
+	});
+	navNecirLogin.addEventListener('click', function(){
+		necirLoginDialog.showModal();
+	});
+	navLogout.addEventListener('click', firebaseLogout);
+	adminAuth.addEventListener('click', authenticateAsAdmin);
+	saveCategorizationButton.addEventListener('click', saveCategorizations);
+	saveTableCategorizationButton.addEventListener('click', saveTableCategorizations);
+	showFullReportButton.addEventListener('click', function() {
+		hljs.highlightBlock(preElement);
+		fullReportDialog.showModal();
+		fullReportDialog.scrollTop = 0;
+	});
+	fullReportDialog.querySelector('button').addEventListener('click', function() {
+		fullReportDialog.close();
+	});
+	tableFullReportDialog.querySelector('#close').addEventListener('click', function() {
+		tableFullReportDialog.close();
+	});
+	necirLoginDialog.querySelector('#close').addEventListener('click', function() {
+		necirLoginDialog.close();
+	});
+	necirLoginDialog.querySelector('#necir-login-button').addEventListener('click', necirLogin);
+	getNextReportButton.addEventListener('click', function(){
+		removeClass(currentReportLoader, 'hidden');
+		getNextReport(0);
+		var snackbarData = {
+			message: 'Fetching report...',
+			timeout: 2000
+		};
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+	});
+	necirLoginButton.addEventListener('click', function() {
+		necirLoginDialog.showModal();
+	}, false);
+	refreshViewReportsButton.addEventListener('click', function(){
+		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
+		resyncAllData();
+	});
+	refreshApproveReportsButton.addEventListener('click', function(){
+		approveReportsTableBody.innerHTML = "";
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
+		resyncAllData();
+	});
+	viewReportsPreviousButton.addEventListener('click', function(){
+		if ((firstResultIndex - (resultsLength + 1)) >= 0) {
+			firstResultIndex -= (resultsLength + 1);
+			viewReportsTableBody.innerHTML = "";
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
+			fillViewReports(firstResultIndex);
+			if (viewReportsNextButton.disabled) {
+				viewReportsNextButton.disabled = false;
+			}
+		} else if (firstResultIndex > 0) {
+			viewReportsTableBody.innerHTML = "";
+			firstResultIndex = 0;
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
+			fillViewReports(firstResultIndex);
+			if (viewReportsNextButton.disabled) {
+				viewReportsNextButton.disabled = false;
+			}
+		} else {
+			viewReportsPreviousButton.disabled = true;
+		}
+	});
+	viewReportsNextButton.addEventListener('click', function(){
+		if ((firstResultIndex + resultsLength + 1) < Object.keys(resultSection).length) {
+			firstResultIndex += (resultsLength + 1);
+			viewReportsTableBody.innerHTML = "";
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
+			fillViewReports(firstResultIndex);
+			if (viewReportsPreviousButton.disabled) {
+				viewReportsPreviousButton.disabled = false;
+			}
+		} else {
+			viewReportsNextButton.disabled = true;
+		}
+	});
+	approveReportsPreviousButton.addEventListener('click', function(){
+		if ((firstResultIndex - (resultsLength + 1)) >= 0) {
+			firstResultIndex -= (resultsLength + 1);
+			approveReportsTableBody.innerHTML = "";
+			fillApproveReports(firstResultIndex);
+			addClass(approveReportsTableBody, 'hidden');
+			removeClass(approveReportsLoader, 'hidden');
+			if (approveReportsNextButton.disabled) {
+				approveReportsNextButton.disabled = false;
+			}
+		} else if (firstResultIndex > 0) {
+			approveReportsTableBody.innerHTML = "";
+			firstResultIndex = 0;
+			fillApproveReports(firstResultIndex);
+			addClass(approveReportsTableBody, 'hidden');
+			removeClass(approveReportsLoader, 'hidden');
+			if (approveReportsNextButton.disabled) {
+				approveReportsNextButton.disabled = false;
+			}
+		} else {
+			approveReportsPreviousButton.disabled = true;
+		}
+	});
+	approveReportsNextButton.addEventListener('click', function(){
+		if ((firstResultIndex + resultsLength + 1) < Object.keys(resultSection).length) {
+			firstResultIndex += (resultsLength + 1);
+			approveReportsTableBody.innerHTML = "";
+			fillApproveReports(firstResultIndex);
+			addClass(approveReportsTableBody, 'hidden');
+			removeClass(approveReportsLoader, 'hidden');
+			if (approveReportsPreviousButton.disabled) {
+				approveReportsPreviousButton.disabled = false;
+			}
+		} else {
+			approveReportsNextButton.disabled = true;
+		}
+	});
+	show10ReportsButton.addEventListener('click', function(){
+		resultsLength = 9;
+		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
+		fillViewReports(firstResultIndex);
+		approveReportsTableBody.innerHTML = "";
+		fillApproveReports(firstResultIndex);
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
+	});
+	show25ReportsButton.addEventListener('click', function(){
+		resultsLength = 24;
+		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
+		fillViewReports(firstResultIndex);
+		approveReportsTableBody.innerHTML = "";
+		fillApproveReports(firstResultIndex);
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
+	});
+	show50ReportsButton.addEventListener('click', function(){
+		resultsLength = 49;
+		viewReportsTableBody.innerHTML = "";
+		addClass(viewReportsTableBody, 'hidden');
+		removeClass(viewReportsLoader, 'hidden');
+		fillViewReports(firstResultIndex);
+		approveReportsTableBody.innerHTML = "";
+		fillApproveReports(firstResultIndex);
+		addClass(approveReportsTableBody, 'hidden');
+		removeClass(approveReportsLoader, 'hidden');
+	});
+	showUnfilteredReportsButton.addEventListener('click', function(){
+		database.ref('unfilteredIndices/').once('value').then(function(snapshot){
+			resultSection = snapshot.val();
+			resultSectionNum = 1;
+			viewReportsTableBody.innerHTML = "";
+			firstResultIndex = 0;
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
+			fillViewReports(firstResultIndex);
+			if (viewReportsNextButton.disabled) {
+					viewReportsNextButton.disabled = false;
+				}
+				if (viewReportsPreviousButton.disabled) {
+					viewReportsPreviousButton.disabled = false;
+				}
+			viewReportsHeader.innerHTML = 'Unreviewed Reports';
+		}).catch(function(error){
+			console.log(error);
+		});
+	});
+	showFilteredReportsButton.addEventListener('click', function(){
+		database.ref('filteredIndices/').once('value').then(function(snapshot){
+			filteredIndices = snapshot.val();
+			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
+			resultSection = filteredIndices;
+			resultSectionNum = 2;
+			viewReportsTableBody.innerHTML = "";
+			firstResultIndex = 0;
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
+			fillViewReports(firstResultIndex);
+			if (viewReportsNextButton.disabled) {
+				viewReportsNextButton.disabled = false;
+			}
+			if (viewReportsPreviousButton.disabled) {
+				viewReportsPreviousButton.disabled = false;
+			}
+			viewReportsHeader.innerHTML = 'Reviewed Reports';
+			var snackbarData = {
+				message: 'Filtered Report Indices Downloaded',
+				timeout: 2000
+			};
+			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		}).catch(function(error){
+			console.log(error);
+		});
+	});
+	showApprovedReportsButton.addEventListener('click', function(){
+		database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
+			adminReviewedIndices = snapshot.val();
+			window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
+			resultSection = adminReviewedIndices;
+			resultSectionNum = 3;
+			viewReportsTableBody.innerHTML = "";
+			firstResultIndex = 0;
+			addClass(viewReportsTableBody, 'hidden');
+			removeClass(viewReportsLoader, 'hidden');
+			fillViewReports(firstResultIndex);
+			if (viewReportsNextButton.disabled) {
+				viewReportsNextButton.disabled = false;
+			}
+			if (viewReportsPreviousButton.disabled) {
+				viewReportsPreviousButton.disabled = false;
+			}
+			viewReportsHeader.innerHTML = 'Approved Reports';
+			var snackbarData = {
+				message: 'Approved Report Indices Downloaded',
+				timeout: 2000
+			};
+			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		}).catch(function(error){
+			console.log(error);
+		});
+	});
+	approveTableCategorizationButton.addEventListener('click', function(){
+		database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+			if (snapshot.val() != null) {
+				approveReport();
+			} else {
+				tableFullReportDialog.close();
+				swal("Oops...", "You must be an admin to do that!", "error");
+			}
+		}).catch(function(error){
+			console.log(error);
+		});
+	});
+	resetReportButton.addEventListener('click', function(){
+		database.ref('admins/' + user.uid).once('value').then(function(snapshot){
+			if (snapshot.val() != null) {
+				tableFullReportDialog.close();
+				resetReport();
+			} else {
+				tableFullReportDialog.close();
+				swal("Oops...", "You must be an admin to do that!", "error");
+			}
+		}).catch(function(error){
+			console.log(error);
+		});
+	});
+	settingsButton.addEventListener('click', function(){
+		settingsDialog.querySelector('#settings-display-name').value = '';
+		settingsDialog.querySelector('#settings-photo-url').value = '';
+		removeClass(settingsDialog.querySelector('#settings-photo-url'), 'is-focused');
+		removeClass(settingsDialog.querySelector('#settings-display-name'), 'is-focused');
+		removeClass(settingsDialog.querySelector('#settings-photo-url'), 'is-dirty');
+		removeClass(settingsDialog.querySelector('#settings-display-name'), 'is-dirty');
+		if (isReal(userData.username)) {
+			settingsDialog.querySelector('#settings-display-name').value = userData.username;
+			addClass(settingsDialog.querySelector('#settings-display-name'), 'is-focused');
+			addClass(settingsDialog.querySelector('#settings-display-name'), 'is-dirty');
+		}
+		if (isReal(userData.photoURL)) {
+			settingsDialog.querySelector('#settings-photo-url').value = userData.photoURL;
+			addClass(settingsDialog.querySelector('#settings-photo-url'), 'is-focused');
+			addClass(settingsDialog.querySelector('#settings-photo-url'), 'is-dirty');
+		}
+		settingsDialog.showModal();
+	});
+	settingsDialog.querySelector('#close').addEventListener('click', function() {
+		settingsDialog.close();
+	});
+	settingsDialog.querySelector('#settings-update').addEventListener('click', function() {
+		user = firebase.auth().currentUser;
+		var name = settingsDialog.querySelector('#settings-display-name').value;
+		var pURL = settingsDialog.querySelector('#settings-photo-url').value;
+		database.ref('users/' + userData.username).set('null', function(err){
+			userData.username = name;
+			userData.photoURL = pURL;
+			database.ref('users/' + userData.username).set(userData, function(err){
+				settingsDialog.close();
+				firebase.auth().currentUser = user;
+				window.localStorage.setItem("user", JSON.stringify(user));
+				window.localStorage.setItem("userData", JSON.stringify(userData));
+				swal("Success!", "Preferences updated!", "success");
+				if (isReal(userData.username)) {
+					userNameSpan.innerHTML = userData.username;
+				} else if (isReal(user.email)) {
+					userNameSpan.innerHTML = user.email;
+				}
+				if (isReal(userData.photoURL)) {
+					profilePicture.src = userData.photoURL;
+				} else {
+					profilePicture.src = 'images/user.jpg'
+				}
+			});
+		});
+	});
+	necirLoginDialog.querySelector('#forgot-password').addEventListener('click', function(){
+		necirLoginDialog.close();
+		resetPasswordDialog.showModal();
+	});
+	resetPasswordDialog.querySelector('#reset-password-button').addEventListener('click', function(){
+		var email = resetPasswordDialog.querySelector('#reset-password-email').value;
+		if (isReal(email)){
+			resetPasswordDialog.querySelector('.error-message').value = ''
+			removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
+			var auth = firebase.auth();
+			auth.sendPasswordResetEmail(email).then(function() {
+				resetPasswordDialog.close();
+				swal("Success!", "A password reset has been sent to the email you provided!", "success");
+			}, function(error) {
+				resetPasswordDialog.querySelector('.error-message').innerHTML = error.message;
+				removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
+				console.error(error);
+			});
+		} else {
+			resetPasswordDialog.querySelector('.error-message').innerHTML = 'You must enter a valid email!'
+			removeClass(resetPasswordDialog.querySelector('.error-message'), 'hidden');
+		}
+	});
+	resetPasswordDialog.querySelector('#close').addEventListener('click', function(){
+		resetPasswordDialog.close();
+	});
+	resyncDataButton.addEventListener('click', function(){
+		settingsDialog.close();
+		swal({
+			title: "Are you sure?", 
+			text: "Resyncing data might take a bit, so be prepared to wait. (The webpage may also become unresponsive for a few seconds.)", 
+			type: "warning", 
+			showCancelButton: true, 
+			confirmButtonColor: "#DD6B55", 
+			confirmButtonText: "Resync Data", 
+			closeOnConfirm: true
+		}, function() {
+			resyncAllData();
+			var snackbarData = {
+				message: 'Beginning Resync...',
+				timeout: 2000
+			};
+			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
+		});
+	});
+	eventProgress.addEventListener('mdl-componentupgraded', function() {
+	  this.MaterialProgress.setProgress(0);
+	});
+	database.ref('filteredIndices').on('value', function(snapshot){
+		if (isReal(snapshot.val())) {
+			var filteredLength = Object.keys(snapshot.val()).length;
+			database.ref('adminReviewedIndices').on('value', function(snapshot){
+				if (isReal(snapshot.val())) {
+					console.log('updating bar')
+					var approvedLength = Object.keys(snapshot.val()).length;
+					var totalLength = filteredLength + approvedLength;
+					if (totalLength >= totalReportsNumber) {
+						eventProgress.MaterialProgress.setProgress(100);
+						weDidIt();
+					} else {
+						eventProgress.MaterialProgress.setProgress(Math.round((totalLength / totalReportsNumber) * 100));
+					}
+				}
+			});
+		}
+	});
+
 	for (var i = 0; i < navLinks.length; i++) {
 		navLinks[i].addEventListener('click', function(){
 			for (var i = 0; i < tabs.length; i++) {
@@ -1715,33 +1694,13 @@ window.onload = function() {
 		}
 		removeClass(document.querySelector("#tab-2"), "hidden");
 	}
-	if (unfilteredIndices === null || unfilteredIndices === undefined) {
-		database.ref('unfilteredIndices/').once('value').then(function(snapshot){
-			unfilteredIndices = snapshot.val();
-			window.localStorage.setItem('unfilteredIndices', JSON.stringify(unfilteredIndices));
-			resultSection = unfilteredIndices;
-			var snackbarData = {
-				message: 'Unfiltered Report Indices Downloaded',
-				timeout: 2000
-			};
-			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-			viewReportsTableBody.innerHTML = "";
-			addClass(viewReportsTableBody, 'hidden');
-			removeClass(viewReportsLoader, 'hidden');
-			fillViewReports(firstResultIndex);
-			removeClass(currentReportLoader, 'hidden');
-			getNextReport(0);
-			var snackbarData = {
-				message: 'Fetching report...',
-				timeout: 2000
-			};
-			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-			
-		}).catch(function(error){
-			console.log(error);
-		});
-	} else {
-		resultSection = unfilteredIndices;
+	database.ref('unfilteredIndices/').once('value').then(function(snapshot){
+		resultSection = snapshot.val();
+		var snackbarData = {
+			message: 'Unfiltered Report Indices Downloaded',
+			timeout: 2000
+		};
+		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
 		viewReportsTableBody.innerHTML = "";
 		addClass(viewReportsTableBody, 'hidden');
 		removeClass(viewReportsLoader, 'hidden');
@@ -1753,33 +1712,10 @@ window.onload = function() {
 			timeout: 2000
 		};
 		snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-	}
-	if (filteredIndices === null || filteredIndices === undefined) {
-		database.ref('filteredIndices/').once('value').then(function(snapshot){
-			filteredIndices = snapshot.val();
-			window.localStorage.setItem('filteredIndices', JSON.stringify(filteredIndices));
-			var snackbarData = {
-				message: 'Filtered Report Indices Downloaded',
-				timeout: 2000
-			};
-			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-		}).catch(function(error){
-			console.log(error);
-		});
-	}
-	if (adminReviewedIndices === null || adminReviewedIndices === undefined) {
-		database.ref('adminReviewedIndices/').once('value').then(function(snapshot){
-			adminReviewedIndices = snapshot.val();
-			window.localStorage.setItem('adminReviewedIndices', JSON.stringify(adminReviewedIndices));
-			var snackbarData = {
-				message: 'Admin Reviewed Report Indices Downloaded',
-				timeout: 2000
-			};
-			snackbarContainer.MaterialSnackbar.showSnackbar(snackbarData);
-		}).catch(function(error){
-			console.log(error);
-		});
-	}
+		
+	}).catch(function(error){
+		console.log(error);
+	});
 	if (user != null) {
 		addClass(navNecirLogin, 'hidden');
 		removeClass(navLogout, 'hidden');
