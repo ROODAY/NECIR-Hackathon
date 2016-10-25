@@ -16,7 +16,7 @@ var firstResultIndex = 0;
 var resultSection = null;
 var resultsLength = 9;
 var resultSectionNum = 1;
-var totalReportsNumber = 100;
+var totalReportsNumber = 1429;
 
 var user                  = JSON.parse(window.localStorage.getItem('user'));
 var userData              = JSON.parse(window.localStorage.getItem('userData'));
