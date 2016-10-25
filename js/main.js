@@ -693,7 +693,7 @@ function fillReportData() {
 	spanCitystate.innerHTML = currentReport.City + ', ' + currentReport.State;
 	spanAmount.innerHTML = currentReport.Amount;
 	if (isReal(currentReport.Employer)) {
-		employerWrapper.style.display = "inline-block";
+		employerWrapper.style.display = "block";
 		spanEmployer.innerHTML = currentReport.Employer;
 	} else {
 		spanEmployer.innerHTML = '';
