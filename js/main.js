@@ -909,7 +909,7 @@ function addViewReportsListeners() {
 				tableFullReportDialog.querySelector("#table-span-questionyear").innerHTML = report.question_year;
 				tableFullReportDialog.querySelector("#table-span-recipient").innerHTML = report.Recipient;
 				if (isReal(report.Employer)) {
-					tableFullReportDialog.querySelector('#table-employer-wrapper').style.display = "inline-block";
+					tableFullReportDialog.querySelector('#table-employer-wrapper').style.display = "block";
 					tableFullReportDialog.querySelector('#table-span-employer').innerHTML = report.Employer;
 				} else {
 					tableFullReportDialog.querySelector('#table-employer-wrapper').style.display = "none";
