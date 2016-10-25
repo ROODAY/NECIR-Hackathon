@@ -105,6 +105,8 @@
         <nav class="necir-navigation mdl-navigation mdl-color--blue-grey-800">
           <a class="tab-link mdl-navigation__link active" href="#tab-2">Review Reports</a>
           <a class="tab-link mdl-navigation__link" href="#tab-3">View All Reports</a>
+          <a class="tab-link mdl-navigation__link active" href="#tab-5">Review Contributors</a>
+          <a class="tab-link mdl-navigation__link" href="#tab-6">View All Contributors</a>
           <a id="approve-reports" class="tab-link mdl-navigation__link hidden2" href="#tab-4">Approve Filtered Reports</a>
           <div class="mdl-layout-spacer"></div>
           <a id="admin-auth" class="mdl-navigation__link hidden2" href="#"><span>Authenticate as Admin</span></a>
@@ -135,11 +137,11 @@
             <div id="current-report" class="hidden">
               <h5><i>Report Summary</i></h5> <div id="current-report-loader" class="mdl-spinner mdl-js-spinner is-active"></div>
               <div id="span-wrapper">
-                <h3><span id="span-questionyear"></span> | <span id="span-question"></span></h3>
+                <h3><!--span id="span-questionyear"></span> | --><span id="span-question"></span></h3>
                 <h4>Recipient: <span id="span-recipient"></span></h4>
                 <strong>Contributor:</strong> <span id="span-contributor"></span> <br>
                 <strong>City, State:</strong> <span id="span-citystate"></span> <br>
-                <strong>Amount:</strong> <span id="span-amount"></span> <br>
+                <strong>Amount:</strong> $<span id="span-amount"></span> <br>
                 <strong>Date:</strong> <span id="span-date"></span> <br>
               </div>
 
@@ -159,17 +161,17 @@
                         <input type="radio" id="option-individual" class="mdl-radio__button" name="organizationOptions" value="individual" checked>
                         <span class="mdl-radio__label">Individual</span>
                       </label><br>
-                      <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-organization">
+                      <!--label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-organization">
                         <input type="radio" id="option-organization" class="mdl-radio__button" name="organizationOptions" value="organization">
                         <span class="mdl-radio__label">Organization</span>
                       </label><br>
                       <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-corporation">
                         <input type="radio" id="option-corporation" class="mdl-radio__button" name="organizationOptions" value="corporation">
                         <span class="mdl-radio__label">Corporation</span>
-                      </label><br>
+                      </label><br-->
                       <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unknown-o">
                         <input type="radio" id="option-unknown-o" class="mdl-radio__button" name="organizationOptions" value="unknown">
-                        <span class="mdl-radio__label">Unknown</span>
+                        <span class="mdl-radio__label">Other</span>
                       </label>
                     </div>
                   </div>

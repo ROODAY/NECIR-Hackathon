@@ -68,7 +68,7 @@ var spanCitystate                    = document.querySelector('#span-citystate')
 var spanContributor                  = document.querySelector('#span-contributor');
 var spanDate                         = document.querySelector('#span-date');
 var spanQuestion                     = document.querySelector('#span-question');
-var spanQuestionyear                 = document.querySelector('#span-questionyear');
+//var spanQuestionyear                 = document.querySelector('#span-questionyear');
 var spanRecipient                    = document.querySelector('#span-recipient');
 var startButton                      = document.querySelector('#start-button');
 var tableCategories                  = document.querySelector('#table-categories');
@@ -680,7 +680,7 @@ function getNextReport(startIndex) {
 
 function fillReportData() {
 	spanQuestion.innerHTML = currentReport.Question;
-	spanQuestionyear.innerHTML = currentReport.question_year;
+	//spanQuestionyear.innerHTML = currentReport.question_year;
 	spanRecipient.innerHTML = currentReport.Recipient;
 	spanContributor.innerHTML = currentReport.Contributor;
 	spanCitystate.innerHTML = currentReport.City + ', ' + currentReport.State;
@@ -1237,6 +1237,7 @@ function resetReport() {
 
 window.onload = function() {
 	hljs.initHighlightingOnLoad();
+	
 	/*if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
 	  addClass(document.querySelector('#event-progress-wrapper'), 'hidden');
 	}*/
